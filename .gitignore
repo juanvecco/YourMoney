@@ -1,0 +1,10 @@
+.vs/
+*.user
+*.suo
+*.log
+*.obj
+*.exe
+*.cache
+*.dll
+*.pdb
+*.vscode/
