@@ -1,0 +1,12 @@
+C:\dev\YourMoney\src\YourMoney.Domain\bin\Debug\net9.0\YourMoney.Domain.deps.json
+C:\dev\YourMoney\src\YourMoney.Domain\bin\Debug\net9.0\YourMoney.Domain.dll
+C:\dev\YourMoney\src\YourMoney.Domain\bin\Debug\net9.0\YourMoney.Domain.pdb
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.AssemblyInfoInputs.cache
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.AssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.sourcelink.json
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.dll
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\refint\YourMoney.Domain.dll
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.pdb
+C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\ref\YourMoney.Domain.dll
