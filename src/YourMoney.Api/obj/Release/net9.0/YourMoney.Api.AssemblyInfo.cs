@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f0dee73a58825e60ef03382cf3f6721e09137be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f36746dae8b8bb103cbd9292b58638c409941205")]
 [assembly: System.Reflection.AssemblyProductAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

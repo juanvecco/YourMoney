@@ -78,3 +78,4 @@ C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.pdb
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.genruntimeconfig.cache
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\ref\YourMoney.Api.dll
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\appsettings.json
