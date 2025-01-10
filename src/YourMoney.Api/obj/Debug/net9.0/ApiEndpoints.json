@@ -9,7 +9,7 @@
     "Parameters": [
       {
         "Name": "despesa",
-        "Type": "YourMoney.Domain.Models.Despesa",
+        "Type": "YourMoney.Domain.Entities.Despesa",
         "IsRequired": true
       }
     ],

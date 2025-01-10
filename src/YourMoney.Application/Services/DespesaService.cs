@@ -1,6 +1,6 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Interfaces.Repositories;
-using YourMoney.Domain.Models;
+using YourMoney.Domain.Entities;
 
 namespace YourMoney.Application.Services
 {
@@ -21,7 +21,6 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
             }
 
-            despesa.Data = despesa.Data == default ? DateTime.UtcNow : despesa.Data;
             await _despesaRepository.AdicionarAsync(despesa);
         }
     }

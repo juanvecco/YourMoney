@@ -1,5 +1,5 @@
 ﻿using YourMoney.Domain.Interfaces.Repositories;
-using YourMoney.Domain.Models;
+using YourMoney.Domain.Entities;
 
 namespace YourMoney.Infrastructure.Data.Repositories
 {

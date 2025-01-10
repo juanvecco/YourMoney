@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.Interfaces;
-using YourMoney.Domain.Models;
+using YourMoney.Domain.Entities;
 
 namespace YourMoney.Api.Controllers
 {

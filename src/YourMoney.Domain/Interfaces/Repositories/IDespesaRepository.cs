@@ -1,4 +1,4 @@
-﻿using YourMoney.Domain.Models;
+﻿using YourMoney.Domain.Entities;
 
 namespace YourMoney.Domain.Interfaces.Repositories
 {
