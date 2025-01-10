@@ -1,5 +1,6 @@
 ﻿using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace YourMoney.Infrastructure.Data.Repositories
 {
@@ -16,6 +17,11 @@ namespace YourMoney.Infrastructure.Data.Repositories
         {
             _context.Despesas.Add(despesa);
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<Despesa>> GetAllAsync()
+        {
+            // Exemplo usando Entity Framework
+            return await _context.Despesas.ToListAsync();
         }
     }
 }
