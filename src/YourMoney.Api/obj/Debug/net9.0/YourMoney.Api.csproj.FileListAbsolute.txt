@@ -1,10 +1,3 @@
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.AssemblyReference.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.GeneratedMSBuildEditorConfig.editorconfig
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfoInputs.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfo.cs
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.CoreCompileInputs.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\appsettings.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.staticwebassets.endpoints.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.exe
@@ -14,6 +7,8 @@ C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.pdb
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\Azure.Core.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\Azure.Identity.dll
+C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\MediatR.dll
+C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\MediatR.Contracts.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\Microsoft.Data.SqlClient.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
@@ -61,6 +56,14 @@ C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Application.pdb
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Domain.pdb
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Infrastructure.pdb
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.AssemblyReference.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfoInputs.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\scopedcss\bundle\YourMoney.Api.styles.css
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.build.json
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.development.json

@@ -13,5 +13,6 @@ namespace YourMoney.Domain.Repositories
         Task AddAsync(Despesa despesa);
         //Task UpdateAsync(Despesa despesa);
         //Task DeleteAsync(Guid id);
+        Task<List<Despesa>> GetAllAsync();
     }
 }

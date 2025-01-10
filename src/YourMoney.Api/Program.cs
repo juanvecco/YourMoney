@@ -5,6 +5,7 @@ using YourMoney.Infrastructure;
 using YourMoney.Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "YourMoney API V1");
+        c.RoutePrefix = string.Empty; // Faz o Swagger ser acessível na raiz
     });
 }
 
