@@ -1,0 +1,16 @@
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.deps.json
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.dll
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.pdb
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Domain.dll
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Domain.pdb
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.csproj.AssemblyReference.cache
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.AssemblyInfoInputs.cache
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.AssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.sourcelink.json
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMone.1FF3B8D3.Up2Date
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.dll
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\refint\YourMoney.Infrastructure.dll
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.pdb
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\ref\YourMoney.Infrastructure.dll

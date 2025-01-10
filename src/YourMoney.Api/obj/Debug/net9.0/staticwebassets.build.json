@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "73XVGDUsD63FOD2mcm3NLadYzObLEJRQ0iM0h5SELmY=",
+  "Source": "YourMoney.Api",
+  "BasePath": "_content/YourMoney.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

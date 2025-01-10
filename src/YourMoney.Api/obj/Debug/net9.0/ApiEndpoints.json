@@ -1,0 +1,18 @@
+[
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "AdicionarDespesa",
+    "RelativePath": "api/Despesas",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "despesa",
+        "Type": "YourMoney.Domain.Entities.Despesa",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

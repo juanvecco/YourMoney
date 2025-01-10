@@ -1,0 +1,7 @@
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.csproj.AssemblyReference.cache
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.AssemblyInfoInputs.cache
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.AssemblyInfo.cs
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.MvcApplicationPartsAssemblyInfo.cache
+C:\dev\YourMoney\obj\Debug\net9.0\YourMoney.sourcelink.json
