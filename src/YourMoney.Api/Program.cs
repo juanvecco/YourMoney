@@ -1,6 +1,6 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
-using YourMoney.Domain.Interfaces.Repositories;
+using YourMoney.Domain.Repositories;
 using YourMoney.Infrastructure;
 using YourMoney.Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
