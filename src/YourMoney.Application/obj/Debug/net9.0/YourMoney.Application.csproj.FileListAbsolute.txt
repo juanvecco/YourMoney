@@ -1,3 +1,9 @@
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.csproj.AssemblyReference.cache
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.AssemblyInfoInputs.cache
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.AssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.deps.json
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.pdb
@@ -5,12 +11,6 @@ C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Domain.dll
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Domain.pdb
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Infrastructure.pdb
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.csproj.AssemblyReference.cache
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.GeneratedMSBuildEditorConfig.editorconfig
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.AssemblyInfoInputs.cache
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.AssemblyInfo.cs
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.csproj.CoreCompileInputs.cache
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMone.047F561E.Up2Date
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\refint\YourMoney.Application.dll

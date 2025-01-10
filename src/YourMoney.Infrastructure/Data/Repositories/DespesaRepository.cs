@@ -1,4 +1,4 @@
-﻿using YourMoney.Domain.Interfaces.Repositories;
+﻿using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Infrastructure.Data.Repositories
@@ -12,7 +12,7 @@ namespace YourMoney.Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public async Task AdicionarAsync(Despesa despesa)
+        public async Task AddAsync(Despesa despesa)
         {
             _context.Despesas.Add(despesa);
             await _context.SaveChangesAsync();
