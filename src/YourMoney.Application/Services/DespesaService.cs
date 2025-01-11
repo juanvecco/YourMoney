@@ -21,7 +21,7 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
             }
 
-            await _despesaRepository.AddAsync(despesa);
+            await _despesaRepository.AdicionarAsync(despesa);
         }
     }
 }

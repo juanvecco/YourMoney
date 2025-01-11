@@ -22,7 +22,7 @@ namespace YourMoney.Application.Commands.Handlers
         public async Task<Guid> Handle(CriarDespesaCommand request, CancellationToken cancellationToken)
         {
             var despesa = new Despesa(request.Descricao, request.Valor, request.Data, request.Categoria);
-            await _repository.AddAsync(despesa);
+            await _repository.AdicionarAsync(despesa);
 
             return despesa.Id;
         }

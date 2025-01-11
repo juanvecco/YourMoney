@@ -6,15 +6,19 @@ using YourMoney.Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
+using System.Reflection;
+using YourMoney.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//builder.Logging.AddConsole();  // Para adicionar logs no console
 
 // Adicionar serviços
 builder.Services.AddScoped<IDespesaService, DespesaService>();
 builder.Services.AddScoped<IDespesaRepository, DespesaRepository>();
 
 // Adicionar DbContext
-builder.Services.AddDbContext<YourMoneyDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Adicionar controladores
