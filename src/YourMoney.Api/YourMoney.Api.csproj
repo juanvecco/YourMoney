@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
@@ -15,6 +19,7 @@
     <!-- Referência aos outros projetos -->
     <ProjectReference Include="..\YourMoney.Application\YourMoney.Application.csproj" />
     <ProjectReference Include="..\YourMoney.Domain\YourMoney.Domain.csproj" />
+	  <ProjectReference Include="..\YourMoney.Infrastructure\YourMoney.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

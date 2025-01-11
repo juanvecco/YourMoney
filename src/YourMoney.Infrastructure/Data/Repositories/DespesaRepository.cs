@@ -1,19 +1,20 @@
 ﻿using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using YourMoney.Infrastructure.Persistence;
 
 namespace YourMoney.Infrastructure.Data.Repositories
 {
     public class DespesaRepository : IDespesaRepository
     {
-        private readonly YourMoneyDbContext _context;
+        private readonly AppDbContext _context;
 
-        public DespesaRepository(YourMoneyDbContext context)
+        public DespesaRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task AddAsync(Despesa despesa)
+        public async Task AdicionarAsync(Despesa despesa)
         {
             _context.Despesas.Add(despesa);
             await _context.SaveChangesAsync();

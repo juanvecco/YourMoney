@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace YourMoney.Domain.Entities
 {
-    public class Despesa : BaseEntity
+    public class Despesa
     {
+        public Guid Id { get; private set; }
         public string Descricao { get; private set; }
         public decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
@@ -17,6 +18,7 @@ namespace YourMoney.Domain.Entities
 
         public Despesa(string descricao, decimal valor, DateTime data, string categoria)
         {
+            Id = Guid.NewGuid();
             Descricao = descricao;
             Valor = valor;
             Data = data;
