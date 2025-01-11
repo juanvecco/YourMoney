@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Queries.Handlers;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Api.Controllers
@@ -28,5 +29,13 @@ namespace YourMoney.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var expenses = await _despesaService.Send(new GetExpensesQuery());
+        //    return Ok(expenses);
+        //}
     }
 }

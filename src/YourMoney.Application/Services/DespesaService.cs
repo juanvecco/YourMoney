@@ -1,5 +1,5 @@
 ﻿using YourMoney.Application.Interfaces;
-using YourMoney.Domain.Interfaces.Repositories;
+using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Application.Services

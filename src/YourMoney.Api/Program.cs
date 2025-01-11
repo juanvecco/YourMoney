@@ -1,10 +1,10 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
-using YourMoney.Domain.Interfaces.Repositories;
-using YourMoney.Infrastructure;
-using YourMoney.Infrastructure.Data.Repositories;
+using YourMoney.Domain.Repositories;
+using YourMoney.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using YourMoney.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +13,7 @@ builder.Services.AddScoped<IDespesaService, DespesaService>();
 builder.Services.AddScoped<IDespesaRepository, DespesaRepository>();
 
 // Adicionar DbContext
-builder.Services.AddDbContext<YourMoneyDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Adicionar controladores
@@ -38,6 +38,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "YourMoney API V1");
+        c.RoutePrefix = string.Empty; // Faz o Swagger ser acessível na raiz
     });
 }
 

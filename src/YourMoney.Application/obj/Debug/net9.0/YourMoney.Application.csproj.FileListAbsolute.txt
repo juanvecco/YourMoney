@@ -16,3 +16,5 @@ C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Applicatio
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\refint\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.pdb
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\ref\YourMoney.Application.dll
+C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.runtimeconfig.json
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.genruntimeconfig.cache
