@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YourMoney.Domain.Entities;
+﻿using YourMoney.Domain.Entities;
 using YourMoney.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using YourMoney.Infrastructure.Persistence;
 
 namespace YourMoney.Infrastructure.Repositories
@@ -26,7 +22,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetAllAsync()
         {
             // Exemplo usando Entity Framework
-            return null;
+            return await _context.Despesas.ToListAsync();
         }
     }
 }

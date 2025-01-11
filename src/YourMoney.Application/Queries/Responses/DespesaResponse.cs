@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace YourMoney.Application.Queries.Responses
+﻿namespace YourMoney.Application.Queries.Responses
 {
     public class DespesaResponse
     {
