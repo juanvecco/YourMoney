@@ -30,6 +30,19 @@ namespace YourMoney.Api.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> RemoverDespesa(Guid id)
+        {
+            try
+            {
+                await _despesaService.RemoverDespesaAsync(id);
+                return NoContent(); // Retorna 204 No Content
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message); // Retorna 404 Not Found
+            }
+        }
 
         //[HttpGet]
         //public async Task<IActionResult> GetAll()

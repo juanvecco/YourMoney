@@ -1,4 +1,7 @@
-﻿namespace YourMoney.Domain.Entities
+﻿using System;
+using System.Collections.Generic;
+
+namespace YourMoney.Domain.Entities
 {
     public class Despesa
     {
@@ -13,12 +16,38 @@
         public Despesa(string descricao, decimal valor, DateTime data, string categoria)
         {
             Id = Guid.NewGuid();
-            Descricao = descricao;
-            Valor = valor;
-            Data = data;
-            Categoria = categoria;
+            AtualizarDescricao(descricao);
+            AtualizarValor(valor);
+            AtualizarData(data);
+            AtualizarCategoria(categoria);
+        }
 
-            Validate();
+        public void AtualizarDescricao(string descricao)
+        {
+            if (string.IsNullOrEmpty(descricao))
+                throw new ArgumentException("Descrição não pode ser vazia.");
+            Descricao = descricao;
+        }
+
+        public void AtualizarValor(decimal valor)
+        {
+            if (valor <= 0)
+                throw new ArgumentException("O valor da despesa deve ser maior que zero.");
+            Valor = valor;
+        }
+
+        public void AtualizarData(DateTime data)
+        {
+            if (data > DateTime.Now)
+                throw new ArgumentException("A data da despesa não pode estar no futuro.");
+            Data = data;
+        }
+
+        public void AtualizarCategoria(string categoria)
+        {
+            if (string.IsNullOrEmpty(categoria))
+                throw new ArgumentException("Categoria não pode ser vazia.");
+            Categoria = categoria;
         }
 
         private void Validate()
@@ -27,11 +56,10 @@
                 throw new ArgumentException("Descrição não pode ser vazia.");
             if (Valor <= 0)
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
-            //if (Data > DateTime.Now)
-                //throw new ArgumentException("A data da despesa não pode estar no futuro.");
+            if (Data > DateTime.Now)
+                throw new ArgumentException("A data da despesa não pode estar no futuro.");
             if (string.IsNullOrEmpty(Categoria))
                 throw new ArgumentException("Categoria não pode ser vazia.");
         }
     }
-
 }
