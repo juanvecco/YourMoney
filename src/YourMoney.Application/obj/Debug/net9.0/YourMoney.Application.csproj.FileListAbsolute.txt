@@ -1,4 +1,5 @@
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.deps.json
+C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.runtimeconfig.json
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.pdb
 C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Domain.dll
@@ -15,6 +16,5 @@ C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMone.047F561E.Up
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\refint\YourMoney.Application.dll
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.pdb
-C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\ref\YourMoney.Application.dll
-C:\dev\YourMoney\src\YourMoney.Application\bin\Debug\net9.0\YourMoney.Application.runtimeconfig.json
 C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\YourMoney.Application.genruntimeconfig.cache
+C:\dev\YourMoney\src\YourMoney.Application\obj\Debug\net9.0\ref\YourMoney.Application.dll
