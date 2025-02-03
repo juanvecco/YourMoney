@@ -1,4 +1,5 @@
 C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.deps.json
+C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.runtimeconfig.json
 C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.pdb
 C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Domain.dll
@@ -13,6 +14,5 @@ C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMone.1FF3B8D3
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\refint\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.pdb
-C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\ref\YourMoney.Infrastructure.dll
-C:\dev\YourMoney\src\YourMoney.Infrastructure\bin\Debug\net9.0\YourMoney.Infrastructure.runtimeconfig.json
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.genruntimeconfig.cache
+C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\ref\YourMoney.Infrastructure.dll
