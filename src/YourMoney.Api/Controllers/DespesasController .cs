@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using YourMoney.Application.Interfaces;
-using YourMoney.Application.Queries.Handlers;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Api.Controllers
@@ -36,19 +38,38 @@ namespace YourMoney.Api.Controllers
             try
             {
                 await _despesaService.RemoverDespesaAsync(id);
-                return NoContent(); // Retorna 204 No Content
+                return NoContent();
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(ex.Message); // Retorna 404 Not Found
+                return NotFound(ex.Message);
             }
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    var expenses = await _despesaService.Send(new GetExpensesQuery());
-        //    return Ok(expenses);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> ListarDespesas()
+        {
+            var despesas = await _despesaService.ListarAsync();
+            return Ok(despesas);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] Despesa despesa)
+        {
+            if (id != despesa.Id)
+            {
+                return BadRequest("O ID da URL não corresponde ao ID da despesa.");
+            }
+
+            try
+            {
+                await _despesaService.AtualizarAsync(despesa);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }

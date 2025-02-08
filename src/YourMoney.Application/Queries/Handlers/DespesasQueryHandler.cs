@@ -18,7 +18,7 @@ namespace YourMoney.Application.Queries.Handlers
 
         public async Task<List<DespesaResponse>> Handle(GetExpensesQuery request, CancellationToken cancellationToken)
         {
-            var despesas = await _repository.GetAllAsync();
+            var despesas = await _repository.ListarAsync();
             return despesas.Select(e => new DespesaResponse
             {
                 Id = e.Id,
