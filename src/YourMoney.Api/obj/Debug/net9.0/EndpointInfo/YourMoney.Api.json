@@ -35,6 +35,16 @@
             "description": "OK"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Despesas"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/Despesas/{id}": {
@@ -53,6 +63,46 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Despesas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Despesa"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Despesa"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Despesa"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"

@@ -1,6 +1,9 @@
-﻿using YourMoney.Domain.Entities;
-using YourMoney.Domain.Repositories;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using YourMoney.Domain.Entities;
+using YourMoney.Domain.Repositories;
 using YourMoney.Infrastructure.Persistence;
 
 namespace YourMoney.Infrastructure.Repositories
@@ -20,23 +23,9 @@ namespace YourMoney.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Despesa>> GetAllAsync()
+        public async Task<List<Despesa>> ListarAsync()
         {
-            // Exemplo usando Entity Framework
             return await _context.TbDespesa.ToListAsync();
-        }
-
-        public async Task RemoverAsync(Guid id)
-        {
-            var despesa = await _context.TbDespesa.FindAsync(id);
-            if (despesa == null)
-            {
-                throw new InvalidOperationException("Despesa não encontrada.");
-            }
-            // Remove a despesa do contexto
-            _context.TbDespesa.Remove(despesa);
-            // Salva as alterações no banco de dados
-            await _context.SaveChangesAsync();
         }
 
         public async Task<Despesa> GetByIdAsync(Guid id)
@@ -49,19 +38,25 @@ namespace YourMoney.Infrastructure.Repositories
             return despesa;
         }
 
-        public async Task UpdateAsync(Despesa despesa)
+        public async Task RemoverAsync(Guid id)
         {
-            // Verifica se a despesa existe no banco de dados
+            var despesa = await _context.TbDespesa.FindAsync(id);
+            if (despesa == null)
+            {
+                throw new InvalidOperationException("Despesa não encontrada.");
+            }
+            _context.TbDespesa.Remove(despesa);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AtualizarAsync(Despesa despesa)
+        {
             var existingDespesa = await _context.TbDespesa.FindAsync(despesa.Id);
             if (existingDespesa == null)
             {
                 throw new InvalidOperationException("Despesa não encontrada.");
             }
-
-            // Atualiza as propriedades da entidade existente
             _context.Entry(existingDespesa).CurrentValues.SetValues(despesa);
-
-            // Salva as alterações no banco de dados
             await _context.SaveChangesAsync();
         }
     }
