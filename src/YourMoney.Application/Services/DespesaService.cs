@@ -1,9 +1,9 @@
-﻿using YourMoney.Application.Interfaces;
-using YourMoney.Domain.Repositories;
-using YourMoney.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YourMoney.Application.Interfaces;
+using YourMoney.Domain.Repositories;
+using YourMoney.Domain.Entities;
 
 namespace YourMoney.Application.Services
 {
@@ -18,7 +18,6 @@ namespace YourMoney.Application.Services
 
         public async Task AdicionarDespesaAsync(Despesa despesa)
         {
-            // Validações adicionais podem ser feitas aqui
             if (despesa.Valor <= 0)
             {
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
@@ -28,13 +27,11 @@ namespace YourMoney.Application.Services
 
         public async Task<List<Despesa>> GetAllDespesasAsync()
         {
-            // Chama o repositório para obter todas as despesas
-            return await _despesaRepository.GetAllAsync();
+            return await _despesaRepository.ListarAsync();
         }
 
         public async Task<Despesa> GetDespesaByIdAsync(Guid id)
         {
-            // Chama o repositório para buscar uma despesa pelo ID
             var despesa = await _despesaRepository.GetByIdAsync(id);
             if (despesa == null)
             {
@@ -45,14 +42,29 @@ namespace YourMoney.Application.Services
 
         public async Task RemoverDespesaAsync(Guid id)
         {
-            // Verifica se a despesa existe antes de tentar removê-la
             var despesa = await _despesaRepository.GetByIdAsync(id);
             if (despesa == null)
             {
                 throw new InvalidOperationException("Despesa não encontrada.");
             }
-            // Chama o método de remoção no repositório
             await _despesaRepository.RemoverAsync(id);
+        }
+
+        public async Task AtualizarAsync(Despesa despesa)
+        {
+            // Verifica se a despesa existe antes de atualizá-la
+            var existingDespesa = await _despesaRepository.GetByIdAsync(despesa.Id);
+            if (existingDespesa == null)
+            {
+                throw new InvalidOperationException("Despesa não encontrada.");
+            }
+            await _despesaRepository.AtualizarAsync(despesa);
+        }
+
+        public async Task<List<Despesa>> ListarAsync()
+        {
+            // Chama o método GetAllAsync do repositório
+            return await _despesaRepository.ListarAsync();
         }
     }
 }
