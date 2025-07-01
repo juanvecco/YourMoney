@@ -25,7 +25,7 @@ namespace YourMoney.Application.Queries.Handlers
                 Descricao = e.Descricao,
                 Valor = e.Valor,
                 Data = e.Data,
-                Categoria = e.Categoria
+                CategoriaId = e.CategoriaId
             }).ToList();
         }
     }

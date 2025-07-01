@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using YourMoney.Domain.ValueObjects;
+using YourMoney.Domain.Enums;
 
 namespace YourMoney.Domain.Entities
 {
-    public class Despesa
+    public class Receita : BaseEntity
     {
         public Guid Id { get; private set; }
         public string Descricao { get; private set; }
@@ -12,16 +12,23 @@ namespace YourMoney.Domain.Entities
         public DateTime Data { get; private set; }
         public Guid CategoriaId { get; private set; }
         public virtual Categoria Categoria { get; private set; }
+        public bool Recebida { get; private set; }
+        public DateTime? DataRecebimento { get; private set; }
+        public TipoRecorrencia TipoRecorrencia { get; private set; }
+        public DateTime DataCriacao { get; private set; }
 
-        private Despesa() { } // Para ORM
+        private Receita() { }
 
-        public Despesa(string descricao, Money valor, DateTime data, Guid categoriaId)
+        public Receita(string descricao, Money valor, DateTime data, Guid categoriaId, TipoRecorrencia tipoRecorrencia = TipoRecorrencia.Unica)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
             CategoriaId = categoriaId;
+            TipoRecorrencia = tipoRecorrencia;
+            Recebida = false;
+            DataCriacao = DateTime.Now;
         }
 
         public void AtualizarDescricao(string descricao)
@@ -39,6 +46,18 @@ namespace YourMoney.Domain.Entities
         public void AtualizarData(DateTime data)
         {
             Data = data;
+        }
+
+        public void MarcarComoRecebida()
+        {
+            Recebida = true;
+            DataRecebimento = DateTime.Now;
+        }
+
+        public void DesmarcarRecebimento()
+        {
+            Recebida = false;
+            DataRecebimento = null;
         }
     }
 }
