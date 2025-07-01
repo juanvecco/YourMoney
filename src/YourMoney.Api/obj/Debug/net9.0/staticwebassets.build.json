@@ -1,12 +1,1042 @@
 {
   "Version": 1,
-  "Hash": "73XVGDUsD63FOD2mcm3NLadYzObLEJRQ0iM0h5SELmY=",
+  "Hash": "tthRjTtr0Q+acgfkl7DIB6Xj3DZcIlaIWLMc2mwKmg4=",
   "Source": "YourMoney.Api",
   "BasePath": "_content/YourMoney.Api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "YourMoney.Api\\wwwroot",
+      "Source": "YourMoney.Api",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "styles#[.{fingerprint=ynfmp5wyxf}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "24zfx1h19x",
+      "Integrity": "ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "script#[.{fingerprint=trf3ufhe1x}]?.json.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "0s7ztbj49t",
+      "Integrity": "4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "index#[.{fingerprint=tmsxjwpo74}]?.html.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "g37gv5ygyf",
+      "Integrity": "7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "tmsxjwpo74",
+      "Integrity": "y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "script#[.{fingerprint}]?.json",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "trf3ufhe1x",
+      "Integrity": "Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\script.json"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "styles#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "ynfmp5wyxf",
+      "Integrity": "MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\styles.css"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "index.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.002267573696"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "440"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+        }
+      ]
+    },
+    {
+      "Route": "index.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1063"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+        }
+      ]
+    },
+    {
+      "Route": "index.html.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "440"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic="
+        }
+      ]
+    },
+    {
+      "Route": "index.tmsxjwpo74.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.002267573696"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "440"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "tmsxjwpo74"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+        }
+      ]
+    },
+    {
+      "Route": "index.tmsxjwpo74.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1063"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "tmsxjwpo74"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+        }
+      ]
+    },
+    {
+      "Route": "index.tmsxjwpo74.html.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "440"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "tmsxjwpo74"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic="
+        }
+      ]
+    },
+    {
+      "Route": "script.json",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001808318264"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "552"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+        }
+      ]
+    },
+    {
+      "Route": "script.json",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1393"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+        }
+      ]
+    },
+    {
+      "Route": "script.json.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "552"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I="
+        }
+      ]
+    },
+    {
+      "Route": "script.trf3ufhe1x.json",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001808318264"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "552"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "trf3ufhe1x"
+        },
+        {
+          "Name": "label",
+          "Value": "script.json"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+        }
+      ]
+    },
+    {
+      "Route": "script.trf3ufhe1x.json",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1393"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "trf3ufhe1x"
+        },
+        {
+          "Name": "label",
+          "Value": "script.json"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+        }
+      ]
+    },
+    {
+      "Route": "script.trf3ufhe1x.json.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "552"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/json"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:35 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "trf3ufhe1x"
+        },
+        {
+          "Name": "label",
+          "Value": "script.json.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I="
+        }
+      ]
+    },
+    {
+      "Route": "styles.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.005952380952"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "167"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+        }
+      ]
+    },
+    {
+      "Route": "styles.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "258"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+        }
+      ]
+    },
+    {
+      "Route": "styles.css.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "167"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo="
+        }
+      ]
+    },
+    {
+      "Route": "styles.ynfmp5wyxf.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.005952380952"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "167"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "ynfmp5wyxf"
+        },
+        {
+          "Name": "label",
+          "Value": "styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+        }
+      ]
+    },
+    {
+      "Route": "styles.ynfmp5wyxf.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "258"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "ynfmp5wyxf"
+        },
+        {
+          "Name": "label",
+          "Value": "styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+        }
+      ]
+    },
+    {
+      "Route": "styles.ynfmp5wyxf.css.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "167"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 21 Jun 2025 21:59:56 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "ynfmp5wyxf"
+        },
+        {
+          "Name": "label",
+          "Value": "styles.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo="
+        }
+      ]
+    }
+  ]
 }

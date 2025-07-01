@@ -1,0 +1,37 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "PackagePath": "staticwebassets\\script.json"
+    },
+    {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "PackagePath": "staticwebassets\\styles.css"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.YourMoney.Api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.YourMoney.Api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.build.YourMoney.Api.props",
+      "PackagePath": "build\\YourMoney.Api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildMultiTargeting.YourMoney.Api.props",
+      "PackagePath": "buildMultiTargeting\\YourMoney.Api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildTransitive.YourMoney.Api.props",
+      "PackagePath": "buildTransitive\\YourMoney.Api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
