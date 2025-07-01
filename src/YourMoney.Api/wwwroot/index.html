@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Seu Dinheiro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Seu Dinheiro</h1>
+    <form id="transaction-form">
+        <input type="date" id="date" required>
+        <input type="text" id="description" placeholder="Descrição" required>
+        <input type="number" id="amount" placeholder="Valor" required>
+        <select id="category" required>
+            <option value="Necessidades Básicas">Necessidades Básicas</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Investimentos">Investimentos</option>
+            <option value="Renda">Renda</option>
+        </select>
+        <select id="type" required>
+            <option value="Despesa">Despesa</option>
+            <option value="Receita">Receita</option>
+        </select>
+        <button type="submit">Adicionar</button>
+    </form>
+    <ul id="transaction-list"></ul>
+    <script src="script.js"></script>
+</body>
+</html>
