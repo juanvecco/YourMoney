@@ -1,0 +1,6 @@
+C:\dev\YourMoney\src\YourMoney.Api\wwwroot\styles.css
+C:\dev\YourMoney\src\YourMoney.Api\wwwroot\script.json
+C:\dev\YourMoney\src\YourMoney.Api\wwwroot\index.html
+wwwroot\index.html
+wwwroot\script.json
+wwwroot\styles.css
