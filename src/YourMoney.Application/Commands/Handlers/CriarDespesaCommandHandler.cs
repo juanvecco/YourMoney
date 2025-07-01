@@ -16,7 +16,7 @@ namespace YourMoney.Application.Commands.Handlers
 
         public async Task<Guid> Handle(CriarDespesaCommand request, CancellationToken cancellationToken)
         {
-            var despesa = new Despesa(request.Descricao, request.Valor, request.Data, request.Categoria);
+            var despesa = new Despesa(request.Descricao, request.Valor, request.Data, request.CategoriaId);
             await _repository.AdicionarAsync(despesa);
 
             return despesa.Id;

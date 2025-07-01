@@ -18,7 +18,7 @@ namespace YourMoney.Application.Services
 
         public async Task AdicionarDespesaAsync(Despesa despesa)
         {
-            if (despesa.Valor <= 0)
+            if (despesa.Valor.Valor <= 0)
             {
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
             }
