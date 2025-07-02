@@ -55,5 +55,9 @@ namespace YourMoney.Application.Services
             }
             await _despesaRepository.AtualizarAsync(despesa);
         }
+        public async Task<List<Despesa>> ListarAsync()
+        {
+            return await _despesaRepository.ListarAsync();
+        }
     }
 }
