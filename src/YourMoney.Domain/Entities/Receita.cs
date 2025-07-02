@@ -6,7 +6,6 @@ namespace YourMoney.Domain.Entities
 {
     public class Receita : BaseEntity
     {
-        public Guid Id { get; private set; }
         public string Descricao { get; private set; }
         public Money Valor { get; private set; }
         public DateTime Data { get; private set; }

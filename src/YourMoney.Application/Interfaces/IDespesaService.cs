@@ -11,5 +11,6 @@ namespace YourMoney.Application.Interfaces
         Task<Despesa> GetDespesaByIdAsync(Guid id); // Método já existente
         Task RemoverDespesaAsync(Guid id); // Método já existente
         Task AtualizarAsync(Despesa despesa); // Novo método
+        Task<List<Despesa>> ListarAsync();
     }
 }
