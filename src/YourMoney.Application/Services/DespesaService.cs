@@ -25,11 +25,6 @@ namespace YourMoney.Application.Services
             await _despesaRepository.AdicionarAsync(despesa);
         }
 
-        public async Task<List<Despesa>> GetAllDespesasAsync()
-        {
-            return await _despesaRepository.ListarAsync();
-        }
-
         public async Task<Despesa> GetDespesaByIdAsync(Guid id)
         {
             var despesa = await _despesaRepository.GetByIdAsync(id);
@@ -59,12 +54,6 @@ namespace YourMoney.Application.Services
                 throw new InvalidOperationException("Despesa não encontrada.");
             }
             await _despesaRepository.AtualizarAsync(despesa);
-        }
-
-        public async Task<List<Despesa>> ListarAsync()
-        {
-            // Chama o método GetAllAsync do repositório
-            return await _despesaRepository.ListarAsync();
         }
     }
 }

@@ -46,12 +46,12 @@ namespace YourMoney.Api.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListarDespesas()
-        {
-            var despesas = await _despesaService.ListarAsync();
-            return Ok(despesas);
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> ListarDespesas()
+        //{
+        //    var despesas = await _despesaService.ListarAsync();
+        //    return Ok(despesas);
+        //}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] Despesa despesa)
