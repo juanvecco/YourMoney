@@ -17,47 +17,68 @@ namespace YourMoney.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AdicionarAsync(Despesa despesa)
-        {
-            await _context.TbDespesa.AddAsync(despesa);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<List<Despesa>> ListarAsync()
-        {
-            return await _context.TbDespesa.ToListAsync();
-        }
-
         public async Task<Despesa> GetByIdAsync(Guid id)
         {
-            var despesa = await _context.TbDespesa.FindAsync(id);
-            if (despesa == null)
-            {
-                throw new InvalidOperationException("Despesa não encontrada.");
-            }
-            return despesa;
+            return await _context.Despesas
+                .Include(r => r.Categoria)
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task RemoverAsync(Guid id)
+        public async Task<List<Despesa>> GetAllAsync()
         {
-            var despesa = await _context.TbDespesa.FindAsync(id);
-            if (despesa == null)
-            {
-                throw new InvalidOperationException("Despesa não encontrada.");
-            }
-            _context.TbDespesa.Remove(despesa);
+            return await _context.Despesas
+                .Include(r => r.Categoria)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim)
+        {
+            return await _context.Despesas
+                .Include(r => r.Categoria)
+                .Where(r => r.Data >= dataInicio && r.Data <= dataFim)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano)
+        {
+            return await _context.Despesas
+                .Include(r => r.Categoria)
+                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
+        {
+            return await _context.Despesas
+                .Include(r => r.Categoria)
+                .Where(r => r.CategoriaId == categoriaId)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task AdicionarAsync(Despesa despesa)
+        {
+            await _context.Despesas.AddAsync(despesa);
             await _context.SaveChangesAsync();
         }
 
         public async Task AtualizarAsync(Despesa despesa)
         {
-            var existingDespesa = await _context.TbDespesa.FindAsync(despesa.Id);
-            if (existingDespesa == null)
-            {
-                throw new InvalidOperationException("Despesa não encontrada.");
-            }
-            _context.Entry(existingDespesa).CurrentValues.SetValues(despesa);
+            _context.Despesas.Update(despesa);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoverAsync(Guid id)
+        {
+            var despesa = await GetByIdAsync(id);
+            if (despesa != null)
+            {
+                _context.Despesas.Remove(despesa);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

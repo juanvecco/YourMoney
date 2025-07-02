@@ -7,26 +7,13 @@ namespace YourMoney.Application.Queries.Handlers
 {
     public class GetExpensesQuery : IRequest<List<DespesaResponse>> { }
 
-    public class DespesasQueryHandler : IRequestHandler<GetExpensesQuery, List<DespesaResponse>>
-    {
-        private readonly IDespesaRepository _repository;
+    //public class DespesasQueryHandler : IRequestHandler<GetExpensesQuery, List<DespesaResponse>>
+    //{
+    //    private readonly IDespesaRepository _repository;
 
-        public DespesasQueryHandler(IDespesaRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public async Task<List<DespesaResponse>> Handle(GetExpensesQuery request, CancellationToken cancellationToken)
-        {
-            var despesas = await _repository.ListarAsync();
-            return despesas.Select(e => new DespesaResponse
-            {
-                Id = e.Id,
-                Descricao = e.Descricao,
-                Valor = e.Valor,
-                Data = e.Data,
-                CategoriaId = e.CategoriaId
-            }).ToList();
-        }
-    }
+    //    public DespesasQueryHandler(IDespesaRepository repository)
+    //    {
+    //        _repository = repository;
+    //    }
+    //}
 }

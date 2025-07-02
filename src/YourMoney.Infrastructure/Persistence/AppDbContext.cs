@@ -18,6 +18,9 @@ namespace YourMoney.Infrastructure.Persistence
             // Configurações adicionais (se necessário)
         }
 
-
+        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Receita> Receitas { get; set; }
+        public DbSet<Investimento> Investimentos { get; set; }
+        public DbSet<Meta> Metas { get; set; }
     }
 }
