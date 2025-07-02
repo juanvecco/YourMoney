@@ -1,5 +1,68 @@
 [
   {
+    "ContainingType": "YourMoney.Api.Controllers.DashboardController",
+    "Method": "GetBalancoMensal",
+    "RelativePath": "api/Dashboard/balanco-mensal",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DashboardController",
+    "Method": "GetGraficoDespesas",
+    "RelativePath": "api/Dashboard/graficos/despesas",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DashboardController",
+    "Method": "GetResumo",
+    "RelativePath": "api/Dashboard/resumo",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "YourMoney.Api.Controllers.DespesasController",
     "Method": "AdicionarDespesa",
     "RelativePath": "api/Despesas",
@@ -13,16 +76,6 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
-    "Method": "ListarDespesas",
-    "RelativePath": "api/Despesas",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
     "ReturnTypes": []
   },
   {
