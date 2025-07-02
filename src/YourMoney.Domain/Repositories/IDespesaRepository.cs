@@ -11,6 +11,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId);
         Task AdicionarAsync(Despesa despesa);
         Task AtualizarAsync(Despesa despesa); // Descomentado para permitir atualizações
-        Task RemoverAsync(Guid id);
+        Task RemoverAsync(Guid id); 
+        Task<List<Despesa>> ListarAsync();
     }
 }

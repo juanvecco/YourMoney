@@ -80,6 +80,16 @@
   },
   {
     "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "ListarDespesas",
+    "RelativePath": "api/Despesas",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
     "Method": "RemoverDespesa",
     "RelativePath": "api/Despesas/{id}",
     "HttpMethod": "DELETE",
@@ -110,6 +120,38 @@
       {
         "Name": "despesa",
         "Type": "YourMoney.Domain.Entities.Despesa",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "DesmarcarPagamento",
+    "RelativePath": "api/Despesas/{id}/desmarcar-pagamento",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "MarcarComoPaga",
+    "RelativePath": "api/Despesas/{id}/pagar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
         "IsRequired": true
       }
     ],

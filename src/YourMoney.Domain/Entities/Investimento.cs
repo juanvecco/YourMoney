@@ -5,7 +5,6 @@ namespace YourMoney.Domain.Entities
 {
     public class Investimento : BaseEntity
     {
-        public Guid Id { get; private set; }
         public string Nome { get; private set; }
         public string Descricao { get; private set; }
         public Money ValorInvestido { get; private set; }

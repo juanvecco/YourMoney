@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 
 namespace YourMoney.Infrastructure.Configurations
 {
@@ -9,11 +10,44 @@ namespace YourMoney.Infrastructure.Configurations
         public void Configure(EntityTypeBuilder<Despesa> builder)
         {
             builder.ToTable("tbDespesa");
+
             builder.HasKey(d => d.Id);
-            builder.Property(d => d.Descricao).HasMaxLength(255).IsRequired();
-            builder.Property(d => d.Valor).HasColumnType("decimal(18,2)").IsRequired();
+
+            builder.Property(d => d.Descricao)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            builder.OwnsOne(d => d.Valor, money =>
+            {
+                money.Property(m => m.Valor)
+                    .HasColumnName("Valor")
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                money.Property(m => m.Moeda)
+                    .HasColumnName("Moeda")
+                    .HasMaxLength(3)
+                    .IsRequired()
+                    .HasDefaultValue("BRL");
+            });
+
             builder.Property(d => d.Data).IsRequired();
-            builder.Property(d => d.Categoria).HasMaxLength(255).IsRequired();
+            builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);
+            builder.Property(d => d.DataPagamento);
+            builder.Property(d => d.TipoRecorrencia)
+                .IsRequired()
+                .HasConversion<int>()
+                .HasDefaultValue(TipoRecorrencia.Unica);
+            builder.Property(d => d.DataCriacao).IsRequired();
+
+            builder.HasOne(d => d.Categoria)
+                .WithMany()
+                .HasForeignKey(d => d.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(d => d.Data).HasDatabaseName("IX_Despesa_Data");
+            builder.HasIndex(d => d.CategoriaId).HasDatabaseName("IX_Despesa_Categoria"); 
+            builder.HasIndex(d => d.TipoRecorrencia).HasDatabaseName("IX_Despesa_TipoRecorrencia");
         }
     }
 }

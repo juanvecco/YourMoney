@@ -7,8 +7,6 @@ namespace YourMoney.Domain.ValueObjects
         public decimal Valor { get; private set; }
         public string Moeda { get; private set; }
 
-        private Money() { }
-
         public Money(decimal valor, string moeda = "BRL")
         {
             if (valor < 0)

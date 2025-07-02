@@ -19,9 +19,10 @@ namespace YourMoney.Infrastructure.Repositories
 
         public async Task<Despesa> GetByIdAsync(Guid id)
         {
-            return await _context.Despesas
+            var despesa = await _context.Despesas
                 .Include(r => r.Categoria)
                 .FirstOrDefaultAsync(r => r.Id == id);
+            return despesa == null ? throw new InvalidOperationException("Despesa não encontrada.") : despesa;
         }
 
         public async Task<List<Despesa>> GetAllAsync()
@@ -79,6 +80,12 @@ namespace YourMoney.Infrastructure.Repositories
                 _context.Despesas.Remove(despesa);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<List<Despesa>> ListarAsync()
+        {
+            return await _context.Despesas
+                .Include(d => d.Categoria)
+                .ToListAsync();
         }
     }
 }

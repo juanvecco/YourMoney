@@ -7,7 +7,6 @@ namespace YourMoney.Domain.Entities
 {
     public class RelatorioMensal : BaseEntity
     {
-        public Guid Id { get; private set; }
         public int Mes { get; private set; }
         public int Ano { get; private set; }
         public Money TotalReceitas { get; private set; }
