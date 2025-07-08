@@ -19,33 +19,9 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(i => i.Descricao)
                 .HasMaxLength(500);
 
-            builder.OwnsOne(i => i.ValorInvestido, money =>
-            {
-                money.Property(m => m.Valor)
-                    .HasColumnName("ValorInvestido")
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
+            builder.Property(i => i.ValorInvestido);
 
-                money.Property(m => m.Moeda)
-                    .HasColumnName("MoedaInvestido")
-                    .HasMaxLength(3)
-                    .IsRequired()
-                    .HasDefaultValue("BRL");
-            });
-
-            builder.OwnsOne(i => i.ValorAtual, money =>
-            {
-                money.Property(m => m.Valor)
-                    .HasColumnName("ValorAtual")
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
-
-                money.Property(m => m.Moeda)
-                    .HasColumnName("MoedaAtual")
-                    .HasMaxLength(3)
-                    .IsRequired()
-                    .HasDefaultValue("BRL");
-            });
+            builder.Property(i => i.ValorAtual);
 
             builder.Property(i => i.DataInvestimento)
                 .IsRequired();

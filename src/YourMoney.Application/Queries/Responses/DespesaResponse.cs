@@ -7,7 +7,7 @@ namespace YourMoney.Application.Queries.Responses
     {
         public Guid Id { get; set; }
         public string? Descricao { get; set; }
-        public Money? Valor { get; set; }
+        public Decimal Valor { get; set; }
         public DateTime Data { get; set; }
         public Guid CategoriaId { get; set; }
         public string? CategoriaNome { get; set; }

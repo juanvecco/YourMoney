@@ -156,5 +156,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
+    "Method": "AdicionarReceita",
+    "RelativePath": "api/Receitas",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "receita",
+        "Type": "YourMoney.Domain.Entities.Receita",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

@@ -8,8 +8,8 @@ namespace YourMoney.Domain.Entities
     {
         public string Nome { get; private set; }
         public string Descricao { get; private set; }
-        public Money ValorObjetivo { get; private set; }
-        public Money ValorAtual { get; private set; }
+        public decimal ValorObjetivo { get; private set; }
+        public decimal ValorAtual { get; private set; }
         public DateTime DataInicio { get; private set; }
         public DateTime DataObjetivo { get; private set; }
         public StatusMeta Status { get; private set; }
@@ -18,13 +18,13 @@ namespace YourMoney.Domain.Entities
 
         private Meta() { }
 
-        public Meta(string nome, string descricao, Money valorObjetivo, DateTime dataObjetivo, Guid? categoriaId = null)
+        public Meta(string nome, string descricao, decimal valorObjetivo, DateTime dataObjetivo, Guid? categoriaId = null)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
             AtualizarDescricao(descricao);
-            ValorObjetivo = valorObjetivo ?? throw new ArgumentNullException(nameof(valorObjetivo));
-            ValorAtual = new Money(0, valorObjetivo.Moeda);
+            ValorObjetivo = valorObjetivo;
+            ValorAtual = 0;
             DataInicio = DateTime.Now;
             DataObjetivo = dataObjetivo;
             Status = StatusMeta.Ativa;
@@ -43,21 +43,21 @@ namespace YourMoney.Domain.Entities
             Descricao = descricao?.Trim() ?? string.Empty;
         }
 
-        public void AdicionarValor(Money valor)
+        public void AdicionarValor(decimal valor)
         {
-            ValorAtual = ValorAtual.Somar(valor);
+            ValorAtual += valor;
             VerificarConclusao();
         }
 
-        public void SubtrairValor(Money valor)
+        public void SubtrairValor(decimal valor)
         {
-            ValorAtual = ValorAtual.Subtrair(valor);
+            ValorAtual -= valor;
         }
 
         public decimal PercentualConcluido()
         {
-            if (ValorObjetivo.Valor == 0) return 0;
-            return Math.Min((ValorAtual.Valor / ValorObjetivo.Valor) * 100, 100);
+            if (ValorObjetivo == 0) return 0;
+            return Math.Min((ValorAtual / ValorObjetivo) * 100, 100);
         }
 
         public void PausarMeta() => Status = StatusMeta.Pausada;
@@ -66,7 +66,7 @@ namespace YourMoney.Domain.Entities
 
         private void VerificarConclusao()
         {
-            if (ValorAtual.Valor >= ValorObjetivo.Valor && Status == StatusMeta.Ativa)
+            if (ValorAtual >= ValorObjetivo && Status == StatusMeta.Ativa)
             {
                 Status = StatusMeta.Concluida;
             }

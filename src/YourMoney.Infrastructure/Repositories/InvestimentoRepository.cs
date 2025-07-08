@@ -76,14 +76,14 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return await _context.Investimentos
                 .Where(i => i.Ativo)
-                .SumAsync(i => i.ValorInvestido.Valor);
+                .SumAsync(i => i.ValorInvestido);
         }
 
         public async Task<decimal> GetTotalAtualAsync()
         {
             return await _context.Investimentos
                 .Where(i => i.Ativo)
-                .SumAsync(i => i.ValorAtual.Valor);
+                .SumAsync(i => i.ValorAtual);
         }
     }
 }

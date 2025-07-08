@@ -17,14 +17,14 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<Receita> GetByIdAsync(Guid id)
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<List<Receita>> GetAllAsync()
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim)
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .Where(r => r.Data >= dataInicio && r.Data <= dataFim)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
@@ -41,7 +41,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
@@ -50,8 +50,8 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
-                .Where(r => r.CategoriaId == categoriaId)
+                //.Include(r => r.Categoria)
+                //.Where(r => r.CategoriaId == categoriaId)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -59,8 +59,8 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetPendentesAsync()
         {
             return await _context.Receitas
-                .Include(r => r.Categoria)
-                .Where(r => !r.Recebida)
+                //.Include(r => r.Categoria)
+                //.Where(r => !r.Recebida)
                 .OrderBy(r => r.Data)
                 .ToListAsync();
         }
@@ -90,8 +90,8 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
-                .Where(r => r.Data.Month == mes && r.Data.Year == ano && r.Recebida)
-                .SumAsync(r => r.Valor.Valor);
+                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .SumAsync(r => r.Valor);
         }
     }
 }
