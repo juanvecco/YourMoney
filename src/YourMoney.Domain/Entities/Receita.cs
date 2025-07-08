@@ -7,27 +7,27 @@ namespace YourMoney.Domain.Entities
     public class Receita : BaseEntity
     {
         public string Descricao { get; private set; }
-        public Money Valor { get; private set; }
+        public Decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
-        public Guid CategoriaId { get; private set; }
-        public virtual Categoria Categoria { get; private set; }
-        public bool Recebida { get; private set; }
-        public DateTime? DataRecebimento { get; private set; }
-        public TipoRecorrencia TipoRecorrencia { get; private set; }
-        public DateTime DataCriacao { get; private set; }
+        //public Guid CategoriaId { get; private set; }  
+        // public virtual Categoria Categoria { get; private set; }  
+        //public bool Recebida { get; private set; }
+        //public DateTime? DataRecebimento { get; private set; }
+        //public TipoRecorrencia TipoRecorrencia { get; private set; }  
+        //public DateTime DataCriacao { get; private set; }
 
         private Receita() { }
 
-        public Receita(string descricao, Money valor, DateTime data, Guid categoriaId, TipoRecorrencia tipoRecorrencia = TipoRecorrencia.Unica)
+        public Receita(string descricao, Decimal valor, DateTime data)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
-            CategoriaId = categoriaId;
-            TipoRecorrencia = tipoRecorrencia;
-            Recebida = false;
-            DataCriacao = DateTime.Now;
+            // CategoriaId = categoriaId;  
+            //TipoRecorrencia = tipoRecorrencia;  
+            //Recebida = false;
+            //DataCriacao = DateTime.Now;
         }
 
         public void AtualizarDescricao(string descricao)
@@ -37,9 +37,11 @@ namespace YourMoney.Domain.Entities
             Descricao = descricao.Trim();
         }
 
-        public void AtualizarValor(Money valor)
+        public void AtualizarValor(Decimal valor)
         {
-            Valor = valor ?? throw new ArgumentNullException(nameof(valor));
+            if (valor == default)
+                throw new ArgumentNullException(nameof(valor));
+            Valor = valor;
         }
 
         public void AtualizarData(DateTime data)
@@ -47,16 +49,16 @@ namespace YourMoney.Domain.Entities
             Data = data;
         }
 
-        public void MarcarComoRecebida()
-        {
-            Recebida = true;
-            DataRecebimento = DateTime.Now;
-        }
+        //public void MarcarComoRecebida()
+        //{
+        //    Recebida = true;
+        //    DataRecebimento = DateTime.Now;
+        //}
 
-        public void DesmarcarRecebimento()
-        {
-            Recebida = false;
-            DataRecebimento = null;
-        }
+        //public void DesmarcarRecebimento()
+        //{
+        //    Recebida = false;
+        //    DataRecebimento = null;
+        //}
     }
 }

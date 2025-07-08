@@ -8,7 +8,7 @@ namespace YourMoney.Domain.Entities
     public class Despesa : BaseEntity
     {
         public string Descricao { get; private set; }
-        public Money Valor { get; private set; }
+        public Decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
         public Guid CategoriaId { get; private set; }
         public virtual Categoria Categoria { get; private set; }
@@ -19,7 +19,7 @@ namespace YourMoney.Domain.Entities
 
         private Despesa() { } // Para ORM
 
-        public Despesa(string descricao, Money valor, DateTime data, Guid categoriaId, TipoRecorrencia tipoRecorrencia = TipoRecorrencia.Unica)
+        public Despesa(string descricao, Decimal valor, DateTime data, Guid categoriaId, TipoRecorrencia tipoRecorrencia = TipoRecorrencia.Unica)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
@@ -38,9 +38,11 @@ namespace YourMoney.Domain.Entities
             Descricao = descricao.Trim();
         }
 
-        public void AtualizarValor(Money valor)
+        public void AtualizarValor(Decimal valor)
         {
-            Valor = valor ?? throw new ArgumentNullException(nameof(valor));
+            if (valor <= 0)
+                throw new ArgumentException("Valor deve ser maior que zero.", nameof(valor));
+            Valor = valor;
         }
 
         public void AtualizarData(DateTime data)

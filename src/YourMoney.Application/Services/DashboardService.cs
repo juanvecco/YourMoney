@@ -34,9 +34,9 @@ namespace YourMoney.Application.Services
             var investimentos = await _investimentoRepository.GetAllAsync();
             var metasAtivas = await _metaRepository.GetAtivasAsync();
 
-            var totalReceitas = receitas.Where(r => r.Recebida).Sum(r => r.Valor.Valor);
-            var totalDespesas = despesas.Sum(d => d.Valor.Valor);
-            var totalInvestimentos = investimentos.Where(i => i.Ativo).Sum(i => i.ValorInvestido.Valor);
+            var totalReceitas = receitas.Sum(r => r.Valor);
+            var totalDespesas = despesas.Sum(d => d.Valor);
+            var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
 
             return new DashboardDTO
             {
@@ -48,8 +48,8 @@ namespace YourMoney.Application.Services
                 {
                     Id = m.Id,
                     Nome = m.Nome,
-                    ValorObjetivo = m.ValorObjetivo.Valor,
-                    ValorAtual = m.ValorAtual.Valor,
+                    ValorObjetivo = m.ValorObjetivo,
+                    ValorAtual = m.ValorAtual,
                     PercentualConcluido = m.PercentualConcluido(),
                     DataObjetivo = m.DataObjetivo
                 }).ToList(),
@@ -68,7 +68,7 @@ namespace YourMoney.Application.Services
                 .Select(g => new GraficoDTO
                 {
                     Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Valor = g.Sum(d => d.Valor.Valor),
+                    Valor = g.Sum(d => d.Valor),
                     Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
                 })
                 .OrderByDescending(g => g.Valor)
@@ -81,13 +81,13 @@ namespace YourMoney.Application.Services
             var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Receita);
 
             return receitas
-                .Where(r => r.Recebida)
-                .GroupBy(r => r.CategoriaId)
+                //.Where(r => r.Recebida)
+                //.GroupBy(r => r.CategoriaId)
                 .Select(g => new GraficoDTO
                 {
-                    Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Valor = g.Sum(r => r.Valor.Valor),
-                    Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
+                    //Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
+                    //Valor = g.Sum(r => r.Valor.Valor),
+                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
                 })
                 .OrderByDescending(g => g.Valor)
                 .ToList();
@@ -101,9 +101,9 @@ namespace YourMoney.Application.Services
                 new DateTime(ano, mes, 1),
                 new DateTime(ano, mes, DateTime.DaysInMonth(ano, mes)));
 
-            var totalReceitas = receitas.Where(r => r.Recebida).Sum(r => r.Valor.Valor);
-            var totalDespesas = despesas.Sum(d => d.Valor.Valor);
-            var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido.Valor);
+            var totalReceitas = receitas.Sum(r => r.Valor);
+            var totalDespesas = despesas.Sum(d => d.Valor);
+            var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
 
             return new BalancoMensalDTO
             {
@@ -114,7 +114,7 @@ namespace YourMoney.Application.Services
                 TotalInvestimentos = totalInvestimentos,
                 SaldoFinal = totalReceitas - totalDespesas - totalInvestimentos,
                 DespesasPorCategoria = await GetDespesasPorCategoriaAsync(despesas),
-                ReceitasPorCategoria = await GetReceitasPorCategoriaAsync(receitas.Where(r => r.Recebida).ToList())
+                ReceitasPorCategoria = await GetReceitasPorCategoriaAsync(receitas.ToList())
             };
         }
 
@@ -128,7 +128,7 @@ namespace YourMoney.Application.Services
                 {
                     CategoriaId = g.Key,
                     NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Total = g.Sum(d => d.Valor.Valor),
+                    Total = g.Sum(d => d.Valor),
                     Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
                 })
                 .OrderByDescending(c => c.Total)
@@ -140,13 +140,13 @@ namespace YourMoney.Application.Services
             var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Receita);
 
             return receitas
-                .GroupBy(r => r.CategoriaId)
+                //.GroupBy(r => r.CategoriaId)
                 .Select(g => new CategoriaResumoDTO
                 {
-                    CategoriaId = g.Key,
-                    NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Total = g.Sum(r => r.Valor.Valor),
-                    Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
+                    //CategoriaId = g.Key,
+                    //NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
+                    //Total = g.Sum(r => r.Valor.Valor),
+                   // Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
                 })
                 .OrderByDescending(c => c.Total)
                 .ToList();

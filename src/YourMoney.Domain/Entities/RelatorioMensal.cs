@@ -9,10 +9,10 @@ namespace YourMoney.Domain.Entities
     {
         public int Mes { get; private set; }
         public int Ano { get; private set; }
-        public Money TotalReceitas { get; private set; }
-        public Money TotalDespesas { get; private set; }
-        public Money TotalInvestimentos { get; private set; }
-        public Money Saldo { get; private set; }
+        public Decimal TotalReceitas { get; private set; }
+        public Decimal TotalDespesas { get; private set; }
+        public Decimal TotalInvestimentos { get; private set; }
+        public Decimal Saldo { get; private set; }
         public DateTime DataGeracao { get; private set; }
 
         private readonly List<DespesaPorCategoria> _despesasPorCategoria = new();
@@ -28,22 +28,21 @@ namespace YourMoney.Domain.Entities
             Id = Guid.NewGuid();
             Mes = mes;
             Ano = ano;
-            TotalReceitas = new Money(0);
-            TotalDespesas = new Money(0);
-            TotalInvestimentos = new Money(0);
-            Saldo = new Money(0);
+            TotalReceitas = new Decimal(0);
+            TotalDespesas = new Decimal(0);
+            TotalInvestimentos = new Decimal(0);
+            Saldo = new Decimal(0);
             DataGeracao = DateTime.Now;
         }
 
         public void CalcularTotais(List<Receita> receitas, List<Despesa> despesas, List<Investimento> investimentos)
         {
-            TotalReceitas = new Money(receitas.Sum(r => r.Valor.Valor));
-            TotalDespesas = new Money(despesas.Sum(d => d.Valor.Valor));
-            TotalInvestimentos = new Money(investimentos.Sum(i => i.ValorInvestido.Valor));
-            Saldo = TotalReceitas.Subtrair(TotalDespesas).Subtrair(TotalInvestimentos);
+            TotalReceitas = receitas.Sum(r => r.Valor);
+            TotalDespesas = despesas.Sum(d => d.Valor);
+            TotalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
+            Saldo = TotalReceitas - TotalDespesas - TotalInvestimentos; // Fixed: Replaced "Subtrair" with standard subtraction operator "-"  
 
             CalcularDespesasPorCategoria(despesas);
-            CalcularReceitasPorCategoria(receitas);
         }
 
         private void CalcularDespesasPorCategoria(List<Despesa> despesas)
@@ -53,20 +52,8 @@ namespace YourMoney.Domain.Entities
 
             foreach (var grupo in grupos)
             {
-                var total = new Money(grupo.Sum(d => d.Valor.Valor));
+                var total = Convert.ToDecimal(grupo.Sum(d => Convert.ToDouble(d.Valor)));
                 _despesasPorCategoria.Add(new DespesaPorCategoria(grupo.Key, total));
-            }
-        }
-
-        private void CalcularReceitasPorCategoria(List<Receita> receitas)
-        {
-            _receitasPorCategoria.Clear();
-            var grupos = receitas.GroupBy(r => r.CategoriaId);
-
-            foreach (var grupo in grupos)
-            {
-                var total = new Money(grupo.Sum(r => r.Valor.Valor));
-                _receitasPorCategoria.Add(new ReceitaPorCategoria(grupo.Key, total));
             }
         }
     }
@@ -74,9 +61,9 @@ namespace YourMoney.Domain.Entities
     public class DespesaPorCategoria
     {
         public Guid CategoriaId { get; private set; }
-        public Money Total { get; private set; }
+        public Decimal Total { get; private set; }
 
-        public DespesaPorCategoria(Guid categoriaId, Money total)
+        public DespesaPorCategoria(Guid categoriaId, Decimal total)
         {
             CategoriaId = categoriaId;
             Total = total;
@@ -86,9 +73,9 @@ namespace YourMoney.Domain.Entities
     public class ReceitaPorCategoria
     {
         public Guid CategoriaId { get; private set; }
-        public Money Total { get; private set; }
+        public Decimal Total { get; private set; }
 
-        public ReceitaPorCategoria(Guid categoriaId, Money total)
+        public ReceitaPorCategoria(Guid categoriaId, Decimal total)
         {
             CategoriaId = categoriaId;
             Total = total;
