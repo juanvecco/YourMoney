@@ -7,8 +7,8 @@ namespace YourMoney.Domain.Entities
     {
         public string Nome { get; private set; }
         public string Descricao { get; private set; }
-        public Money ValorInvestido { get; private set; }
-        public Money ValorAtual { get; private set; }
+        public Decimal ValorInvestido { get; private set; }
+        public Decimal ValorAtual { get; private set; }
         public DateTime DataInvestimento { get; private set; }
         public DateTime? DataResgate { get; private set; }
         public string TipoInvestimento { get; private set; }
@@ -17,12 +17,12 @@ namespace YourMoney.Domain.Entities
 
         private Investimento() { }
 
-        public Investimento(string nome, string descricao, Money valorInvestido, DateTime dataInvestimento, string tipoInvestimento)
+        public Investimento(string nome, string descricao, Decimal valorInvestido, DateTime dataInvestimento, string tipoInvestimento)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
             AtualizarDescricao(descricao);
-            ValorInvestido = valorInvestido ?? throw new ArgumentNullException(nameof(valorInvestido));
+            ValorInvestido = valorInvestido;
             ValorAtual = valorInvestido;
             DataInvestimento = dataInvestimento;
             TipoInvestimento = tipoInvestimento ?? throw new ArgumentNullException(nameof(tipoInvestimento));
@@ -42,9 +42,11 @@ namespace YourMoney.Domain.Entities
             Descricao = descricao?.Trim() ?? string.Empty;
         }
 
-        public void AtualizarValorAtual(Money novoValor)
+        public void AtualizarValorAtual(Decimal novoValor)
         {
-            ValorAtual = novoValor ?? throw new ArgumentNullException(nameof(novoValor));
+            if (novoValor <= 0) // Adjusted condition to check for invalid values instead of null  
+                throw new ArgumentException("O novo valor deve ser maior que zero.", nameof(novoValor));
+            ValorAtual = novoValor;
             CalcularTaxaRetorno();
         }
 
@@ -56,9 +58,9 @@ namespace YourMoney.Domain.Entities
 
         private void CalcularTaxaRetorno()
         {
-            if (ValorInvestido.Valor > 0)
+            if (ValorInvestido > 0)
             {
-                TaxaRetorno = ((ValorAtual.Valor - ValorInvestido.Valor) / ValorInvestido.Valor) * 100;
+                TaxaRetorno = ((ValorAtual - ValorInvestido) / ValorInvestido) * 100;
             }
         }
     }

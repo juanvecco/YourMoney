@@ -17,19 +17,7 @@ namespace YourMoney.Infrastructure.Configurations
                 .IsRequired()
                 .HasMaxLength(255);
 
-            builder.OwnsOne(d => d.Valor, money =>
-            {
-                money.Property(m => m.Valor)
-                    .HasColumnName("Valor")
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
-
-                money.Property(m => m.Moeda)
-                    .HasColumnName("Moeda")
-                    .HasMaxLength(3)
-                    .IsRequired()
-                    .HasDefaultValue("BRL");
-            });
+            builder.Property(d => d.Valor);
 
             builder.Property(d => d.Data).IsRequired();
             builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);

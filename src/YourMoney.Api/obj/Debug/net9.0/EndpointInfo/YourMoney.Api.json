@@ -247,6 +247,37 @@
           }
         }
       }
+    },
+    "/api/Receitas": {
+      "post": {
+        "tags": [
+          "Receitas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receita"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receita"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receita"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -303,7 +334,8 @@
             "nullable": true
           },
           "valor": {
-            "$ref": "#/components/schemas/Money"
+            "type": "number",
+            "format": "double"
           },
           "data": {
             "type": "string",
@@ -337,16 +369,25 @@
         },
         "additionalProperties": false
       },
-      "Money": {
+      "Receita": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
           "valor": {
             "type": "number",
             "format": "double"
           },
-          "moeda": {
+          "data": {
             "type": "string",
-            "nullable": true
+            "format": "date-time"
           }
         },
         "additionalProperties": false
