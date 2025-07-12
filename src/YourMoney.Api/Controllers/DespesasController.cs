@@ -78,44 +78,44 @@ namespace YourMoney.Api.Controllers
                 return NotFound(ex.Message);
             }
         }
-        [HttpPut("{id}/pagar")]
-        public async Task<IActionResult> MarcarComoPaga(Guid id)
-        {
-            try
-            {
-                var despesa = await _despesaService.GetDespesaByIdAsync(id);
-                despesa.MarcarComoPaga();
-                await _despesaService.AtualizarAsync(despesa);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPut("{id}/pagar")]
+        //public async Task<IActionResult> MarcarComoPaga(Guid id)
+        //{
+        //    try
+        //    {
+        //        var despesa = await _despesaService.GetDespesaByIdAsync(id);
+        //        despesa.MarcarComoPaga();
+        //        await _despesaService.AtualizarAsync(despesa);
+        //        return NoContent();
+        //    }
+        //    catch (InvalidOperationException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
-        [HttpPut("{id}/desmarcar-pagamento")]
-        public async Task<IActionResult> DesmarcarPagamento(Guid id)
-        {
-            try
-            {
-                var despesa = await _despesaService.GetDespesaByIdAsync(id);
-                despesa.DesmarcarPagamento();
-                await _despesaService.AtualizarAsync(despesa);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPut("{id}/desmarcar-pagamento")]
+        //public async Task<IActionResult> DesmarcarPagamento(Guid id)
+        //{
+        //    try
+        //    {
+        //        var despesa = await _despesaService.GetDespesaByIdAsync(id);
+        //        despesa.DesmarcarPagamento();
+        //        await _despesaService.AtualizarAsync(despesa);
+        //        return NoContent();
+        //    }
+        //    catch (InvalidOperationException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
     }
 }

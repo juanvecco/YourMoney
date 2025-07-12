@@ -20,7 +20,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<Despesa> GetByIdAsync(Guid id)
         {
             var despesa = await _context.Despesas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .FirstOrDefaultAsync(r => r.Id == id);
             return despesa == null ? throw new InvalidOperationException("Despesa não encontrada.") : despesa;
         }
@@ -28,7 +28,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetAllAsync()
         {
             return await _context.Despesas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -36,7 +36,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim)
         {
             return await _context.Despesas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .Where(r => r.Data >= dataInicio && r.Data <= dataFim)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
@@ -45,7 +45,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Despesas
-                .Include(r => r.Categoria)
+                //.Include(r => r.Categoria)
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
@@ -54,8 +54,8 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Despesas
-                .Include(r => r.Categoria)
-                .Where(r => r.CategoriaId == categoriaId)
+                //.Include(r => r.Categoria)
+                //.Where(r => r.CategoriaId == categoriaId)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -84,7 +84,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> ListarAsync()
         {
             return await _context.Despesas
-                .Include(d => d.Categoria)
+                //.Include(d => d.Categoria)
                 .ToListAsync();
         }
     }
