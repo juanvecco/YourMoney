@@ -35,27 +35,27 @@ namespace YourMoney.Domain.Entities
             DataGeracao = DateTime.Now;
         }
 
-        public void CalcularTotais(List<Receita> receitas, List<Despesa> despesas, List<Investimento> investimentos)
-        {
-            TotalReceitas = receitas.Sum(r => r.Valor);
-            TotalDespesas = despesas.Sum(d => d.Valor);
-            TotalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
-            Saldo = TotalReceitas - TotalDespesas - TotalInvestimentos; // Fixed: Replaced "Subtrair" with standard subtraction operator "-"  
+        //public void CalcularTotais(List<Receita> receitas, List<Despesa> despesas, List<Investimento> investimentos)
+        //{
+        //    TotalReceitas = receitas.Sum(r => r.Valor);
+        //    TotalDespesas = despesas.Sum(d => d.Valor);
+        //    TotalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
+        //    Saldo = TotalReceitas - TotalDespesas - TotalInvestimentos; // Fixed: Replaced "Subtrair" with standard subtraction operator "-"  
 
-            CalcularDespesasPorCategoria(despesas);
-        }
+        //    CalcularDespesasPorCategoria(despesas);
+        //}
 
-        private void CalcularDespesasPorCategoria(List<Despesa> despesas)
-        {
-            _despesasPorCategoria.Clear();
-            var grupos = despesas.GroupBy(d => d.CategoriaId);
+        //private void CalcularDespesasPorCategoria(List<Despesa> despesas)
+        //{
+        //    _despesasPorCategoria.Clear();
+        //    var grupos = despesas.GroupBy(d => d.CategoriaId);
 
-            foreach (var grupo in grupos)
-            {
-                var total = Convert.ToDecimal(grupo.Sum(d => Convert.ToDouble(d.Valor)));
-                _despesasPorCategoria.Add(new DespesaPorCategoria(grupo.Key, total));
-            }
-        }
+        //    foreach (var grupo in grupos)
+        //    {
+        //        var total = Convert.ToDecimal(grupo.Sum(d => Convert.ToDouble(d.Valor)));
+        //        _despesasPorCategoria.Add(new DespesaPorCategoria(grupo.Key, total));
+        //    }
+        //}
     }
 
     public class DespesaPorCategoria

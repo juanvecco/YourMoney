@@ -20,22 +20,22 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(d => d.Valor);
 
             builder.Property(d => d.Data).IsRequired();
-            builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);
-            builder.Property(d => d.DataPagamento);
-            builder.Property(d => d.TipoRecorrencia)
-                .IsRequired()
-                .HasConversion<int>()
-                .HasDefaultValue(TipoRecorrencia.Unica);
-            builder.Property(d => d.DataCriacao).IsRequired();
+            //builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);
+            //builder.Property(d => d.DataPagamento);
+            //builder.Property(d => d.TipoRecorrencia)
+            //    .IsRequired()
+            //    .HasConversion<int>()
+            //    .HasDefaultValue(TipoRecorrencia.Unica);
+            //builder.Property(d => d.DataCriacao).IsRequired();
 
-            builder.HasOne(d => d.Categoria)
-                .WithMany()
-                .HasForeignKey(d => d.CategoriaId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.HasOne(d => d.Categoria)
+            //    .WithMany()
+            //    .HasForeignKey(d => d.CategoriaId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(d => d.Data).HasDatabaseName("IX_Despesa_Data");
-            builder.HasIndex(d => d.CategoriaId).HasDatabaseName("IX_Despesa_Categoria"); 
-            builder.HasIndex(d => d.TipoRecorrencia).HasDatabaseName("IX_Despesa_TipoRecorrencia");
+            //builder.HasIndex(d => d.Data).HasDatabaseName("IX_Despesa_Data");
+            //builder.HasIndex(d => d.CategoriaId).HasDatabaseName("IX_Despesa_Categoria"); 
+            //builder.HasIndex(d => d.TipoRecorrencia).HasDatabaseName("IX_Despesa_TipoRecorrencia");
         }
     }
 }

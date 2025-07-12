@@ -10,25 +10,25 @@ namespace YourMoney.Domain.Entities
         public string Descricao { get; private set; }
         public Decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
-        public Guid CategoriaId { get; private set; }
-        public virtual Categoria Categoria { get; private set; }
-        public bool Pago { get; private set; }
-        public DateTime? DataPagamento { get; private set; }
-        public TipoRecorrencia TipoRecorrencia { get; private set; }
-        public DateTime DataCriacao { get; private set; }
+        //public Guid CategoriaId { get; private set; }
+        //public virtual Categoria Categoria { get; private set; }
+        //public bool Pago { get; private set; }
+        //public DateTime? DataPagamento { get; private set; }
+        //public TipoRecorrencia TipoRecorrencia { get; private set; }
+        //public DateTime DataCriacao { get; private set; }
 
         private Despesa() { } // Para ORM
 
-        public Despesa(string descricao, Decimal valor, DateTime data, Guid categoriaId, TipoRecorrencia tipoRecorrencia = TipoRecorrencia.Unica)
+        public Despesa(string descricao, Decimal valor, DateTime data)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
-            CategoriaId = categoriaId;
-            TipoRecorrencia = tipoRecorrencia;
-            Pago = false;
-            DataCriacao = DateTime.Now;
+            //CategoriaId = categoriaId;
+            //TipoRecorrencia = tipoRecorrencia;
+            //Pago = false;
+            //DataCriacao = DateTime.Now;
         }
 
         public void AtualizarDescricao(string descricao)
@@ -49,23 +49,23 @@ namespace YourMoney.Domain.Entities
         {
             Data = data;
         }
-        public void AtualizarCategoriaId(Guid categoriaId)
-        {
-            if (categoriaId == Guid.Empty)
-                throw new ArgumentException("CategoriaId é obrigatório.");
-            CategoriaId = categoriaId;
-        }
+        //public void AtualizarCategoriaId(Guid categoriaId)
+        //{
+        //    if (categoriaId == Guid.Empty)
+        //        throw new ArgumentException("CategoriaId é obrigatório.");
+        //    CategoriaId = categoriaId;
+        //}
 
-        public void MarcarComoPaga()
-        {
-            Pago = true;
-            DataPagamento = DateTime.Now;
-        }
+        //public void MarcarComoPaga()
+        //{
+        //    Pago = true;
+        //    DataPagamento = DateTime.Now;
+        //}
 
-        public void DesmarcarPagamento()
-        {
-            Pago = false;
-            DataPagamento = null;
-        }
+        //public void DesmarcarPagamento()
+        //{
+        //    Pago = false;
+        //    DataPagamento = null;
+        //}
     }
 }

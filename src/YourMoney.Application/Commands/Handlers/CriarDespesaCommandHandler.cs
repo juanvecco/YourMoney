@@ -19,16 +19,16 @@ namespace YourMoney.Application.Commands.Handlers
 
         public async Task<Guid> Handle(CriarDespesaCommand request, CancellationToken cancellationToken)
         {
-            if (!await _categoriaRepository.ExisteAsync(request.CategoriaId))
-                throw new InvalidOperationException("Categoria não encontrada.");
+            //if (!await _categoriaRepository.ExisteAsync(request.CategoriaId))
+            //    throw new InvalidOperationException("Categoria não encontrada.");
 
             // Fixed the issue by using the correct type for 'Valor'  
             var despesa = new Despesa(
                 request.Descricao,
                 request.Valor, // Assuming 'Money' has an 'Amount' property for decimal value  
-                request.Data,
-                request.CategoriaId,
-                request.TipoRecorrencia
+                request.Data//,
+                //request.CategoriaId,
+                //request.TipoRecorrencia
             );
 
             await _despesaRepository.AdicionarAsync(despesa);
