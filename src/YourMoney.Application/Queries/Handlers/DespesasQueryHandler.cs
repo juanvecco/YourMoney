@@ -23,13 +23,13 @@ namespace YourMoney.Application.Queries.Handlers
                 Id = e.Id,
                 Descricao = e.Descricao,
                 Valor = e.Valor,
-                Data = e.Data,
-                CategoriaId = e.CategoriaId,
-                CategoriaNome = e.Categoria?.Nome ?? "Sem Categoria",
-                Pago = e.Pago,
-                DataPagamento = e.DataPagamento,
-                TipoRecorrencia = e.TipoRecorrencia,
-                DataCriacao = e.DataCriacao
+                Data = e.Data//,
+                //CategoriaId = e.CategoriaId,
+                //CategoriaNome = e.Categoria?.Nome ?? "Sem Categoria",
+                //Pago = e.Pago,
+                //DataPagamento = e.DataPagamento,
+                //TipoRecorrencia = e.TipoRecorrencia,
+                //DataCriacao = e.DataCriacao
             }).ToList();
         }
     }

@@ -64,12 +64,12 @@ namespace YourMoney.Application.Services
             var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Despesa);
 
             return despesas
-                .GroupBy(d => d.CategoriaId)
+                //.GroupBy(d => d.CategoriaId)
                 .Select(g => new GraficoDTO
                 {
-                    Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Valor = g.Sum(d => d.Valor),
-                    Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
+                    //Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
+                    //Valor = g.Sum(d => d.Valor),
+                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
                 })
                 .OrderByDescending(g => g.Valor)
                 .ToList();
@@ -123,13 +123,13 @@ namespace YourMoney.Application.Services
             var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Despesa);
 
             return despesas
-                .GroupBy(d => d.CategoriaId)
+                //.GroupBy(d => d.CategoriaId)
                 .Select(g => new CategoriaResumoDTO
                 {
-                    CategoriaId = g.Key,
-                    NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    Total = g.Sum(d => d.Valor),
-                    Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
+                    //CategoriaId = g.Key,
+                    //NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
+                    //Total = g.Sum(d => d.Valor),
+                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
                 })
                 .OrderByDescending(c => c.Total)
                 .ToList();

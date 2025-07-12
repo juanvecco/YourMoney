@@ -202,52 +202,6 @@
         }
       }
     },
-    "/api/Despesas/{id}/pagar": {
-      "put": {
-        "tags": [
-          "Despesas"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Despesas/{id}/desmarcar-pagamento": {
-      "put": {
-        "tags": [
-          "Despesas"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Receitas": {
       "post": {
         "tags": [
@@ -282,45 +236,6 @@
   },
   "components": {
     "schemas": {
-      "Categoria": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "readOnly": true
-          },
-          "nome": {
-            "type": "string",
-            "nullable": true
-          },
-          "descricao": {
-            "type": "string",
-            "nullable": true
-          },
-          "cor": {
-            "type": "string",
-            "nullable": true
-          },
-          "icone": {
-            "type": "string",
-            "nullable": true
-          },
-          "tipoTransacao": {
-            "$ref": "#/components/schemas/TipoTransacao"
-          },
-          "ativa": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "dataCriacao": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
       "Despesa": {
         "type": "object",
         "properties": {
@@ -340,31 +255,6 @@
           "data": {
             "type": "string",
             "format": "date-time"
-          },
-          "categoriaId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "categoria": {
-            "$ref": "#/components/schemas/Categoria"
-          },
-          "pago": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "dataPagamento": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "readOnly": true
-          },
-          "tipoRecorrencia": {
-            "$ref": "#/components/schemas/TipoRecorrencia"
-          },
-          "dataCriacao": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -391,30 +281,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "TipoRecorrencia": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "TipoTransacao": {
-        "enum": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "format": "int32"
       }
     }
   }

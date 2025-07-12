@@ -1,10 +1,3 @@
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.AssemblyReference.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.GeneratedMSBuildEditorConfig.editorconfig
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfoInputs.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfo.cs
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.CoreCompileInputs.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cache
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\appsettings.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.staticwebassets.runtime.json
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Api.staticwebassets.endpoints.json
@@ -146,6 +139,13 @@ C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Infrastructure.dll
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Application.pdb
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Domain.pdb
 C:\dev\YourMoney\src\YourMoney.Api\bin\Debug\net9.0\YourMoney.Infrastructure.pdb
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.AssemblyReference.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfoInputs.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.AssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.csproj.CoreCompileInputs.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.sourcelink.json
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\scopedcss\bundle\YourMoney.Api.styles.css
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\topngqi2tx-tmsxjwpo74.gz
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\qyjgmpucqh-trf3ufhe1x.gz

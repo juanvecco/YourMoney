@@ -9,7 +9,7 @@ namespace YourMoney.Application.Commands.Requests
         public string? Descricao { get; set; }
         public Decimal Valor { get; set; }
         public DateTime Data { get; set; }
-        public Guid CategoriaId { get; set; }
-        public TipoRecorrencia TipoRecorrencia { get; set; }
+        //public Guid CategoriaId { get; set; }
+        //public TipoRecorrencia TipoRecorrencia { get; set; }
     }
 }
