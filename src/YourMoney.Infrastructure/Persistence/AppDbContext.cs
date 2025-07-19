@@ -13,6 +13,7 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<Receita> Receitas { get; set; }
         public DbSet<Investimento> Investimentos { get; set; }
         public DbSet<Meta> Metas { get; set; }
+        public DbSet<ContaFinanceira> ContaFinanceira { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +24,7 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ReceitaConfiguration());
             modelBuilder.ApplyConfiguration(new InvestimentoConfiguration());
             modelBuilder.ApplyConfiguration(new MetaConfiguration());
+            modelBuilder.ApplyConfiguration(new ContaFinanceiraConfiguration());
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
