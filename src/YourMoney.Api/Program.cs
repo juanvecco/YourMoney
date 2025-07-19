@@ -18,6 +18,8 @@ builder.Services.AddScoped<IReceitaService, ReceitaService>();
 builder.Services.AddScoped<IInvestimentoRepository, InvestimentoRepository>();
 builder.Services.AddScoped<IMetaRepository, MetaRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
+builder.Services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
 
 // Adicionar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
