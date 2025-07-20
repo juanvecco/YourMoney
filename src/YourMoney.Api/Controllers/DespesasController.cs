@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.ValueObjects;
 
 namespace YourMoney.Api.Controllers
 {
@@ -61,22 +63,17 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] Despesa despesa)
+        public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] DespesaDTO dto)
         {
-            if (id != despesa.Id)
-            {
-                return BadRequest("O ID da URL não corresponde ao ID da despesa.");
-            }
+            var despesa = await _despesaService.GetDespesaByIdAsync(id);
 
-            try
-            {
-                await _despesaService.AtualizarAsync(despesa);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            despesa.AtualizarDescricao(dto.Descricao);
+            despesa.AtualizarValor(dto.Valor);
+            despesa.AtualizarData(dto.Data);
+            despesa.AtualizarContaFinanceira(dto.IdContaFinanceira);
+
+            await _despesaService.AtualizarAsync(despesa);
+            return NoContent();
         }
         //[HttpPut("{id}/pagar")]
         //public async Task<IActionResult> MarcarComoPaga(Guid id)

@@ -88,17 +88,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ContaFinanceira"
+                "$ref": "#/components/schemas/ContaFinanceiraDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ContaFinanceira"
+                "$ref": "#/components/schemas/ContaFinanceiraDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ContaFinanceira"
+                "$ref": "#/components/schemas/ContaFinanceiraDTO"
               }
             }
           }
@@ -284,17 +284,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/DespesaDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/DespesaDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/DespesaDTO"
               }
             }
           }
@@ -360,6 +360,20 @@
         },
         "additionalProperties": false
       },
+      "ContaFinanceiraDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Despesa": {
         "type": "object",
         "properties": {
@@ -386,6 +400,32 @@
           },
           "contaFinanceira": {
             "$ref": "#/components/schemas/ContaFinanceira"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DespesaDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idContaFinanceira": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "additionalProperties": false
