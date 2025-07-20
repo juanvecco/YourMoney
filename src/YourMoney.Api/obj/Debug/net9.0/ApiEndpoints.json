@@ -55,8 +55,8 @@
         "IsRequired": true
       },
       {
-        "Name": "contaFinanceira",
-        "Type": "YourMoney.Domain.Entities.ContaFinanceira",
+        "Name": "dto",
+        "Type": "YourMoney.Application.DTOs.ContaFinanceiraDTO",
         "IsRequired": true
       }
     ],
@@ -181,8 +181,8 @@
         "IsRequired": true
       },
       {
-        "Name": "despesa",
-        "Type": "YourMoney.Domain.Entities.Despesa",
+        "Name": "dto",
+        "Type": "YourMoney.Application.DTOs.DespesaDTO",
         "IsRequired": true
       }
     ],

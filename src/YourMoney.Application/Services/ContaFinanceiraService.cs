@@ -1,6 +1,7 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
 using YourMoney.Domain.Repositories;
+using YourMoney.Infrastructure.Repositories;
 
 namespace YourMoney.Application.Services
 {
@@ -40,6 +41,15 @@ namespace YourMoney.Application.Services
         public async Task<List<ContaFinanceira>> ListarAsync()
         {
             return await _contaFinanceiraRepository.ListarAsync();
+        }
+        public async Task<ContaFinanceira> GetByIdAsync(Guid id)
+        {
+            var contaFinanceira = await _contaFinanceiraRepository.GetByIdAsync(id);
+            if (contaFinanceira == null)
+            {
+                throw new InvalidOperationException("Conta Financeira não encontrada.");
+            }
+            return contaFinanceira;
         }
     }
 }

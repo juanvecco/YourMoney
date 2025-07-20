@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
 using YourMoney.Domain.Entities;
@@ -59,22 +60,15 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> AtualizarContaFinanceira(Guid id, [FromBody] ContaFinanceira contaFinanceira)
+        public async Task<IActionResult> AtualizarContaFinanceira(Guid id, [FromBody] ContaFinanceiraDTO dto)
         {
-            if (id != contaFinanceira.Id)
-            {
-                return BadRequest("O ID da URL não corresponde ao ID da conta financeira.");
-            }
+            var contaFinanceira = await _contaFinanceiraService.GetByIdAsync(id);
 
-            try
-            {
-                await _contaFinanceiraService.AtualizarAsync(contaFinanceira);
+            contaFinanceira.AtualizarDescricao(dto.Descricao);
+
+            await _contaFinanceiraService.AtualizarAsync(contaFinanceira);
                 return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            
         }
     }
 }
