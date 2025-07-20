@@ -10,7 +10,9 @@ namespace YourMoney.Domain.Entities
         public string Descricao { get; private set; }
         public Decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
-        //public Guid CategoriaId { get; private set; }
+        public Guid IdContaFinanceira { get; private set; }
+        public virtual ContaFinanceira ContaFinanceira { get; private set; }
+        //"public Guid CategoriaId { get; private set; }
         //public virtual Categoria Categoria { get; private set; }
         //public bool Pago { get; private set; }
         //public DateTime? DataPagamento { get; private set; }
@@ -19,12 +21,13 @@ namespace YourMoney.Domain.Entities
 
         private Despesa() { } // Para ORM
 
-        public Despesa(string descricao, Decimal valor, DateTime data)
+        public Despesa(string descricao, Decimal valor, DateTime data, Guid idContaFinanceira)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
+            IdContaFinanceira = idContaFinanceira;
             //CategoriaId = categoriaId;
             //TipoRecorrencia = tipoRecorrencia;
             //Pago = false;
