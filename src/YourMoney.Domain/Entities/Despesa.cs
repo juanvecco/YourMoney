@@ -27,7 +27,7 @@ namespace YourMoney.Domain.Entities
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
-            IdContaFinanceira = idContaFinanceira;
+            AtualizarContaFinanceira(idContaFinanceira);
             //CategoriaId = categoriaId;
             //TipoRecorrencia = tipoRecorrencia;
             //Pago = false;
@@ -51,6 +51,12 @@ namespace YourMoney.Domain.Entities
         public void AtualizarData(DateTime data)
         {
             Data = data;
+        }
+        public void AtualizarContaFinanceira(Guid idContaFinanceira)
+        {
+            if (idContaFinanceira == Guid.Empty)
+                throw new ArgumentException("Conta Financeira é obrigatória.");
+            IdContaFinanceira = idContaFinanceira;
         }
         //public void AtualizarCategoriaId(Guid categoriaId)
         //{
