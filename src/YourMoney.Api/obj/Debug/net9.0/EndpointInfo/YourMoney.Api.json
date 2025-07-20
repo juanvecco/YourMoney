@@ -379,6 +379,13 @@
           "data": {
             "type": "string",
             "format": "date-time"
+          },
+          "idContaFinanceira": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contaFinanceira": {
+            "$ref": "#/components/schemas/ContaFinanceira"
           }
         },
         "additionalProperties": false

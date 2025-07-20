@@ -26,9 +26,10 @@ namespace YourMoney.Application.Commands.Handlers
             var despesa = new Despesa(
                 request.Descricao,
                 request.Valor, // Assuming 'Money' has an 'Amount' property for decimal value  
-                request.Data//,
-                //request.CategoriaId,
-                //request.TipoRecorrencia
+                request.Data,
+                request.IdContaFinanceira
+            //request.CategoriaId,
+            //request.TipoRecorrencia
             );
 
             await _despesaRepository.AdicionarAsync(despesa);
