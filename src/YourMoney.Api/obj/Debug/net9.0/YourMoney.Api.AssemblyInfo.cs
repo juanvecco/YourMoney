@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+318dbe945421bb94550b15cc0dfb872947bf4e82")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+942eb6316c124df9f3a36dc3708914938620bc93")]
 [assembly: System.Reflection.AssemblyProductAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YourMoney.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
