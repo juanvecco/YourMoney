@@ -30,43 +30,19 @@ namespace YourMoney.Application.Services
             return await _categoriaRepository.GetAllAsync();
         }
 
-        public async Task<List<Categoria>> GetByTipoAsync(TipoTransacao tipo)
-        {
-            return await _categoriaRepository.GetByTipoAsync(tipo);
-        }
-
-        public async Task<List<Categoria>> GetAtivasAsync()
-        {
-            return await _categoriaRepository.GetAtivasAsync();
-        }
-
         public async Task AdicionarAsync(Categoria categoria)
         {
-            if (await _categoriaRepository.ExisteNomeAsync(categoria.Nome, categoria.TipoTransacao))
-                throw new InvalidOperationException("Já existe uma categoria com este nome e tipo.");
             await _categoriaRepository.AdicionarAsync(categoria);
         }
 
         public async Task AtualizarAsync(Categoria categoria)
         {
-            if (await _categoriaRepository.ExisteNomeAsync(categoria.Nome, categoria.TipoTransacao, categoria.Id))
-                throw new InvalidOperationException("Já existe uma categoria com este nome e tipo.");
             await _categoriaRepository.AtualizarAsync(categoria);
         }
 
         public async Task RemoverAsync(Guid id)
         {
             await _categoriaRepository.RemoverAsync(id);
-        }
-
-        public async Task<bool> ExisteAsync(Guid id)
-        {
-            return await _categoriaRepository.ExisteAsync(id);
-        }
-
-        public async Task<bool> ExisteNomeAsync(string nome, TipoTransacao tipo, Guid? ignorarId = null)
-        {
-            return await _categoriaRepository.ExisteNomeAsync(nome, tipo, ignorarId);
         }
     }
 }

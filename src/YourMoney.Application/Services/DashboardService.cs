@@ -61,7 +61,6 @@ namespace YourMoney.Application.Services
         public async Task<List<GraficoDTO>> GetGraficoDespesasPorCategoriaAsync(int mes, int ano)
         {
             var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano);
-            var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Despesa);
 
             return despesas
                 //.GroupBy(d => d.CategoriaId)
@@ -78,7 +77,6 @@ namespace YourMoney.Application.Services
         public async Task<List<GraficoDTO>> GetGraficoReceitasPorCategoriaAsync(int mes, int ano)
         {
             var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano);
-            var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Receita);
 
             return receitas
                 //.Where(r => r.Recebida)
@@ -120,7 +118,6 @@ namespace YourMoney.Application.Services
 
         private async Task<List<CategoriaResumoDTO>> GetDespesasPorCategoriaAsync(List<Domain.Entities.Despesa> despesas)
         {
-            var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Despesa);
 
             return despesas
                 //.GroupBy(d => d.CategoriaId)
@@ -137,7 +134,6 @@ namespace YourMoney.Application.Services
 
         private async Task<List<CategoriaResumoDTO>> GetReceitasPorCategoriaAsync(List<Domain.Entities.Receita> receitas)
         {
-            var categorias = await _categoriaRepository.GetByTipoAsync(TipoTransacao.Receita);
 
             return receitas
                 //.GroupBy(r => r.CategoriaId)
