@@ -11,8 +11,24 @@ namespace YourMoney.Infrastructure.Configurations
             builder.ToTable("tbCategoria");
 
             builder.HasKey(c => c.Id);
+
             builder.Property(c => c.Descricao)
-                .HasMaxLength(500);
+                .HasMaxLength(500)
+                .IsRequired(false); // Permitido ser NULL no banco
+
+            builder.Property(c => c.TipoTransacao)
+                .IsRequired(true); // Ajustado conforme o banco
+
+            builder.Property(c => c.CategoriaPaiId)
+                .IsRequired(false); // Autorrelacionamento opcional
+
+            //builder.HasOne(c => c.CategoriaPai)
+            //    .WithMany(c => c.Subcategorias)
+            //    .HasForeignKey(c => c.CategoriaPaiId)
+            //    .OnDelete(DeleteBehavior.Restrict); // ou .SetNull se preferir
+
+            builder.HasIndex(c => c.CategoriaPaiId)
+                .HasDatabaseName("IX_Categoria_CategoriaPaiId");
         }
     }
 }

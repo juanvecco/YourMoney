@@ -455,6 +455,17 @@
           "descricao": {
             "type": "string",
             "nullable": true
+          },
+          "tipoTransacao": {
+            "$ref": "#/components/schemas/TipoTransacao"
+          },
+          "categoriaPaiId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoriaPai": {
+            "$ref": "#/components/schemas/Categoria"
           }
         },
         "additionalProperties": false
@@ -468,6 +479,14 @@
           },
           "descricao": {
             "type": "string",
+            "nullable": true
+          },
+          "tipoTransacao": {
+            "$ref": "#/components/schemas/TipoTransacao"
+          },
+          "categoriaPaiId": {
+            "type": "string",
+            "format": "uuid",
             "nullable": true
           }
         },
@@ -585,6 +604,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "TipoTransacao": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
       }
     }
   }
