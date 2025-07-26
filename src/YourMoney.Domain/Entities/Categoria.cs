@@ -7,19 +7,19 @@ namespace YourMoney.Domain.Entities
     public class Categoria : BaseEntity
     {
         public string Descricao { get; private set; }
+        public TipoTransacao TipoTransacao { get; private set; }
+        public Guid? CategoriaPaiId { get; private set; }
+        public Categoria CategoriaPai { get; private set; }
+        //public ICollection<Categoria> Subcategorias { get; private set; }
 
         private Categoria() { }
 
-        public Categoria(string descricao)
+        public Categoria(string descricao, TipoTransacao tipoTransacao, Guid? categoriaPaiId = null)
         {
             Id = Guid.NewGuid();
-            //AtualizarNome(nome);
             AtualizarDescricao(descricao);
-            //TipoTransacao = tipoTransacao;
-            //Cor = cor;
-            //Icone = icone;
-            //Ativa = true;
-            //DataCriacao = DateTime.Now;
+            TipoTransacao = tipoTransacao;
+            CategoriaPaiId = categoriaPaiId;
         }
 
         public void AtualizarDescricao(string descricao)
