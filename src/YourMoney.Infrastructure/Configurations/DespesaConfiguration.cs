@@ -30,6 +30,16 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.HasIndex(d => d.IdContaFinanceira)
                 .HasDatabaseName("IX_Despesa_IdContaFinanceira");
+
+            builder.Property(d => d.IdCategoria).IsRequired();
+
+            builder.HasOne(d => d.Categoria)
+                .WithMany()
+                .HasForeignKey(d => d.IdCategoria)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(d => d.IdCategoria)
+                .HasDatabaseName("IX_Despesa_IdCategoria");
             //builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);
             //builder.Property(d => d.DataPagamento);
             //builder.Property(d => d.TipoRecorrencia)

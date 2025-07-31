@@ -71,7 +71,7 @@ namespace YourMoney.Api.Controllers
             despesa.AtualizarValor(dto.Valor);
             despesa.AtualizarData(dto.Data);
             despesa.AtualizarContaFinanceira(dto.IdContaFinanceira);
-
+            despesa.AtualizarCategoria(dto.IdCategoria);
             await _despesaService.AtualizarAsync(despesa);
             return NoContent();
         }

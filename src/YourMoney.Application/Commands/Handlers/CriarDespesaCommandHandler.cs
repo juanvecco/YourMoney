@@ -27,8 +27,8 @@ namespace YourMoney.Application.Commands.Handlers
                 request.Descricao,
                 request.Valor, // Assuming 'Money' has an 'Amount' property for decimal value  
                 request.Data,
-                request.IdContaFinanceira
-            //request.CategoriaId,
+                request.IdContaFinanceira,
+                request.IdCategoria
             //request.TipoRecorrencia
             );
 

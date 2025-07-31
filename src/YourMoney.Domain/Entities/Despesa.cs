@@ -12,8 +12,8 @@ namespace YourMoney.Domain.Entities
         public DateTime Data { get; private set; }
         public Guid IdContaFinanceira { get; private set; }
         public virtual ContaFinanceira ContaFinanceira { get; private set; }
-        //"public Guid CategoriaId { get; private set; }
-        //public virtual Categoria Categoria { get; private set; }
+        public Guid IdCategoria { get; private set; }
+        public virtual Categoria Categoria { get; private set; }
         //public bool Pago { get; private set; }
         //public DateTime? DataPagamento { get; private set; }
         //public TipoRecorrencia TipoRecorrencia { get; private set; }
@@ -21,14 +21,14 @@ namespace YourMoney.Domain.Entities
 
         private Despesa() { } // Para ORM
 
-        public Despesa(string descricao, Decimal valor, DateTime data, Guid idContaFinanceira)
+        public Despesa(string descricao, Decimal valor, DateTime data, Guid idContaFinanceira, Guid idCategoria)
         {
             Id = Guid.NewGuid();
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
             AtualizarContaFinanceira(idContaFinanceira);
-            //CategoriaId = categoriaId;
+            AtualizarCategoria(idCategoria);
             //TipoRecorrencia = tipoRecorrencia;
             //Pago = false;
             //DataCriacao = DateTime.Now;
@@ -58,12 +58,12 @@ namespace YourMoney.Domain.Entities
                 throw new ArgumentException("Conta Financeira é obrigatória.");
             IdContaFinanceira = idContaFinanceira;
         }
-        //public void AtualizarCategoriaId(Guid categoriaId)
-        //{
-        //    if (categoriaId == Guid.Empty)
-        //        throw new ArgumentException("CategoriaId é obrigatório.");
-        //    CategoriaId = categoriaId;
-        //}
+        public void AtualizarCategoria(Guid idCategoria)
+        {
+            if (idCategoria == Guid.Empty)
+                throw new ArgumentException("Categoria é obrigatório.");
+            IdCategoria = idCategoria;
+        }
 
         //public void MarcarComoPaga()
         //{
