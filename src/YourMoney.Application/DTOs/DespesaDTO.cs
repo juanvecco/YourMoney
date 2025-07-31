@@ -7,7 +7,7 @@
         public decimal Valor { get; set; }
         public DateTime Data { get; set; }
         public Guid IdContaFinanceira { get; set; }
-        //public Guid CategoriaId { get; set; }
+        public Guid IdCategoria { get; set; }
         //public bool Pago { get; set; }
         //public DateTime? DataPagamento { get; set; }
         //public TipoRecorrencia TipoRecorrencia { get; set; }
