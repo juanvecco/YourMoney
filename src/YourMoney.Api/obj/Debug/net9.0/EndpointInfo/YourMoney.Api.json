@@ -552,6 +552,13 @@
           },
           "contaFinanceira": {
             "$ref": "#/components/schemas/ContaFinanceira"
+          },
+          "idCategoria": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/Categoria"
           }
         },
         "additionalProperties": false
@@ -576,6 +583,10 @@
             "format": "date-time"
           },
           "idContaFinanceira": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "idCategoria": {
             "type": "string",
             "format": "uuid"
           }
