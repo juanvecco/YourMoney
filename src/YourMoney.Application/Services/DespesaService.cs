@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace YourMoney.Application.Services
 {
@@ -59,5 +60,14 @@ namespace YourMoney.Application.Services
         {
             return await _despesaRepository.ListarAsync();
         }
+
+        public async Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
+        {
+            var despesas = await _despesaRepository.ObterPorMesAnoAsync(mes, ano, idContaFinanceira);
+            return despesas.Where(d => d.Data.Month == mes && d.Data.Year == ano
+                                        && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
+                           .ToList();
+        }
+
     }
 }

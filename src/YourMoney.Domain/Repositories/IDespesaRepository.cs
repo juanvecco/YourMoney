@@ -8,6 +8,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Despesa>> GetAllAsync();
         Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim);
         Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano);
+        Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira);
         Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId);
         Task AdicionarAsync(Despesa despesa);
         Task AtualizarAsync(Despesa despesa); // Descomentado para permitir atualizações

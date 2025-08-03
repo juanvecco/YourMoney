@@ -14,5 +14,6 @@ namespace YourMoney.Application.Interfaces
         //Task RemoverDespesaAsync(Guid id); // Método já existente
         //Task AtualizarAsync(Despesa despesa); // Novo método
         //Task<List<Despesa>> ListarAsync();
+        Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano);
     }
 }
