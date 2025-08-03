@@ -51,6 +51,14 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
+        {
+            return await _context.Despesas
+                .Where(d => d.Data.Month == mes && d.Data.Year == ano
+                            && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
+                .ToListAsync();
+        }
+
         public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Despesas

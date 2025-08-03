@@ -252,6 +252,32 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "ObterPorReferencia",
+    "RelativePath": "api/Despesas/por-referencia",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "idContaFinanceira",
+        "Type": "System.Nullable\u00601[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
     "Method": "AdicionarReceita",
     "RelativePath": "api/Receitas",
@@ -263,6 +289,27 @@
         "Name": "receita",
         "Type": "YourMoney.Domain.Entities.Receita",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
+    "Method": "ObterPorReferencia",
+    "RelativePath": "api/Receitas/por-referencia",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

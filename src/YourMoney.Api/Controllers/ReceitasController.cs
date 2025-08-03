@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Api.Controllers
@@ -27,6 +28,13 @@ namespace YourMoney.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpGet("por-referencia")]
+        public async Task<IActionResult> ObterPorReferencia([FromQuery] int mes, [FromQuery] int ano)
+        {
+            var receitas = await _receitaService.ObterPorMesAnoAsync(mes, ano);
+            return Ok(receitas);
         }
     }
 }

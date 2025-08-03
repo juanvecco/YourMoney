@@ -75,6 +75,14 @@ namespace YourMoney.Api.Controllers
             await _despesaService.AtualizarAsync(despesa);
             return NoContent();
         }
+
+        [HttpGet("por-referencia")]
+        public async Task<IActionResult> ObterPorReferencia([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idContaFinanceira)
+        {
+            var despesas = await _despesaService.ObterPorMesAnoAsync(mes, ano, idContaFinanceira);
+            return Ok(despesas);
+        }
+
         //[HttpPut("{id}/pagar")]
         //public async Task<IActionResult> MarcarComoPaga(Guid id)
         //{
