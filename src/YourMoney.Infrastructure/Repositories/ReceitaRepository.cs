@@ -47,6 +47,13 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano)
+        {
+            return await _context.Receitas
+                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .ToListAsync();
+        }
+
         public async Task<List<Receita>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Receitas
