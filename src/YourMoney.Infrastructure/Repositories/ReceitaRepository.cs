@@ -100,5 +100,11 @@ namespace YourMoney.Infrastructure.Repositories
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
                 .SumAsync(r => r.Valor);
         }
+        public async Task<List<Receita>> ListarAsync()
+        {
+            return await _context.Receitas
+                //.Include(d => d.Categoria)
+                .ToListAsync();
+        }
     }
 }
