@@ -295,6 +295,53 @@
   },
   {
     "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
+    "Method": "ListarReceitas",
+    "RelativePath": "api/Receitas",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
+    "Method": "RemoverReceita",
+    "RelativePath": "api/Receitas/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
+    "Method": "AtualizarReceita",
+    "RelativePath": "api/Receitas/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "YourMoney.Application.DTOs.ReceitaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
     "Method": "ObterPorReferencia",
     "RelativePath": "api/Receitas/por-referencia",
     "HttpMethod": "GET",

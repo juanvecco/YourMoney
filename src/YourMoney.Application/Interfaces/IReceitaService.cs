@@ -10,10 +10,10 @@ namespace YourMoney.Application.Interfaces
     public interface IReceitaService
     {
         Task AdicionarReceitaAsync(Receita receita);
-        //Task<Despesa> GetDespesaByIdAsync(Guid id); // Método já existente
-        //Task RemoverDespesaAsync(Guid id); // Método já existente
-        //Task AtualizarAsync(Despesa despesa); // Novo método
-        //Task<List<Despesa>> ListarAsync();
+        Task<Receita> GetReceitaByIdAsync(Guid id);
+        Task RemoverReceitaAsync(Guid id);
+        Task AtualizarAsync(Receita receita);
+        Task<List<Receita>> ListarAsync();
         Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano);
     }
 }
