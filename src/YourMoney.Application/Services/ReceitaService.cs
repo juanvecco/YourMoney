@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YourMoney.Application.Interfaces;
+﻿using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
 using YourMoney.Domain.Repositories;
 using YourMoney.Infrastructure.Repositories;
@@ -26,6 +21,40 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("O valor da receita deve ser maior que zero.");
             }
             await _receitaRepository.AdicionarAsync(receita);
+        }
+
+        public async Task<Receita> GetReceitaByIdAsync(Guid id)
+        {
+            var receita = await _receitaRepository.GetByIdAsync(id);
+            if (receita == null)
+            {
+                throw new InvalidOperationException("Receita não encontrada.");
+            }
+            return receita;
+        }
+
+        public async Task RemoverReceitaAsync(Guid id)
+        {
+            var receita = await _receitaRepository.GetByIdAsync(id);
+            if (receita == null)
+            {
+                throw new InvalidOperationException("Receita não encontrada.");
+            }
+            await _receitaRepository.RemoverAsync(id);
+        }
+
+        public async Task AtualizarAsync(Receita receita)
+        {
+            var existingReceita = await _receitaRepository.GetByIdAsync(receita.Id);
+            if (existingReceita == null)
+            {
+                throw new InvalidOperationException("Receita não encontrada.");
+            }
+            await _receitaRepository.AtualizarAsync(receita);
+        }
+        public async Task<List<Receita>> ListarAsync()
+        {
+            return await _receitaRepository.ListarAsync();
         }
 
         public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano)

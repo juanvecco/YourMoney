@@ -15,5 +15,6 @@ namespace YourMoney.Domain.Repositories
         Task AtualizarAsync(Receita receita);
         Task RemoverAsync(Guid id);
         Task<decimal> GetTotalByMesAnoAsync(int mes, int ano);
+        Task<List<Receita>> ListarAsync();
     }
 }

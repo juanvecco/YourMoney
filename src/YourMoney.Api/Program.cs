@@ -38,6 +38,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200") // ou .AllowAnyOrigin() para testes
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure o Swagger no pipeline
@@ -51,7 +62,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection(); 
+app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 
