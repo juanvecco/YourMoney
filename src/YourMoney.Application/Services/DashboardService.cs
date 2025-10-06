@@ -36,14 +36,14 @@ namespace YourMoney.Application.Services
 
             var totalReceitas = receitas.Sum(r => r.Valor);
             var totalDespesas = despesas.Sum(d => d.Valor);
-            var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
+            //var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
 
             return new DashboardDTO
             {
                 TotalReceitas = totalReceitas,
                 TotalDespesas = totalDespesas,
-                TotalInvestimentos = totalInvestimentos,
-                SaldoMensal = totalReceitas - totalDespesas - totalInvestimentos,
+                //TotalInvestimentos = totalInvestimentos,
+                SaldoMensal = totalReceitas - totalDespesas, //- totalInvestimentos,
                 MetasAtivas = metasAtivas.Take(5).Select(m => new MetaResumoDTO
                 {
                     Id = m.Id,
@@ -101,7 +101,7 @@ namespace YourMoney.Application.Services
 
             var totalReceitas = receitas.Sum(r => r.Valor);
             var totalDespesas = despesas.Sum(d => d.Valor);
-            var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
+            //var totalInvestimentos = investimentos.Sum(i => i.ValorInvestido);
 
             return new BalancoMensalDTO
             {
@@ -109,8 +109,8 @@ namespace YourMoney.Application.Services
                 Ano = ano,
                 TotalReceitas = totalReceitas,
                 TotalDespesas = totalDespesas,
-                TotalInvestimentos = totalInvestimentos,
-                SaldoFinal = totalReceitas - totalDespesas - totalInvestimentos,
+                //TotalInvestimentos = totalInvestimentos,
+                SaldoFinal = totalReceitas - totalDespesas, //- totalInvestimentos,
                 DespesasPorCategoria = await GetDespesasPorCategoriaAsync(despesas),
                 ReceitasPorCategoria = await GetReceitasPorCategoriaAsync(receitas.ToList())
             };

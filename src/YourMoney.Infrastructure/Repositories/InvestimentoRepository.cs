@@ -37,7 +37,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Investimento>> GetByTipoAsync(string tipo)
         {
             return await _context.Investimentos
-                .Where(i => i.TipoInvestimento == tipo)
+                .Where(i => i.Tipo == tipo)
                 .OrderByDescending(i => i.DataInvestimento)
                 .ToListAsync();
         }
@@ -76,7 +76,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return await _context.Investimentos
                 .Where(i => i.Ativo)
-                .SumAsync(i => i.ValorInvestido);
+                .SumAsync(i => i.ValorAtual);
         }
 
         public async Task<decimal> GetTotalAtualAsync()
@@ -84,6 +84,27 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.Investimentos
                 .Where(i => i.Ativo)
                 .SumAsync(i => i.ValorAtual);
+        }
+
+        public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano)
+        {
+            return await _context.Investimentos
+                .Where(r => r.DataInvestimento.Month == mes && r.DataInvestimento.Year == ano)
+                .SumAsync(r => r.ValorAtual);
+        }
+
+        public async Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano)
+        {
+            return await _context.Investimentos
+                .Where(r => r.DataInvestimento.Month == mes && r.DataInvestimento.Year == ano)
+                .ToListAsync();
+        }
+
+        public async Task<List<Investimento>> ListarAsync()
+        {
+            return await _context.Investimentos
+                //.Include(d => d.Categoria)
+                .ToListAsync();
         }
     }
 }
