@@ -278,6 +278,90 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "YourMoney.Api.Controllers.InvestimentoController",
+    "Method": "AdicionarInvestimento",
+    "RelativePath": "api/Investimento",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "investimento",
+        "Type": "YourMoney.Domain.Entities.Investimento",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.InvestimentoController",
+    "Method": "ListarInvestimentos",
+    "RelativePath": "api/Investimento",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.InvestimentoController",
+    "Method": "RemoverInvestimento",
+    "RelativePath": "api/Investimento/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.InvestimentoController",
+    "Method": "AtualizarInvestimento",
+    "RelativePath": "api/Investimento/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "YourMoney.Application.DTOs.InvestimentoDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.InvestimentoController",
+    "Method": "ObterPorReferencia",
+    "RelativePath": "api/Investimento/por-referencia",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "YourMoney.Api.Controllers.ReceitasController",
     "Method": "AdicionarReceita",
     "RelativePath": "api/Receitas",

@@ -19,7 +19,7 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(i => i.Descricao)
                 .HasMaxLength(500);
 
-            builder.Property(i => i.ValorInvestido);
+            //builder.Property(i => i.ValorInvestido);
 
             builder.Property(i => i.ValorAtual);
 
@@ -28,13 +28,13 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.Property(i => i.DataResgate);
 
-            builder.Property(i => i.TipoInvestimento)
-                .IsRequired()
-                .HasMaxLength(50);
+            //builder.Property(i => i.TipoInvestimento)
+            //    .IsRequired()
+            //    .HasMaxLength(50);
 
-            builder.Property(i => i.TaxaRetorno)
-                .HasColumnType("decimal(5,2)")
-                .HasDefaultValue(0);
+            //builder.Property(i => i.TaxaRetorno)
+            //    .HasColumnType("decimal(5,2)")
+            //    .HasDefaultValue(0);
 
             builder.Property(i => i.Ativo)
                 .IsRequired()
@@ -43,8 +43,8 @@ namespace YourMoney.Infrastructure.Configurations
             builder.HasIndex(i => i.DataInvestimento)
                 .HasDatabaseName("IX_Investimento_Data");
 
-            builder.HasIndex(i => i.TipoInvestimento)
-                .HasDatabaseName("IX_Investimento_Tipo");
+            //builder.HasIndex(i => i.TipoInvestimento)
+            //    .HasDatabaseName("IX_Investimento_Tipo");
         }
     }
 }

@@ -14,5 +14,7 @@ namespace YourMoney.Domain.Repositories
         Task RemoverAsync(Guid id);
         Task<decimal> GetTotalInvestidoAsync();
         Task<decimal> GetTotalAtualAsync();
+        Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano);
+        Task<List<Investimento>> ListarAsync();
     }
 }
