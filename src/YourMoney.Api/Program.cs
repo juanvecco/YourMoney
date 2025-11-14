@@ -8,19 +8,35 @@ using YourMoney.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============= CONNECTION STRING - Funciona no Railway + Local + Docker =============
+// ============================================
+// 1) REDUZIR LOGS NO RAILWAY (evita rate limit)
+// ============================================
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Logging.ClearProviders();                    // remove todos os providers padrão
+    builder.Logging.AddConsole();                         // mantém só o console
+    builder.Logging.SetMinimumLevel(LogLevel.Warning);   // só Warning, Error e Critical
+    // Opcional: se quiser ver Information mas não o spam do EF Core:
+    // builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+}
+
+// ============= CONNECTION STRING =============
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
         "Connection string não encontrada! Configure a variável de ambiente 'DATABASE_CONNECTION_STRING' ou o appsettings.json");
 
-Console.WriteLine("=== CONNECTION STRING EM USO ===");
-Console.WriteLine(connectionString);
-Console.WriteLine("=====================================");
+// Só mostra a connection string em desenvolvimento (evita exibir senha no Railway)
+if (builder.Environment.IsDevelopment())
+{
+    Console.WriteLine("=== CONNECTION STRING EM USO ===");
+    Console.WriteLine(connectionString);
+    Console.WriteLine("=====================================");
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
-// ====================================================================================
+// ====================================================
 
 // ============= INJEÇÃO DE DEPENDÊNCIA =============
 builder.Services.AddScoped<IDespesaService, DespesaService>();
@@ -50,7 +66,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS (temporariamente aberto - depois aperta)
+// CORS (temporariamente aberto)
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -70,7 +86,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "YourMoney API V1");
-        c.RoutePrefix = string.Empty; // Swagger na raiz
+        c.RoutePrefix = string.Empty;
     });
 }
 
