@@ -12,7 +12,7 @@ namespace YourMoney.Domain.Entities
         public decimal ValorAtual { get; private set; }
         public DateTime DataInicio { get; private set; }
         public DateTime DataObjetivo { get; private set; }
-        public StatusMeta Status { get; private set; }
+        public StatusMeta? Status { get; private set; }
         public Guid? CategoriaId { get; private set; }
         public virtual Categoria Categoria { get; private set; }
 
