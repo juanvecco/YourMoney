@@ -159,7 +159,6 @@ C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets\msbuild.buil
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.YourMoney.Api.props
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.YourMoney.Api.props
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.pack.json
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMone.7E3C2AB3.Up2Date
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.dll
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\refint\YourMoney.Api.dll
@@ -167,3 +166,4 @@ C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.pdb
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.genruntimeconfig.cache
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\ref\YourMoney.Api.dll
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
