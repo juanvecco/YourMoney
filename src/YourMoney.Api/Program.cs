@@ -8,15 +8,21 @@ using YourMoney.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============= NOVO: Sobrescreve a Connection String com variável de ambiente (Railway) =============
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")))
-{
-    builder.Configuration["ConnectionStrings:DefaultConnection"] =
-        Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
-}
-// ====================================================================================================
+// ============= CONNECTION STRING - Funciona no Railway + Local + Docker =============
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string não encontrada! Configure a variável de ambiente 'DATABASE_CONNECTION_STRING' ou o appsettings.json");
 
-// Adicionar serviços (DI)
+Console.WriteLine("=== CONNECTION STRING EM USO ===");
+Console.WriteLine(connectionString);
+Console.WriteLine("=====================================");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+// ====================================================================================
+
+// ============= INJEÇÃO DE DEPENDÊNCIA =============
 builder.Services.AddScoped<IDespesaService, DespesaService>();
 builder.Services.AddScoped<IDespesaRepository, DespesaRepository>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
@@ -29,16 +35,7 @@ builder.Services.AddScoped<IMetaRepository, MetaRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
 builder.Services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
-
-// DbContext
-// ============= CONNECTION STRING PARA RAILWAY (SQL Server) =============
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection") // fallback local
-    ?? throw new InvalidOperationException("Connection string não encontrada!");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
-// =========================================================================
+// ===================================================
 
 // Controllers + Swagger
 builder.Services.AddControllers();
@@ -53,20 +50,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ============= CORS atualizado – funciona local e no Railway =============
+// CORS (temporariamente aberto - depois aperta)
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
-            .AllowAnyOrigin()      // Temporariamente aceita qualquer origem (ideal para MVP)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        // Quando o frontend estiver no ar, troque por:
-        // .WithOrigins("https://seu-frontend.railway.app", "http://localhost:4200")
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
-// ===========================================================================
 
 var app = builder.Build();
 
@@ -86,12 +79,14 @@ app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 
-// ============= APLICA MIGRAÇÕES AUTOMATICAMENTE NO STARTUP =============
+// ============= APLICA MIGRAÇÕES AUTOMATICAMENTE =============
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Isso cria/atualiza o banco no Railway automaticamente
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    Console.WriteLine("Aplicando migrações no banco de dados...");
+    db.Database.Migrate();
+    Console.WriteLine("Migrações aplicadas com sucesso!");
 }
-// =========================================================================
+// ===========================================================
 
 app.Run();
