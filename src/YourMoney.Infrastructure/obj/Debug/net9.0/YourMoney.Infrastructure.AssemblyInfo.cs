@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YourMoney.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0f4d15da21a10899b5335c449deba77145be60c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f7e125679065cffaae958bfa4c324e8427159169")]
 [assembly: System.Reflection.AssemblyProductAttribute("YourMoney.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YourMoney.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
