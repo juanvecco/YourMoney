@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Desativa completamente o fallback do Visual Studio (a raiz do erro) -->
+    <DisableImplicitNuGetFallbackFolders>true</DisableImplicitNuGetFallbackFolders>
+    
+    <!-- Força o uso apenas do nuget.org -->
+    <RestorePackagesPath>$(UserProfile)\.nuget\packages</RestorePackagesPath>
+    <RestoreFallbackFolders>clear</RestoreFallbackFolders>
+  </PropertyGroup>
+</Project>

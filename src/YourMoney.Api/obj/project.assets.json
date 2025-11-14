@@ -5255,8 +5255,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\juanv\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\juanv\\.nuget\\packages": {}
   },
   "project": {
     "version": "1.0.0",
@@ -5264,13 +5263,11 @@
       "projectUniqueName": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\YourMoney.Api.csproj",
       "projectName": "YourMoney.Api",
       "projectPath": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\YourMoney.Api.csproj",
-      "packagesPath": "C:\\Users\\juanv\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\juanv\\.nuget\\packages",
       "outputPath": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
+        "C:\\dev\\YourMoney\\NuGet.Config",
         "C:\\Users\\juanv\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -5279,7 +5276,6 @@
         "net9.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
