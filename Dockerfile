@@ -2,22 +2,22 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copia só os csproj e restaura (camada de cache)
+# Copia a solução e todos os csproj
 COPY *.sln .
-COPY src/YourMoney.Api/YourMoney.Api.csproj ./src/YourMoney.Api/
-COPY src/YourMoney.Application/YourMoney.Application.csproj ./src/YourMoney.Application/
-COPY src/YourMoney.Domain/YourMoney.Domain.csproj ./src/YourMoney.Domain/
-COPY src/YourMoney.Infrastructure/YourMoney.Infrastructure.csproj ./src/YourMoney.Infrastructure/
+COPY src/**/*.csproj ./src/
+# Ajusta o caminho dos projetos para o formato correto dentro do container
+RUN find src -name "*.csproj" -exec dirname {} \; | sed 's/^src\///' | awk '{print "\""$0"/"$0".csproj\"","\"src/"$0"\""}' | sed 's/.*/COPY [&] .\//' > /tmp/copy.proj
+RUN cat /tmp/copy.proj | xargs -I {} sh -c "{}"
 
-# Restaura pacotes (incluindo analyzers)
-RUN dotnet restore src/YourMoney.Api/YourMoney.Api.csproj
+# Restaura com o caminho correto (OBRIGATÓRIO)
+RUN dotnet restore YourMoney.sln
 
-# Copia todo o código
+# Copia todo o código fonte
 COPY . .
 
-# Publica apenas o projeto da API (não a solução inteira!)
+# Publica a API (sem --no-restore!)
 WORKDIR /src/src/YourMoney.Api
-RUN dotnet publish YourMoney.Api.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish YourMoney.Api.csproj -c Release -o /app/publish
 
 # ---------- Runtime ----------
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
