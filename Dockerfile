@@ -11,8 +11,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# ESSAS DUAS LINHAS SÃO OBRIGATÓRIAS NO RAILWAY COM PRIVATE NETWORK
+# OBRIGATÓRIO no Railway com Private Networking
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://[::]:8080   # escuta IPv4 + IPv6
+
+# ← comentário em linha separada (o problema era isso)
+ENV ASPNETCORE_URLS=http://[::]:8080
 
 ENTRYPOINT ["dotnet", "YourMoney.Api.dll"]
