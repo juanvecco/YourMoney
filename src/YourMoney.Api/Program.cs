@@ -31,8 +31,14 @@ builder.Services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
 builder.Services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
 
 // DbContext
+// ============= CONNECTION STRING PARA RAILWAY (SQL Server) =============
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") // fallback local
+    ?? throw new InvalidOperationException("Connection string não encontrada!");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
+// =========================================================================
 
 // Controllers + Swagger
 builder.Services.AddControllers();
