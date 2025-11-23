@@ -5,20 +5,59 @@ using YourMoney.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using YourMoney.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using YourMoney.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using YourMoney.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================
-// 1) REDUZIR LOGS NO RAILWAY (evita rate limit)
-// ============================================
-if (!builder.Environment.IsDevelopment())
+// 1. Configuração do Entity Framework Core e Identity
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders(); // Necessário para reset de senha e outros tokens
+
+// 2. Configuração do JWT
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secret = jwtSettings["Secret"];
+
+builder.Services.AddAuthentication(options =>
 {
-    builder.Logging.ClearProviders();                    // remove todos os providers padrão
-    builder.Logging.AddConsole();                         // mantém só o console
-    builder.Logging.SetMinimumLevel(LogLevel.Warning);   // só Warning, Error e Critical
-    // Opcional: se quiser ver Information mas não o spam do EF Core:
-    // builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
-}
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = true; // Deve ser true em produção
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+    };
+});
+
+// Adicionar Autorização (necessário para o [Authorize] funcionar)
+//builder.Services.AddAuthorization();
+
+//if (!builder.Environment.IsDevelopment())
+//{
+//    builder.Logging.ClearProviders();                    // remove todos os providers padrão
+//    builder.Logging.AddConsole();                         // mantém só o console
+//    builder.Logging.SetMinimumLevel(LogLevel.Warning);   // só Warning, Error e Critical
+//    // Opcional: se quiser ver Information mas não o spam do EF Core:
+//    // builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+//}
 
 // ============= CONNECTION STRING =============
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
@@ -51,6 +90,8 @@ builder.Services.AddScoped<IMetaRepository, MetaRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
 builder.Services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 // ===================================================
 
 // Controllers + Swagger
@@ -92,6 +133,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
