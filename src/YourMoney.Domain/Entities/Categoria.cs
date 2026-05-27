@@ -30,6 +30,13 @@ namespace YourMoney.Domain.Entities
             Descricao = descricao.Trim();
         }
 
+        public void Atualizar(string descricao, TipoTransacao tipoTransacao, Guid? categoriaPaiId)
+        {
+            AtualizarDescricao(descricao);
+            TipoTransacao = tipoTransacao;
+            CategoriaPaiId = categoriaPaiId;
+        }
+
         //public void AtualizarDescricao(string descricao)
         //{
         //    Descricao = descricao?.Trim() ?? string.Empty;
