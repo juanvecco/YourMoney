@@ -42,6 +42,10 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.ContaFinanceira
                 .ToListAsync();
         }
+        public async Task<bool> ExisteAsync(Guid id)
+        {
+            return await _context.ContaFinanceira.AnyAsync(c => c.Id == id);
+        }
         public async Task RemoverAsync(Guid id)
         {
 

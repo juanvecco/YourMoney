@@ -14,6 +14,10 @@ namespace YourMoney.Domain.Entities
         public virtual ContaFinanceira ContaFinanceira { get; private set; }
         public Guid IdCategoria { get; private set; }
         public virtual Categoria Categoria { get; private set; }
+        public Guid? ParcelamentoId { get; private set; }
+        public int? NumeroParcela { get; private set; }
+        public int? TotalParcelas { get; private set; }
+        public decimal? ValorTotalParcelamento { get; private set; }
         //public bool Pago { get; private set; }
         //public DateTime? DataPagamento { get; private set; }
         //public TipoRecorrencia TipoRecorrencia { get; private set; }
@@ -63,6 +67,31 @@ namespace YourMoney.Domain.Entities
             if (idCategoria == Guid.Empty)
                 throw new ArgumentException("Categoria é obrigatório.");
             IdCategoria = idCategoria;
+        }
+
+        public void AplicarParcelamento(Guid parcelamentoId, int numeroParcela, int totalParcelas, decimal valorTotalParcelamento)
+        {
+            if (parcelamentoId == Guid.Empty)
+                throw new ArgumentException("Parcelamento é obrigatório.", nameof(parcelamentoId));
+            if (totalParcelas < 1 || totalParcelas > 120)
+                throw new ArgumentException("Total de parcelas deve estar entre 1 e 120.", nameof(totalParcelas));
+            if (numeroParcela < 1 || numeroParcela > totalParcelas)
+                throw new ArgumentException("Número da parcela deve estar entre 1 e o total de parcelas.", nameof(numeroParcela));
+            if (valorTotalParcelamento <= 0)
+                throw new ArgumentException("Valor total do parcelamento deve ser maior que zero.", nameof(valorTotalParcelamento));
+
+            ParcelamentoId = parcelamentoId;
+            NumeroParcela = numeroParcela;
+            TotalParcelas = totalParcelas;
+            ValorTotalParcelamento = valorTotalParcelamento;
+        }
+
+        public void LimparParcelamento()
+        {
+            ParcelamentoId = null;
+            NumeroParcela = null;
+            TotalParcelas = null;
+            ValorTotalParcelamento = null;
         }
 
         //public void MarcarComoPaga()

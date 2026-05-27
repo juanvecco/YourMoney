@@ -8,3 +8,11 @@
 *.dll
 *.pdb
 *.vscode/
+bin/
+obj/
+packages/
+TestResults/
+coverage/
+*.trx
+*.tmp
+Thumbs.db

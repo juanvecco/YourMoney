@@ -25,6 +25,11 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.Categorias.OrderBy(c => c.Descricao).ToListAsync();
         }
 
+        public async Task<bool> ExisteAsync(Guid id)
+        {
+            return await _context.Categorias.AnyAsync(c => c.Id == id);
+        }
+
         public async Task AdicionarAsync(Categoria categoria)
         {
             await _context.Categorias.AddAsync(categoria);

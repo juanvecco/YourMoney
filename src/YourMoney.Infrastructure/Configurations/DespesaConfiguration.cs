@@ -21,6 +21,15 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.Property(d => d.Data).IsRequired();
 
+            builder.Property(d => d.ParcelamentoId);
+
+            builder.Property(d => d.NumeroParcela);
+
+            builder.Property(d => d.TotalParcelas);
+
+            builder.Property(d => d.ValorTotalParcelamento)
+                .HasColumnType("decimal(18,2)");
+
             builder.Property(d => d.IdContaFinanceira).IsRequired();
 
             builder.HasOne(d => d.ContaFinanceira)
@@ -40,6 +49,12 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.HasIndex(d => d.IdCategoria)
                 .HasDatabaseName("IX_Despesa_IdCategoria");
+
+            builder.HasIndex(d => d.ParcelamentoId)
+                .HasDatabaseName("IX_Despesa_ParcelamentoId");
+
+            builder.HasIndex(d => new { d.ParcelamentoId, d.NumeroParcela })
+                .HasDatabaseName("IX_Despesa_Parcelamento_Parcela");
             //builder.Property(d => d.Pago).IsRequired().HasDefaultValue(false);
             //builder.Property(d => d.DataPagamento);
             //builder.Property(d => d.TipoRecorrencia)

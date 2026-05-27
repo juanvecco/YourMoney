@@ -16,3 +16,7 @@ C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\refint\YourMoney.
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.pdb
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\YourMoney.Infrastructure.genruntimeconfig.cache
 C:\dev\YourMoney\src\YourMoney.Infrastructure\obj\Debug\net9.0\ref\YourMoney.Infrastructure.dll
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Infrastructure.deps.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Infrastructure.runtimeconfig.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Infrastructure.dll
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Infrastructure.pdb

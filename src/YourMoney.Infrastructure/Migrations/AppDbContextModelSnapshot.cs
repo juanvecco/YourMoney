@@ -85,7 +85,19 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<Guid>("IdContaFinanceira")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("NumeroParcela")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ParcelamentoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("TotalParcelas")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalParcelamento")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -95,6 +107,12 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("IdContaFinanceira")
                         .HasDatabaseName("IX_Despesa_IdContaFinanceira");
+
+                    b.HasIndex("ParcelamentoId")
+                        .HasDatabaseName("IX_Despesa_ParcelamentoId");
+
+                    b.HasIndex("ParcelamentoId", "NumeroParcela")
+                        .HasDatabaseName("IX_Despesa_Parcelamento_Parcela");
 
                     b.ToTable("tbDespesa", (string)null);
                 });

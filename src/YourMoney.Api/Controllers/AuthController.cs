@@ -74,6 +74,62 @@ namespace YourMoney.Api.Controllers
             return CustomResponse();
         }
 
+        [HttpPost("esqueci-minha-senha")]
+        public async Task<ActionResult> EsqueciMinhaSenha(UsuarioEsqueceuSenha usuarioEsqueceuSenha)
+        {
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(usuarioEsqueceuSenha.Email);
+
+            if (user == null)
+            {
+                return CustomResponse(new
+                {
+                    mensagem = "Se o e-mail estiver cadastrado, enviaremos as instruções para redefinir a senha."
+                });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            return CustomResponse(new
+            {
+                mensagem = "Token de redefinição gerado com sucesso.",
+                email = user.Email,
+                token
+            });
+        }
+
+        [HttpPost("resetar-senha")]
+        public async Task<ActionResult> ResetarSenha(UsuarioResetSenha usuarioResetSenha)
+        {
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(usuarioResetSenha.Email);
+
+            if (user == null)
+            {
+                AdicionarErroProcessamento("Token inválido ou expirado.");
+                return CustomResponse();
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, usuarioResetSenha.Token, usuarioResetSenha.Senha);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    AdicionarErroProcessamento(error.Description);
+                }
+
+                return CustomResponse();
+            }
+
+            return CustomResponse(new
+            {
+                mensagem = "Senha redefinida com sucesso."
+            });
+        }
+
         private async Task<UsuarioRespostaLogin> GerarJwt(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -96,9 +152,7 @@ namespace YourMoney.Api.Controllers
 
             claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, System.Guid.NewGuid().ToString()));
-            //claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, ToUnixEpochDate(DateTime.UtcNow).ToString()));
-            //claims.Add(new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
             foreach (var userRole in userRoles)
             {
@@ -120,7 +174,7 @@ namespace YourMoney.Api.Controllers
                 Issuer = _jwtSettings.Emissor,
                 Audience = _jwtSettings.ValidoEm,
                 Subject = identityClaims,
-                Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpirationInMinutes),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             });
             return tokenHandler.WriteToken(token);
@@ -131,7 +185,7 @@ namespace YourMoney.Api.Controllers
             return new UsuarioRespostaLogin
             {
                 AccessToken = encodedToken,
-                ExpiresIn = TimeSpan.FromHours(_jwtSettings.ExpirationInMinutes).TotalSeconds,
+                ExpiresIn = TimeSpan.FromMinutes(_jwtSettings.ExpirationInMinutes).TotalSeconds,
                 UsuarioToken = new UsuarioToken
                 {
                     Id = user.Id,
@@ -140,11 +194,6 @@ namespace YourMoney.Api.Controllers
                 }
             };
         }
-
-        private static long ToUnixEpochDate(DateTime date)
-            => (long)Math.Round((date.ToUniversalTime() -
-                new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
-                .TotalSeconds);
 
     }
 }

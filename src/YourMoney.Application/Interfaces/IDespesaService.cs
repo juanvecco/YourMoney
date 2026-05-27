@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YourMoney.Application.DTOs;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Application.Interfaces
@@ -12,6 +13,7 @@ namespace YourMoney.Application.Interfaces
         Task RemoverDespesaAsync(Guid id); // Método já existente
         Task AtualizarAsync(Despesa despesa); // Novo método
         Task<List<Despesa>> ListarAsync();
-        Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null);
+        Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null);
+        Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request);
     }
 }

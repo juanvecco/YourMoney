@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
-using YourMoney.Domain.ValueObjects;
 
 namespace YourMoney.Api.Controllers
 {
@@ -31,6 +28,39 @@ namespace YourMoney.Api.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("parcelamento")]
+        [Authorize]
+        public async Task<IActionResult> CriarParcelamento([FromBody] ParcelamentoDespesaRequest request)
+        {
+            try
+            {
+                var response = await _despesaService.CriarParcelamentoAsync(request);
+                var primeiraParcela = response.Parcelas.FirstOrDefault();
+
+                return CreatedAtAction(
+                    nameof(ObterPorReferencia),
+                    new
+                    {
+                        mes = primeiraParcela?.Data.Month,
+                        ano = primeiraParcela?.Data.Year,
+                        idContaFinanceira = primeiraParcela?.IdContaFinanceira
+                    },
+                    response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
             }
         }
 
@@ -82,45 +112,5 @@ namespace YourMoney.Api.Controllers
             var despesas = await _despesaService.ObterPorMesAnoAsync(mes, ano, idContaFinanceira);
             return Ok(despesas);
         }
-
-        //[HttpPut("{id}/pagar")]
-        //public async Task<IActionResult> MarcarComoPaga(Guid id)
-        //{
-        //    try
-        //    {
-        //        var despesa = await _despesaService.GetDespesaByIdAsync(id);
-        //        despesa.MarcarComoPaga();
-        //        await _despesaService.AtualizarAsync(despesa);
-        //        return NoContent();
-        //    }
-        //    catch (InvalidOperationException ex)
-        //    {
-        //        return NotFound(new { message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //}
-
-        //[HttpPut("{id}/desmarcar-pagamento")]
-        //public async Task<IActionResult> DesmarcarPagamento(Guid id)
-        //{
-        //    try
-        //    {
-        //        var despesa = await _despesaService.GetDespesaByIdAsync(id);
-        //        despesa.DesmarcarPagamento();
-        //        await _despesaService.AtualizarAsync(despesa);
-        //        return NoContent();
-        //    }
-        //    catch (InvalidOperationException ex)
-        //    {
-        //        return NotFound(new { message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //}
     }
 }

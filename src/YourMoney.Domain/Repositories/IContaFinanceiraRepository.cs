@@ -9,5 +9,6 @@ namespace YourMoney.Domain.Repositories
         Task AtualizarAsync(ContaFinanceira contaFinanceira); 
         Task RemoverAsync(Guid id);
         Task<List<ContaFinanceira>> ListarAsync();
+        Task<bool> ExisteAsync(Guid id);
     }
 }
