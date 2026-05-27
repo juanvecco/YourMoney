@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
-using YourMoney.Application.Services;
 using YourMoney.Domain.Entities;
 
 namespace YourMoney.Api.Controllers
@@ -11,21 +10,26 @@ namespace YourMoney.Api.Controllers
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaService _categoriaService;
+
         public CategoriaController(ICategoriaService categoriaService)
         {
             _categoriaService = categoriaService;
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> AdicionarCategoria([FromBody] Categoria categoria)
+        public async Task<IActionResult> AdicionarCategoria([FromBody] CategoriaDTO dto)
         {
             try
             {
+                var categoria = new Categoria(dto.Descricao, dto.TipoTransacao, dto.CategoriaPaiId);
                 await _categoriaService.AdicionarAsync(categoria);
-                return CreatedAtAction(nameof(AdicionarCategoria), new { id = categoria.Id }, categoria);
+                return CreatedAtAction(nameof(ObterCategoria), new { id = categoria.Id }, MapearCategoria(categoria));
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
@@ -41,7 +45,7 @@ namespace YourMoney.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
 
@@ -51,7 +55,7 @@ namespace YourMoney.Api.Controllers
             try
             {
                 var categorias = await _categoriaService.GetAllAsync();
-                return Ok(categorias);
+                return Ok(categorias.Select(MapearCategoria));
             }
             catch (Exception ex)
             {
@@ -59,16 +63,49 @@ namespace YourMoney.Api.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ObterCategoria(Guid id)
+        {
+            try
+            {
+                var categoria = await _categoriaService.GetByIdAsync(id);
+                return Ok(MapearCategoria(categoria));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarCategoria(Guid id, [FromBody] CategoriaDTO dto)
         {
-            var categoria = await _categoriaService.GetByIdAsync(id);
+            try
+            {
+                var categoria = await _categoriaService.GetByIdAsync(id);
+                categoria.Atualizar(dto.Descricao, dto.TipoTransacao, dto.CategoriaPaiId);
+                await _categoriaService.AtualizarAsync(categoria);
+                return Ok(MapearCategoria(categoria));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
 
-            categoria.AtualizarDescricao(dto.Descricao);
-
-            await _categoriaService.AtualizarAsync(categoria);
-            return NoContent();
-
+        private static CategoriaDTO MapearCategoria(Categoria categoria)
+        {
+            return new CategoriaDTO
+            {
+                Id = categoria.Id,
+                Descricao = categoria.Descricao,
+                TipoTransacao = categoria.TipoTransacao,
+                CategoriaPaiId = categoria.CategoriaPaiId
+            };
         }
     }
 }

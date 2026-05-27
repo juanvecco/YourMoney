@@ -32,17 +32,35 @@ namespace YourMoney.Application.Services
 
         public async Task AdicionarAsync(Categoria categoria)
         {
+            await ValidarCategoriaPaiAsync(categoria.CategoriaPaiId);
             await _categoriaRepository.AdicionarAsync(categoria);
         }
 
         public async Task AtualizarAsync(Categoria categoria)
         {
+            await ValidarCategoriaPaiAsync(categoria.CategoriaPaiId, categoria.Id);
             await _categoriaRepository.AtualizarAsync(categoria);
         }
 
         public async Task RemoverAsync(Guid id)
         {
+            var categoria = await _categoriaRepository.GetByIdAsync(id);
+            if (categoria == null)
+                throw new InvalidOperationException("Categoria não encontrada.");
+
             await _categoriaRepository.RemoverAsync(id);
+        }
+
+        private async Task ValidarCategoriaPaiAsync(Guid? categoriaPaiId, Guid? categoriaId = null)
+        {
+            if (!categoriaPaiId.HasValue)
+                return;
+
+            if (categoriaId.HasValue && categoriaPaiId.Value == categoriaId.Value)
+                throw new InvalidOperationException("Categoria não pode ser pai dela mesma.");
+
+            if (!await _categoriaRepository.ExisteAsync(categoriaPaiId.Value))
+                throw new InvalidOperationException("Categoria pai não encontrada.");
         }
     }
 }
