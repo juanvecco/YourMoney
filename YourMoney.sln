@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YourMoney.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YourMoney.Application", "src\YourMoney.Application\YourMoney.Application.csproj", "{0F0A2B52-C6ED-4080-97AF-BE4DBB6FA472}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0C59041E-7E86-438E-A41B-F58A641BE5A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YourMoney.Tests", "tests\YourMoney.Tests\YourMoney.Tests.csproj", "{DDEDC217-DEAE-4A46-A63E-255EF29060E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +39,10 @@ Global
 		{0F0A2B52-C6ED-4080-97AF-BE4DBB6FA472}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F0A2B52-C6ED-4080-97AF-BE4DBB6FA472}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F0A2B52-C6ED-4080-97AF-BE4DBB6FA472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDEDC217-DEAE-4A46-A63E-255EF29060E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDEDC217-DEAE-4A46-A63E-255EF29060E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDEDC217-DEAE-4A46-A63E-255EF29060E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDEDC217-DEAE-4A46-A63E-255EF29060E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +52,6 @@ Global
 		{A80606DF-FD95-4861-B5A0-923C58FAD219} = {0616164E-3499-4F69-8E93-EFD62E28F0CA}
 		{6659F6AD-4F53-457F-AE4F-9FB24C999269} = {0616164E-3499-4F69-8E93-EFD62E28F0CA}
 		{0F0A2B52-C6ED-4080-97AF-BE4DBB6FA472} = {0616164E-3499-4F69-8E93-EFD62E28F0CA}
+		{DDEDC217-DEAE-4A46-A63E-255EF29060E7} = {0C59041E-7E86-438E-A41B-F58A641BE5A5}
 	EndGlobalSection
 EndGlobal

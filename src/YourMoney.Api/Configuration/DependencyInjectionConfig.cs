@@ -1,7 +1,6 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
 using YourMoney.Domain.Repositories;
-using YourMoney.Infrastructure.Interfaces;
 using YourMoney.Infrastructure.Repositories;
 
 namespace YourMoney.Api.Configuration
@@ -23,9 +22,6 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
             services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IAuthService, AuthService>();
-
             return services;
         }
     }

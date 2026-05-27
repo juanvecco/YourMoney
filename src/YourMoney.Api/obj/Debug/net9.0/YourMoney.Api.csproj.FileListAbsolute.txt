@@ -168,4 +168,11 @@ C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\refint\YourMoney.Api.dll
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.pdb
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\YourMoney.Api.genruntimeconfig.cache
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\ref\YourMoney.Api.dll
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\dev\YourMoney\artifacts\api-build\appsettings.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.staticwebassets.runtime.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.staticwebassets.endpoints.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.exe
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.deps.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.runtimeconfig.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.dll
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Api.pdb

@@ -10,5 +10,6 @@ namespace YourMoney.Domain.Repositories
         Task AtualizarAsync(Categoria categoria);
         Task RemoverAsync(Guid id);
         Task<List<Categoria>> GetAllAsync();
+        Task<bool> ExisteAsync(Guid id);
     }
 }

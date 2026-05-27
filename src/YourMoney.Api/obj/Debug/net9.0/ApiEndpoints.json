@@ -295,6 +295,22 @@
   },
   {
     "ContainingType": "YourMoney.Api.Controllers.AuthController",
+    "Method": "EsqueciMinhaSenha",
+    "RelativePath": "api/identidade/esqueci-minha-senha",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioEsqueceuSenha",
+        "Type": "YourMoney.Api.Models.UsuarioEsqueceuSenha",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.AuthController",
     "Method": "Registrar",
     "RelativePath": "api/identidade/nova-conta",
     "HttpMethod": "POST",
@@ -304,6 +320,22 @@
       {
         "Name": "usuarioRegistro",
         "Type": "YourMoney.Api.Models.UsuarioRegistro",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.AuthController",
+    "Method": "ResetarSenha",
+    "RelativePath": "api/identidade/resetar-senha",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioResetSenha",
+        "Type": "YourMoney.Api.Models.UsuarioResetSenha",
         "IsRequired": true
       }
     ],

@@ -1,0 +1,15 @@
+.git/
+.github/
+.vs/
+.vscode/
+bin/
+obj/
+packages/
+TestResults/
+coverage/
+*.log
+*.user
+*.suo
+*.tmp
+Dockerfile*
+.dockerignore

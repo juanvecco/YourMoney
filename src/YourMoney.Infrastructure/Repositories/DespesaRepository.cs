@@ -74,6 +74,22 @@ namespace YourMoney.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AdicionarEmLoteAsync(IReadOnlyCollection<Despesa> despesas)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.Despesas.AddRangeAsync(despesas);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task AtualizarAsync(Despesa despesa)
         {
             _context.Despesas.Update(despesa);

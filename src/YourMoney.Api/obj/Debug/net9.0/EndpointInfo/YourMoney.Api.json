@@ -67,6 +67,68 @@
         }
       }
     },
+    "/api/identidade/esqueci-minha-senha": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioEsqueceuSenha"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioEsqueceuSenha"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioEsqueceuSenha"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/identidade/resetar-senha": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenha"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenha"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenha"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Categoria": {
       "post": {
         "tags": [
@@ -1079,6 +1141,20 @@
         "type": "integer",
         "format": "int32"
       },
+      "UsuarioEsqueceuSenha": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "additionalProperties": false
+      },
       "UsuarioLogin": {
         "required": [
           "email",
@@ -1109,6 +1185,35 @@
             "minLength": 1,
             "type": "string",
             "format": "email"
+          },
+          "senha": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string"
+          },
+          "senhaConfirmacao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UsuarioResetSenha": {
+        "required": [
+          "email",
+          "senha",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "token": {
+            "minLength": 1,
+            "type": "string"
           },
           "senha": {
             "maxLength": 100,

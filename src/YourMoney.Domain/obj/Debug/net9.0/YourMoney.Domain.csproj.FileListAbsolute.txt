@@ -10,3 +10,6 @@ C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.dll
 C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\refint\YourMoney.Domain.dll
 C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\YourMoney.Domain.pdb
 C:\dev\YourMoney\src\YourMoney.Domain\obj\Debug\net9.0\ref\YourMoney.Domain.dll
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Domain.deps.json
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Domain.dll
+C:\dev\YourMoney\artifacts\api-build\YourMoney.Domain.pdb

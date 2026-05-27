@@ -8,6 +8,10 @@
         public DateTime Data { get; set; }
         public Guid IdContaFinanceira { get; set; }
         public Guid IdCategoria { get; set; }
+        public Guid? ParcelamentoId { get; set; }
+        public int? NumeroParcela { get; set; }
+        public int? TotalParcelas { get; set; }
+        public decimal? ValorTotalParcelamento { get; set; }
         //public bool Pago { get; set; }
         //public DateTime? DataPagamento { get; set; }
         //public TipoRecorrencia TipoRecorrencia { get; set; }
