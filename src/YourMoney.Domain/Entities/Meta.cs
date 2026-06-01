@@ -31,6 +31,12 @@ namespace YourMoney.Domain.Entities
             CategoriaId = categoriaId;
         }
 
+        public Meta(string nome, string descricao, decimal valorObjetivo, DateTime dataObjetivo, string usuarioId, Guid? categoriaId = null)
+            : this(nome, descricao, valorObjetivo, dataObjetivo, categoriaId)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         public void AtualizarNome(string nome)
         {
             if (string.IsNullOrWhiteSpace(nome))

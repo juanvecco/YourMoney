@@ -37,6 +37,12 @@ namespace YourMoney.Domain.Entities
             CategoriaPaiId = categoriaPaiId;
         }
 
+        public Categoria(string descricao, TipoTransacao tipoTransacao, string usuarioId, Guid? categoriaPaiId = null)
+            : this(descricao, tipoTransacao, categoriaPaiId)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         //public void AtualizarDescricao(string descricao)
         //{
         //    Descricao = descricao?.Trim() ?? string.Empty;

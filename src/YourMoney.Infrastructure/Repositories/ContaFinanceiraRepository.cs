@@ -26,6 +26,13 @@ namespace YourMoney.Infrastructure.Repositories
             return contaFinanceira == null ? throw new InvalidOperationException("Conta Financeira não encontrada.") : contaFinanceira;
         }
 
+        public async Task<ContaFinanceira> GetByIdAsync(Guid id, string usuarioId)
+        {
+            var contaFinanceira = await _context.ContaFinanceira
+                .FirstOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId);
+            return contaFinanceira == null ? throw new InvalidOperationException("Conta Financeira não encontrada.") : contaFinanceira;
+        }
+
         public async Task AdicionarAsync(ContaFinanceira contaFinanceira)
         {
             await _context.ContaFinanceira.AddAsync(contaFinanceira);
@@ -42,9 +49,19 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.ContaFinanceira
                 .ToListAsync();
         }
+        public async Task<List<ContaFinanceira>> ListarAsync(string usuarioId)
+        {
+            return await _context.ContaFinanceira
+                .Where(c => c.UsuarioId == usuarioId)
+                .ToListAsync();
+        }
         public async Task<bool> ExisteAsync(Guid id)
         {
             return await _context.ContaFinanceira.AnyAsync(c => c.Id == id);
+        }
+        public async Task<bool> ExisteAsync(Guid id, string usuarioId)
+        {
+            return await _context.ContaFinanceira.AnyAsync(c => c.Id == id && c.UsuarioId == usuarioId);
         }
         public async Task RemoverAsync(Guid id)
         {
@@ -55,6 +72,13 @@ namespace YourMoney.Infrastructure.Repositories
                 _context.ContaFinanceira.Remove(contaFinanceira);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task RemoverAsync(Guid id, string usuarioId)
+        {
+            var contaFinanceira = await GetByIdAsync(id, usuarioId);
+            _context.ContaFinanceira.Remove(contaFinanceira);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "OuyJQND9wXjECoeK9S8WGs5JE8kZNpkdfu7SXWPfGrc=",
+  "Hash": "Vc7tdcaMhNglduGwDjXhtgk/eFS96tcd+9Hpf/iB4nA=",
   "Source": "YourMoney.Api",
   "BasePath": "_content/YourMoney.Api",
   "Mode": "Default",
@@ -17,54 +17,96 @@
   ],
   "Assets": [
     {
-      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\2ve6ul3e4c-pjm38qobjh.gz",
       "SourceId": "YourMoney.Api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/YourMoney.Api",
-      "RelativePath": "styles#[.{fingerprint=ynfmp5wyxf}]?.css.gz",
+      "RelativePath": "polyfills-B6TNHZQ6#[.{fingerprint=pjm38qobjh}]?.js.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
       "AssetMergeBehavior": "",
       "AssetMergeSource": "",
-      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "24zfx1h19x",
-      "Integrity": "ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=",
+      "Fingerprint": "u66xw4iuhk",
+      "Integrity": "ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css"
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js"
     },
     {
-      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\9pnykdiusl-xl4lp2b08f.gz",
       "SourceId": "YourMoney.Api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/YourMoney.Api",
-      "RelativePath": "script#[.{fingerprint=trf3ufhe1x}]?.json.gz",
+      "RelativePath": "main-ZAB2MTVP#[.{fingerprint=xl4lp2b08f}]?.js.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
       "AssetMergeBehavior": "",
       "AssetMergeSource": "",
-      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "0s7ztbj49t",
-      "Integrity": "4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=",
+      "Fingerprint": "3v6dgbrytu",
+      "Integrity": "AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json"
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js"
     },
     {
-      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\fabl5nek1i-81pv0r92lr.gz",
       "SourceId": "YourMoney.Api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/YourMoney.Api",
-      "RelativePath": "index#[.{fingerprint=tmsxjwpo74}]?.html.gz",
+      "RelativePath": "styles-HSJ57JRC#[.{fingerprint=81pv0r92lr}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "sadpvsh40c",
+      "Integrity": "bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\sosytr9v8y-vagikyz9qx.gz",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "favicon#[.{fingerprint=vagikyz9qx}]?.ico.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "spc2whqxhc",
+      "Integrity": "4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-233vzp62oq.gz",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "index#[.{fingerprint=233vzp62oq}]?.html.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -73,11 +115,53 @@
       "RelatedAsset": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "g37gv5ygyf",
-      "Integrity": "7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=",
+      "Fingerprint": "ggwvaqhui6",
+      "Integrity": "8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\assets\\logo.png",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "assets/logo#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "dgd2tfoxuu",
+      "Integrity": "Y7bhGTiyAZuNSjKVkfHsv7jpx+j1KkZys/k/14zGUs4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\assets\\logo.png"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "favicon#[.{fingerprint}]?.ico",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "vagikyz9qx",
+      "Integrity": "+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\favicon.ico"
     },
     {
       "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
@@ -94,19 +178,19 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "tmsxjwpo74",
-      "Integrity": "y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=",
+      "Fingerprint": "233vzp62oq",
+      "Integrity": "Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\index.html"
     },
     {
-      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js",
       "SourceId": "YourMoney.Api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
       "BasePath": "_content/YourMoney.Api",
-      "RelativePath": "script#[.{fingerprint}]?.json",
+      "RelativePath": "main-ZAB2MTVP#[.{fingerprint}]?.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -115,19 +199,19 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "trf3ufhe1x",
-      "Integrity": "Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=",
+      "Fingerprint": "xl4lp2b08f",
+      "Integrity": "a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\script.json"
+      "OriginalItemSpec": "wwwroot\\main-ZAB2MTVP.js"
     },
     {
-      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js",
       "SourceId": "YourMoney.Api",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
       "BasePath": "_content/YourMoney.Api",
-      "RelativePath": "styles#[.{fingerprint}]?.css",
+      "RelativePath": "polyfills-B6TNHZQ6#[.{fingerprint}]?.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -136,22 +220,125 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "ynfmp5wyxf",
-      "Integrity": "MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=",
+      "Fingerprint": "pjm38qobjh",
+      "Integrity": "5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\styles.css"
+      "OriginalItemSpec": "wwwroot\\polyfills-B6TNHZQ6.js"
+    },
+    {
+      "Identity": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css",
+      "SourceId": "YourMoney.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\",
+      "BasePath": "_content/YourMoney.Api",
+      "RelativePath": "styles-HSJ57JRC#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "81pv0r92lr",
+      "Integrity": "fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\styles-HSJ57JRC.css"
     }
   ],
   "Endpoints": [
     {
-      "Route": "index.html",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
+      "Route": "assets/logo.dgd2tfoxuu.png",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\assets\\logo.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "10127"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Y7bhGTiyAZuNSjKVkfHsv7jpx+j1KkZys/k/14zGUs4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 14 Feb 2026 15:24:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "dgd2tfoxuu"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/logo.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Y7bhGTiyAZuNSjKVkfHsv7jpx+j1KkZys/k/14zGUs4="
+        }
+      ]
+    },
+    {
+      "Route": "assets/logo.png",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\assets\\logo.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "10127"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Y7bhGTiyAZuNSjKVkfHsv7jpx+j1KkZys/k/14zGUs4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 14 Feb 2026 15:24:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Y7bhGTiyAZuNSjKVkfHsv7jpx+j1KkZys/k/14zGUs4="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.ico",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\sosytr9v8y-vagikyz9qx.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.002267573696"
+          "Quality": "0.000237360551"
         }
       ],
       "ResponseHeaders": [
@@ -161,15 +348,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "440"
+          "Value": "4212"
         },
         {
           "Name": "ETag",
-          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
+          "Value": "\"4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -185,22 +372,328 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "text/html"
+          "Value": "image/x-icon"
         },
         {
           "Name": "ETag",
-          "Value": "W/\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+          "Value": "W/\"+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+          "Value": "sha256-+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8="
         }
       ]
     },
     {
-      "Route": "index.html",
+      "Route": "favicon.ico",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "15086"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.ico.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\sosytr9v8y-vagikyz9qx.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4212"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.vagikyz9qx.ico",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\sosytr9v8y-vagikyz9qx.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000237360551"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4212"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vagikyz9qx"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.ico"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.vagikyz9qx.ico",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "15086"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vagikyz9qx"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.ico"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-+RAr6AKXwFKSB2B75Sd7T5C8qJ1lmI+hdxuRx4lOgV8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.vagikyz9qx.ico.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\sosytr9v8y-vagikyz9qx.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4212"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 02 Aug 2025 19:33:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vagikyz9qx"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.ico.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-4JD5TBkaKkYJVw5DzZh1jKJdCSTQYxpre7fdXrSQ/P8="
+        }
+      ]
+    },
+    {
+      "Route": "index.233vzp62oq.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-233vzp62oq.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000224315837"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4457"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "233vzp62oq"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E="
+        }
+      ]
+    },
+    {
+      "Route": "index.233vzp62oq.html",
       "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
       "Selectors": [],
       "ResponseHeaders": [
@@ -210,7 +703,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1063"
+          "Value": "26046"
         },
         {
           "Name": "Content-Type",
@@ -218,121 +711,21 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+          "Value": "\"Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
-        }
-      ]
-    },
-    {
-      "Route": "index.html.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "440"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/html"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic="
-        }
-      ]
-    },
-    {
-      "Route": "index.tmsxjwpo74.html",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
-      "Selectors": [
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip",
-          "Quality": "0.002267573696"
-        }
-      ],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "440"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
           "Value": "max-age=31536000, immutable"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/html"
-        },
-        {
-          "Name": "ETag",
-          "Value": "W/\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "tmsxjwpo74"
+          "Value": "233vzp62oq"
         },
         {
           "Name": "label",
@@ -340,13 +733,13 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
+          "Value": "sha256-Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E="
         }
       ]
     },
     {
-      "Route": "index.tmsxjwpo74.html",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
+      "Route": "index.233vzp62oq.html.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-233vzp62oq.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -355,7 +748,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1063"
+          "Value": "4457"
         },
         {
           "Name": "Content-Type",
@@ -363,56 +756,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A=\""
+          "Value": "\"8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "tmsxjwpo74"
-        },
-        {
-          "Name": "label",
-          "Value": "index.html"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-y+2WHfGmJMmb4bbV3fPRcS9FLdcU08u0eVCSnHHjN/A="
-        }
-      ]
-    },
-    {
-      "Route": "index.tmsxjwpo74.html.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-tmsxjwpo74.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "440"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/html"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -430,7 +778,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "tmsxjwpo74"
+          "Value": "233vzp62oq"
         },
         {
           "Name": "label",
@@ -438,18 +786,18 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-7FrdVuy32xZANGxLQ++mFiP1RYvObwqmW29zCO5Zwic="
+          "Value": "sha256-8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY="
         }
       ]
     },
     {
-      "Route": "script.json",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Route": "index.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-233vzp62oq.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.001808318264"
+          "Quality": "0.000224315837"
         }
       ],
       "ResponseHeaders": [
@@ -459,15 +807,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "552"
+          "Value": "4457"
         },
         {
           "Name": "ETag",
-          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+          "Value": "\"8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -483,23 +831,23 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/html"
         },
         {
           "Name": "ETag",
-          "Value": "W/\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+          "Value": "W/\"Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+          "Value": "sha256-Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E="
         }
       ]
     },
     {
-      "Route": "script.json",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "Route": "index.html",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -508,19 +856,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1393"
+          "Value": "26046"
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/html"
         },
         {
           "Name": "ETag",
-          "Value": "\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+          "Value": "\"Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -530,13 +878,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+          "Value": "sha256-Xgj4hP6+BJBTV7rvP9j0MJtFts6/8T+KhBrrR2+6R8E="
         }
       ]
     },
     {
-      "Route": "script.json.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Route": "index.html.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\topngqi2tx-233vzp62oq.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -545,19 +893,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "552"
+          "Value": "4457"
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/html"
         },
         {
           "Name": "ETag",
-          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+          "Value": "\"8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -575,18 +923,18 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I="
+          "Value": "sha256-8Mcuzq9ZoBr7FXdQxmB43zlVbR8fT0uzen4ZX9YmBWY="
         }
       ]
     },
     {
-      "Route": "script.trf3ufhe1x.json",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Route": "main-ZAB2MTVP.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\9pnykdiusl-xl4lp2b08f.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.001808318264"
+          "Quality": "0.000004648309"
         }
       ],
       "ResponseHeaders": [
@@ -596,19 +944,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "552"
+          "Value": "215131"
         },
         {
           "Name": "ETag",
-          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+          "Value": "\"AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         },
         {
           "Name": "Content-Encoding",
@@ -620,31 +968,23 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "W/\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+          "Value": "W/\"a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA=\""
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "trf3ufhe1x"
-        },
-        {
-          "Name": "label",
-          "Value": "script.json"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+          "Value": "sha256-a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA="
         }
       ]
     },
     {
-      "Route": "script.trf3ufhe1x.json",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
+      "Route": "main-ZAB2MTVP.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -653,43 +993,35 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1393"
+          "Value": "725633"
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "\"Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY=\""
+          "Value": "\"a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "trf3ufhe1x"
-        },
-        {
-          "Name": "label",
-          "Value": "script.json"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-Z4PwxYT3P+voVLt2JsWYmhbRX+xc6g8UQTMrm0RHblY="
+          "Value": "sha256-a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA="
         }
       ]
     },
     {
-      "Route": "script.trf3ufhe1x.json.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\qyjgmpucqh-trf3ufhe1x.gz",
+      "Route": "main-ZAB2MTVP.js.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\9pnykdiusl-xl4lp2b08f.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -698,23 +1030,23 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "552"
+          "Value": "215131"
         },
         {
           "Name": "Content-Type",
-          "Value": "application/json"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "\"4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I=\""
+          "Value": "\"AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         },
         {
           "Name": "Content-Encoding",
@@ -727,27 +1059,19 @@
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "trf3ufhe1x"
-        },
-        {
-          "Name": "label",
-          "Value": "script.json.gz"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-4HSGQjorIKzClZbO+F/1DrqnYjJIFPFB0iKJRRksh+I="
+          "Value": "sha256-AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc="
         }
       ]
     },
     {
-      "Route": "styles.css",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Route": "main-ZAB2MTVP.xl4lp2b08f.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\9pnykdiusl-xl4lp2b08f.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.005952380952"
+          "Quality": "0.000004648309"
         }
       ],
       "ResponseHeaders": [
@@ -757,19 +1081,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "167"
+          "Value": "215131"
         },
         {
           "Name": "ETag",
-          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+          "Value": "\"AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "no-cache"
+          "Value": "max-age=31536000, immutable"
         },
         {
           "Name": "Content-Encoding",
@@ -781,23 +1105,31 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "text/css"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "W/\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+          "Value": "W/\"a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA=\""
         }
       ],
       "EndpointProperties": [
         {
+          "Name": "fingerprint",
+          "Value": "xl4lp2b08f"
+        },
+        {
+          "Name": "label",
+          "Value": "main-ZAB2MTVP.js"
+        },
+        {
           "Name": "integrity",
-          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+          "Value": "sha256-a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA="
         }
       ]
     },
     {
-      "Route": "styles.css",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "Route": "main-ZAB2MTVP.xl4lp2b08f.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -806,35 +1138,43 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "258"
+          "Value": "725633"
         },
         {
           "Name": "Content-Type",
-          "Value": "text/css"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+          "Value": "\"a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "no-cache"
+          "Value": "max-age=31536000, immutable"
         }
       ],
       "EndpointProperties": [
         {
+          "Name": "fingerprint",
+          "Value": "xl4lp2b08f"
+        },
+        {
+          "Name": "label",
+          "Value": "main-ZAB2MTVP.js"
+        },
+        {
           "Name": "integrity",
-          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+          "Value": "sha256-a0RRL7woQUW/m/YiNWr1m3L+9Zec1LTMAh/6mPopBXA="
         }
       ]
     },
     {
-      "Route": "styles.css.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Route": "main-ZAB2MTVP.xl4lp2b08f.js.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\9pnykdiusl-xl4lp2b08f.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -843,23 +1183,23 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "167"
+          "Value": "215131"
         },
         {
           "Name": "Content-Type",
-          "Value": "text/css"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+          "Value": "\"AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "no-cache"
+          "Value": "max-age=31536000, immutable"
         },
         {
           "Name": "Content-Encoding",
@@ -872,19 +1212,27 @@
       ],
       "EndpointProperties": [
         {
+          "Name": "fingerprint",
+          "Value": "xl4lp2b08f"
+        },
+        {
+          "Name": "label",
+          "Value": "main-ZAB2MTVP.js.gz"
+        },
+        {
           "Name": "integrity",
-          "Value": "sha256-ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo="
+          "Value": "sha256-AVDHGQ2iaI/wmf6atw4PjO38HQEHkR95wf3BvkTGSgc="
         }
       ]
     },
     {
-      "Route": "styles.ynfmp5wyxf.css",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Route": "polyfills-B6TNHZQ6.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\2ve6ul3e4c-pjm38qobjh.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.005952380952"
+          "Quality": "0.000079573486"
         }
       ],
       "ResponseHeaders": [
@@ -894,15 +1242,313 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "167"
+          "Value": "12566"
         },
         {
           "Name": "ETag",
-          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+          "Value": "\"ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills-B6TNHZQ6.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "34579"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills-B6TNHZQ6.js.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\2ve6ul3e4c-pjm38qobjh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "12566"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills-B6TNHZQ6.pjm38qobjh.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\2ve6ul3e4c-pjm38qobjh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000079573486"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "12566"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "pjm38qobjh"
+        },
+        {
+          "Name": "label",
+          "Value": "polyfills-B6TNHZQ6.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills-B6TNHZQ6.pjm38qobjh.js",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "34579"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "pjm38qobjh"
+        },
+        {
+          "Name": "label",
+          "Value": "polyfills-B6TNHZQ6.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-5YQR23G5CGFsXCEtI3Pntat5BVx5h+CDbmSyWdpyUH8="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills-B6TNHZQ6.pjm38qobjh.js.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\2ve6ul3e4c-pjm38qobjh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "12566"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "pjm38qobjh"
+        },
+        {
+          "Name": "label",
+          "Value": "polyfills-B6TNHZQ6.js.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ahI+y3qZTgyr/pzB1Jc6YHaVgZCrY62voNtaWhBMCnY="
+        }
+      ]
+    },
+    {
+      "Route": "styles-HSJ57JRC.81pv0r92lr.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\fabl5nek1i-81pv0r92lr.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000256081946"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3904"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -922,27 +1568,27 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+          "Value": "W/\"fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "ynfmp5wyxf"
+          "Value": "81pv0r92lr"
         },
         {
           "Name": "label",
-          "Value": "styles.css"
+          "Value": "styles-HSJ57JRC.css"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+          "Value": "sha256-fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU="
         }
       ]
     },
     {
-      "Route": "styles.ynfmp5wyxf.css",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
+      "Route": "styles-HSJ57JRC.81pv0r92lr.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -951,7 +1597,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "258"
+          "Value": "17239"
         },
         {
           "Name": "Content-Type",
@@ -959,11 +1605,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U=\""
+          "Value": "\"fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -973,21 +1619,21 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "ynfmp5wyxf"
+          "Value": "81pv0r92lr"
         },
         {
           "Name": "label",
-          "Value": "styles.css"
+          "Value": "styles-HSJ57JRC.css"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-MpqWQM5v3WzupOBLWOCgji0cAOVLnrCrNWSDRoSS39U="
+          "Value": "sha256-fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU="
         }
       ]
     },
     {
-      "Route": "styles.ynfmp5wyxf.css.gz",
-      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\mq58twf6v3-ynfmp5wyxf.gz",
+      "Route": "styles-HSJ57JRC.81pv0r92lr.css.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\fabl5nek1i-81pv0r92lr.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -996,7 +1642,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "167"
+          "Value": "3904"
         },
         {
           "Name": "Content-Type",
@@ -1004,11 +1650,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo=\""
+          "Value": "\"bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 02 Jul 2025 11:07:11 GMT"
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1026,15 +1672,152 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "ynfmp5wyxf"
+          "Value": "81pv0r92lr"
         },
         {
           "Name": "label",
-          "Value": "styles.css.gz"
+          "Value": "styles-HSJ57JRC.css.gz"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-ghSvE8Sv2G4d63+tlazd86ZL3BKB0RT3FBwZqSUAMIo="
+          "Value": "sha256-bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc="
+        }
+      ]
+    },
+    {
+      "Route": "styles-HSJ57JRC.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\fabl5nek1i-81pv0r92lr.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000256081946"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3904"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU="
+        }
+      ]
+    },
+    {
+      "Route": "styles-HSJ57JRC.css",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17239"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-fOw6uuBsxWkD3nEhcJnbaV3EHx7zXeKTLfrhsaqSgEU="
+        }
+      ]
+    },
+    {
+      "Route": "styles-HSJ57JRC.css.gz",
+      "AssetFile": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\obj\\Debug\\net9.0\\compressed\\fabl5nek1i-81pv0r92lr.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3904"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 May 2026 17:38:27 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-bHGArx8SMvPWr6B/j1VfRuUiOPJ7Ndt54CH6YQdI9Yc="
         }
       ]
     }

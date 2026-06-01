@@ -19,6 +19,12 @@
             DataCriacao = DateTime.Now;
         }
 
+        public ContaFinanceira(string descricao, string usuarioId)
+            : this(descricao)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         public void AtualizarDescricao(string descricao)
         {
             if (string.IsNullOrWhiteSpace(descricao))

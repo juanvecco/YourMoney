@@ -9,6 +9,7 @@ namespace YourMoney.Application.Interfaces
     public interface IDespesaService
     {
         Task AdicionarDespesaAsync(Despesa despesa);
+        Task<CriarDespesaResponse> CriarDespesaAsync(CriarDespesaRequest request);
         Task<Despesa> GetDespesaByIdAsync(Guid id); // Método já existente
         Task RemoverDespesaAsync(Guid id); // Método já existente
         Task AtualizarAsync(Despesa despesa); // Novo método

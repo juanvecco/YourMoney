@@ -36,6 +36,18 @@ namespace YourMoney.Infrastructure.Persistence
                     }
                 }
             }
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType)))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property<string>(nameof(BaseEntity.UsuarioId))
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasIndex(nameof(BaseEntity.UsuarioId));
+            }
         }
     }
 }

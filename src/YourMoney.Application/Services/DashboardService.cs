@@ -12,27 +12,31 @@ namespace YourMoney.Application.Services
         private readonly IInvestimentoRepository _investimentoRepository;
         private readonly IMetaRepository _metaRepository;
         private readonly ICategoriaRepository _categoriaRepository;
+        private readonly ICurrentUserService _currentUserService;
 
         public DashboardService(
             IReceitaRepository receitaRepository,
             IDespesaRepository despesaRepository,
             IInvestimentoRepository investimentoRepository,
             IMetaRepository metaRepository,
-            ICategoriaRepository categoriaRepository)
+            ICategoriaRepository categoriaRepository,
+            ICurrentUserService currentUserService)
         {
             _receitaRepository = receitaRepository;
             _despesaRepository = despesaRepository;
             _investimentoRepository = investimentoRepository;
             _metaRepository = metaRepository;
             _categoriaRepository = categoriaRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<DashboardDTO> GetDashboardDataAsync(int mes, int ano)
         {
-            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano);
-            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano);
-            var investimentos = await _investimentoRepository.GetAllAsync();
-            var metasAtivas = await _metaRepository.GetAtivasAsync();
+            var usuarioId = _currentUserService.UserId;
+            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano, usuarioId);
+            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano, usuarioId);
+            var investimentos = await _investimentoRepository.GetAllAsync(usuarioId);
+            var metasAtivas = await _metaRepository.GetAtivasAsync(usuarioId);
 
             var totalReceitas = receitas.Sum(r => r.Valor);
             var totalDespesas = despesas.Sum(d => d.Valor);
@@ -60,7 +64,7 @@ namespace YourMoney.Application.Services
 
         public async Task<List<GraficoDTO>> GetGraficoDespesasPorCategoriaAsync(int mes, int ano)
         {
-            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano);
+            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano, _currentUserService.UserId);
 
             return despesas
                 //.GroupBy(d => d.CategoriaId)
@@ -76,7 +80,7 @@ namespace YourMoney.Application.Services
 
         public async Task<List<GraficoDTO>> GetGraficoReceitasPorCategoriaAsync(int mes, int ano)
         {
-            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano);
+            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano, _currentUserService.UserId);
 
             return receitas
                 //.Where(r => r.Recebida)
@@ -93,11 +97,13 @@ namespace YourMoney.Application.Services
 
         public async Task<BalancoMensalDTO> GetBalancoMensalAsync(int mes, int ano)
         {
-            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano);
-            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano);
+            var usuarioId = _currentUserService.UserId;
+            var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano, usuarioId);
+            var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano, usuarioId);
             var investimentos = await _investimentoRepository.GetByPeriodoAsync(
                 new DateTime(ano, mes, 1),
-                new DateTime(ano, mes, DateTime.DaysInMonth(ano, mes)));
+                new DateTime(ano, mes, DateTime.DaysInMonth(ano, mes)),
+                usuarioId);
 
             var totalReceitas = receitas.Sum(r => r.Valor);
             var totalDespesas = despesas.Sum(d => d.Valor);
