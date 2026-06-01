@@ -1,16 +1,28 @@
 {
   "Files": [
     {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\assets\\logo.png",
+      "PackagePath": "staticwebassets\\assets\\logo.png"
+    },
+    {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
       "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\index.html",
       "PackagePath": "staticwebassets\\index.html"
     },
     {
-      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\script.json",
-      "PackagePath": "staticwebassets\\script.json"
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\main-ZAB2MTVP.js",
+      "PackagePath": "staticwebassets\\main-ZAB2MTVP.js"
     },
     {
-      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles.css",
-      "PackagePath": "staticwebassets\\styles.css"
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\polyfills-B6TNHZQ6.js",
+      "PackagePath": "staticwebassets\\polyfills-B6TNHZQ6.js"
+    },
+    {
+      "Id": "C:\\dev\\YourMoney\\src\\YourMoney.Api\\wwwroot\\styles-HSJ57JRC.css",
+      "PackagePath": "staticwebassets\\styles-HSJ57JRC.css"
     },
     {
       "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.YourMoney.Api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

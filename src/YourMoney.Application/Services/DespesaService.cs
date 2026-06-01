@@ -13,15 +13,18 @@ namespace YourMoney.Application.Services
         private readonly IDespesaRepository _despesaRepository;
         private readonly IContaFinanceiraRepository _contaFinanceiraRepository;
         private readonly ICategoriaRepository _categoriaRepository;
+        private readonly ICurrentUserService _currentUserService;
 
         public DespesaService(
             IDespesaRepository despesaRepository,
             IContaFinanceiraRepository contaFinanceiraRepository,
-            ICategoriaRepository categoriaRepository)
+            ICategoriaRepository categoriaRepository,
+            ICurrentUserService currentUserService)
         {
             _despesaRepository = despesaRepository;
             _contaFinanceiraRepository = contaFinanceiraRepository;
             _categoriaRepository = categoriaRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task AdicionarDespesaAsync(Despesa despesa)
@@ -30,12 +33,31 @@ namespace YourMoney.Application.Services
             {
                 throw new ArgumentException("O valor da despesa deve ser maior que zero.");
             }
+            despesa.DefinirUsuario(_currentUserService.UserId);
             await _despesaRepository.AdicionarAsync(despesa);
+        }
+
+        public async Task<CriarDespesaResponse> CriarDespesaAsync(CriarDespesaRequest request)
+        {
+            await ValidarCriacaoDespesaAsync(request);
+
+            var usuarioId = _currentUserService.UserId;
+            var despesa = new Despesa(
+                request.Descricao!,
+                decimal.Round(request.Valor, 2, MidpointRounding.AwayFromZero),
+                request.Data.Date,
+                request.IdContaFinanceira,
+                request.IdCategoria);
+            despesa.DefinirUsuario(usuarioId);
+
+            await _despesaRepository.AdicionarAsync(despesa);
+
+            return MapearCriacaoDespesa(despesa, request.MesReferencia.Date);
         }
 
         public async Task<Despesa> GetDespesaByIdAsync(Guid id)
         {
-            var despesa = await _despesaRepository.GetByIdAsync(id);
+            var despesa = await _despesaRepository.GetByIdAsync(id, _currentUserService.UserId);
             if (despesa == null)
             {
                 throw new InvalidOperationException("Despesa não encontrada.");
@@ -45,33 +67,34 @@ namespace YourMoney.Application.Services
 
         public async Task RemoverDespesaAsync(Guid id)
         {
-            var despesa = await _despesaRepository.GetByIdAsync(id);
+            var despesa = await _despesaRepository.GetByIdAsync(id, _currentUserService.UserId);
             if (despesa == null)
             {
                 throw new InvalidOperationException("Despesa não encontrada.");
             }
-            await _despesaRepository.RemoverAsync(id);
+            await _despesaRepository.RemoverAsync(id, _currentUserService.UserId);
         }
 
         public async Task AtualizarAsync(Despesa despesa)
         {
             // Verifica se a despesa existe antes de atualizá-la
-            var existingDespesa = await _despesaRepository.GetByIdAsync(despesa.Id);
+            var existingDespesa = await _despesaRepository.GetByIdAsync(despesa.Id, _currentUserService.UserId);
             if (existingDespesa == null)
             {
                 throw new InvalidOperationException("Despesa não encontrada.");
             }
+            despesa.DefinirUsuario(_currentUserService.UserId);
             await _despesaRepository.AtualizarAsync(despesa);
         }
 
         public async Task<List<Despesa>> ListarAsync()
         {
-            return await _despesaRepository.ListarAsync();
+            return await _despesaRepository.ListarAsync(_currentUserService.UserId);
         }
 
         public async Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
         {
-            var despesas = await _despesaRepository.ObterPorMesAnoAsync(mes, ano, idContaFinanceira);
+            var despesas = await _despesaRepository.ObterPorMesAnoAsync(mes, ano, _currentUserService.UserId, idContaFinanceira);
             return despesas.Where(d => d.Data.Month == mes && d.Data.Year == ano
                                         && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
                            .Select(MapearDespesa)
@@ -81,6 +104,7 @@ namespace YourMoney.Application.Services
         public async Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request)
         {
             await ValidarParcelamentoAsync(request);
+            var usuarioId = _currentUserService.UserId;
 
             if (request.QuantidadeParcelas == 1)
             {
@@ -90,6 +114,7 @@ namespace YourMoney.Application.Services
                     request.DataInicial.Date,
                     request.IdContaFinanceira,
                     request.IdCategoria);
+                despesa.DefinirUsuario(usuarioId);
 
                 await _despesaRepository.AdicionarAsync(despesa);
 
@@ -114,6 +139,7 @@ namespace YourMoney.Application.Services
                     CalcularDataParcela(request.DataInicial, index),
                     request.IdContaFinanceira,
                     request.IdCategoria);
+                despesa.DefinirUsuario(usuarioId);
 
                 despesa.AplicarParcelamento(
                     parcelamentoId,
@@ -154,9 +180,34 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Conta Financeira é obrigatória.");
             if (request.IdCategoria == Guid.Empty)
                 throw new ArgumentException("Categoria é obrigatória.");
-            if (!await _contaFinanceiraRepository.ExisteAsync(request.IdContaFinanceira))
+            var usuarioId = _currentUserService.UserId;
+            if (!await _contaFinanceiraRepository.ExisteAsync(request.IdContaFinanceira, usuarioId))
                 throw new ArgumentException("Conta Financeira não encontrada.");
-            if (!await _categoriaRepository.ExisteAsync(request.IdCategoria))
+            if (!await _categoriaRepository.ExisteAsync(request.IdCategoria, usuarioId))
+                throw new ArgumentException("Categoria não encontrada.");
+        }
+
+        private async Task ValidarCriacaoDespesaAsync(CriarDespesaRequest request)
+        {
+            if (request == null)
+                throw new ArgumentException("Dados da despesa são obrigatórios.");
+            if (string.IsNullOrWhiteSpace(request.Descricao))
+                throw new ArgumentException("Descrição é obrigatória.");
+            if (request.Valor <= 0)
+                throw new ArgumentException("Valor deve ser maior que zero.");
+            if (request.Data == default)
+                throw new ArgumentException("Data é obrigatória.");
+            if (request.MesReferencia == default)
+                throw new ArgumentException("Mês de referência é obrigatório.");
+            if (request.IdContaFinanceira == Guid.Empty)
+                throw new ArgumentException("Conta Financeira é obrigatória.");
+            if (request.IdCategoria == Guid.Empty)
+                throw new ArgumentException("Categoria é obrigatória.");
+
+            var usuarioId = _currentUserService.UserId;
+            if (!await _contaFinanceiraRepository.ExisteAsync(request.IdContaFinanceira, usuarioId))
+                throw new ArgumentException("Conta Financeira não encontrada.");
+            if (!await _categoriaRepository.ExisteAsync(request.IdCategoria, usuarioId))
                 throw new ArgumentException("Categoria não encontrada.");
         }
 
@@ -197,6 +248,20 @@ namespace YourMoney.Application.Services
                 NumeroParcela = despesa.NumeroParcela,
                 TotalParcelas = despesa.TotalParcelas,
                 ValorTotalParcelamento = despesa.ValorTotalParcelamento
+            };
+        }
+
+        private static CriarDespesaResponse MapearCriacaoDespesa(Despesa despesa, DateTime mesReferencia)
+        {
+            return new CriarDespesaResponse
+            {
+                Id = despesa.Id,
+                Descricao = despesa.Descricao,
+                Valor = despesa.Valor,
+                Data = despesa.Data,
+                MesReferencia = mesReferencia,
+                IdContaFinanceira = despesa.IdContaFinanceira,
+                IdCategoria = despesa.IdCategoria
             };
         }
 

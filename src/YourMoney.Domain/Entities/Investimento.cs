@@ -33,6 +33,12 @@ namespace YourMoney.Domain.Entities
             Ativo = true;
         }
 
+        public Investimento(string nome, string descricao, string tipo, decimal quantidade, decimal precoMedio, decimal valorAtual, DateTime dataInvestimento, string usuarioId)
+            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         public void AtualizarNome(string nome)
         {
             if (string.IsNullOrWhiteSpace(nome))

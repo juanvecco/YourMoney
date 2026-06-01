@@ -22,6 +22,13 @@ namespace YourMoney.Infrastructure.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<Meta> GetByIdAsync(Guid id, string usuarioId)
+        {
+            return await _context.Metas
+                .Include(m => m.Categoria)
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
+        }
+
         public async Task<List<Meta>> GetAllAsync()
         {
             return await _context.Metas
@@ -44,6 +51,15 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.Metas
                 .Include(m => m.Categoria)
                 .Where(m => m.Status == StatusMeta.Ativa)
+                .OrderBy(m => m.DataObjetivo)
+                .ToListAsync();
+        }
+
+        public async Task<List<Meta>> GetAtivasAsync(string usuarioId)
+        {
+            return await _context.Metas
+                .Include(m => m.Categoria)
+                .Where(m => m.UsuarioId == usuarioId && m.Status == StatusMeta.Ativa)
                 .OrderBy(m => m.DataObjetivo)
                 .ToListAsync();
         }

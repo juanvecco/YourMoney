@@ -21,10 +21,24 @@ namespace YourMoney.Infrastructure.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
+        public async Task<Receita> GetByIdAsync(Guid id, string usuarioId)
+        {
+            return await _context.Receitas
+                .FirstOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId);
+        }
+
         public async Task<List<Receita>> GetAllAsync()
         {
             return await _context.Receitas
                 //.Include(r => r.Categoria)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Receita>> GetAllAsync(string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -38,6 +52,14 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Receita>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId && r.Data >= dataInicio && r.Data <= dataFim)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
         public async Task<List<Receita>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
@@ -47,10 +69,25 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Receita>> GetByMesAnoAsync(int mes, int ano, string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
         public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .ToListAsync();
+        }
+
+        public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
                 .ToListAsync();
         }
 
@@ -94,16 +131,39 @@ namespace YourMoney.Infrastructure.Repositories
             }
         }
 
+        public async Task RemoverAsync(Guid id, string usuarioId)
+        {
+            var receita = await GetByIdAsync(id, usuarioId);
+            if (receita != null)
+            {
+                _context.Receitas.Remove(receita);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
                 .SumAsync(r => r.Valor);
         }
+        public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano, string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .SumAsync(r => r.Valor);
+        }
         public async Task<List<Receita>> ListarAsync()
         {
             return await _context.Receitas
                 //.Include(d => d.Categoria)
+                .ToListAsync();
+        }
+
+        public async Task<List<Receita>> ListarAsync(string usuarioId)
+        {
+            return await _context.Receitas
+                .Where(r => r.UsuarioId == usuarioId)
                 .ToListAsync();
         }
     }

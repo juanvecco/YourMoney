@@ -30,6 +30,12 @@ namespace YourMoney.Domain.Entities
             //DataCriacao = DateTime.Now;
         }
 
+        public Receita(string descricao, Decimal valor, DateTime data, string usuarioId)
+            : this(descricao, valor, data)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         public void AtualizarDescricao(string descricao)
         {
             if (string.IsNullOrWhiteSpace(descricao))

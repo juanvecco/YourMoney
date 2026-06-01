@@ -1,5 +1,6 @@
 ﻿using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 using YourMoney.Domain.Repositories;
 using YourMoney.Infrastructure.Repositories;
 
@@ -10,6 +11,8 @@ namespace YourMoney.Api.Configuration
         public static IServiceCollection AddDependencyInjectionConfiguration(
             this IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IDespesaService, DespesaService>();
             services.AddScoped<IDespesaRepository, DespesaRepository>();
             services.AddScoped<ICategoriaService, CategoriaService>();

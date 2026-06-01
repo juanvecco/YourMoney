@@ -7,6 +7,7 @@ using YourMoney.Application.Services;
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/[controller]")]
     public class InvestimentoController : ControllerBase
     {
