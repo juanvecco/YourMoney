@@ -138,17 +138,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Categoria"
+                "$ref": "#/components/schemas/CategoriaDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Categoria"
+                "$ref": "#/components/schemas/CategoriaDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Categoria"
+                "$ref": "#/components/schemas/CategoriaDTO"
               }
             }
           }
@@ -172,6 +172,27 @@
     },
     "/api/Categoria/{id}": {
       "delete": {
+        "tags": [
+          "Categoria"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
         "tags": [
           "Categoria"
         ],
@@ -463,6 +484,37 @@
         "tags": [
           "Despesas"
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Despesas/parcelamento": {
+      "post": {
+        "tags": [
+          "Despesas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -850,6 +902,11 @@
             "format": "uuid",
             "readOnly": true
           },
+          "usuarioId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
           "descricao": {
             "type": "string",
             "nullable": true
@@ -898,6 +955,11 @@
             "format": "uuid",
             "readOnly": true
           },
+          "usuarioId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
           "descricao": {
             "type": "string",
             "nullable": true
@@ -932,6 +994,11 @@
             "format": "uuid",
             "readOnly": true
           },
+          "usuarioId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
           "descricao": {
             "type": "string",
             "nullable": true
@@ -957,6 +1024,30 @@
           },
           "categoria": {
             "$ref": "#/components/schemas/Categoria"
+          },
+          "parcelamentoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "numeroParcela": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "readOnly": true
+          },
+          "totalParcelas": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "readOnly": true
+          },
+          "valorTotalParcelamento": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -987,6 +1078,26 @@
           "idCategoria": {
             "type": "string",
             "format": "uuid"
+          },
+          "parcelamentoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "numeroParcela": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "totalParcelas": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "valorTotalParcelamento": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -997,6 +1108,11 @@
           "id": {
             "type": "string",
             "format": "uuid",
+            "readOnly": true
+          },
+          "usuarioId": {
+            "type": "string",
+            "nullable": true,
             "readOnly": true
           },
           "nome": {
@@ -1086,12 +1202,47 @@
         },
         "additionalProperties": false
       },
+      "ParcelamentoDespesaRequest": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataInicial": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantidadeParcelas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idContaFinanceira": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "idCategoria": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
       "Receita": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
+            "readOnly": true
+          },
+          "usuarioId": {
+            "type": "string",
+            "nullable": true,
             "readOnly": true
           },
           "descricao": {
@@ -1177,10 +1328,15 @@
       "UsuarioRegistro": {
         "required": [
           "email",
+          "nome",
           "senha"
         ],
         "type": "object",
         "properties": {
+          "nome": {
+            "minLength": 1,
+            "type": "string"
+          },
           "email": {
             "minLength": 1,
             "type": "string",

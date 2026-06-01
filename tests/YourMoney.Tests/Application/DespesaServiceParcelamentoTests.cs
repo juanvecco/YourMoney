@@ -56,7 +56,7 @@ namespace YourMoney.Tests.Application
         public static async Task MonthlyQueryKeepsRegularMetadataNull()
         {
             var repository = new InMemoryDespesaRepository();
-            await repository.AdicionarAsync(new Despesa("Mercado", 200m, new DateTime(2026, 6, 10), DespesaTestFixtures.ContaId, DespesaTestFixtures.CategoriaId));
+            await repository.AdicionarAsync(new Despesa("Mercado", 200m, new DateTime(2026, 6, 10), DespesaTestFixtures.ContaId, DespesaTestFixtures.CategoriaId, "test-user"));
             var service = DespesaTestFixtures.CreateService(repository);
 
             var june = await service.ObterPorMesAnoAsync(6, 2026);

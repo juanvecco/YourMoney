@@ -27,6 +27,8 @@
             }
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseCors();
 
@@ -35,6 +37,7 @@
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToFile("index.html");
             });
 
             return app;

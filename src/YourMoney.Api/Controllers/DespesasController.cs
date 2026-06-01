@@ -7,6 +7,7 @@ using YourMoney.Domain.Entities;
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class DespesasController : ControllerBase
     {
@@ -18,16 +19,38 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarDespesa([FromBody] Despesa despesa)
+        public async Task<IActionResult> AdicionarDespesa([FromBody] CriarDespesaRequest request)
         {
             try
             {
-                await _despesaService.AdicionarDespesaAsync(despesa);
-                return CreatedAtAction(nameof(AdicionarDespesa), new { id = despesa.Id }, despesa);
+                var response = await _despesaService.CriarDespesaAsync(request);
+                return CreatedAtAction(nameof(GetDespesaById), new { id = response.Id }, response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDespesaById(Guid id)
+        {
+            try
+            {
+                var despesa = await _despesaService.GetDespesaByIdAsync(id);
+                return Ok(despesa);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
         }
 

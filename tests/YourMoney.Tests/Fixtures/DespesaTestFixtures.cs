@@ -27,6 +27,25 @@ namespace YourMoney.Tests.Fixtures
             };
         }
 
+        public static CriarDespesaRequest CriarRequest(
+            string? descricao = "Mercado",
+            decimal valor = 120.35m,
+            DateTime? data = null,
+            DateTime? mesReferencia = null,
+            Guid? idContaFinanceira = null,
+            Guid? idCategoria = null)
+        {
+            return new CriarDespesaRequest
+            {
+                Descricao = descricao,
+                Valor = valor,
+                Data = data ?? new DateTime(2026, 5, 30),
+                MesReferencia = mesReferencia ?? new DateTime(2026, 5, 1),
+                IdContaFinanceira = idContaFinanceira ?? ContaId,
+                IdCategoria = idCategoria ?? CategoriaId
+            };
+        }
+
         public static DespesaService CreateService(
             InMemoryDespesaRepository? despesaRepository = null,
             bool contaExists = true,
@@ -35,8 +54,15 @@ namespace YourMoney.Tests.Fixtures
             return new DespesaService(
                 despesaRepository ?? new InMemoryDespesaRepository(),
                 new ContaFinanceiraRepositoryStub(contaExists),
-                new CategoriaRepositoryStub(categoriaExists));
+                new CategoriaRepositoryStub(categoriaExists),
+                new FakeCurrentUserService());
         }
+    }
+
+    public class FakeCurrentUserService : ICurrentUserService
+    {
+        public string UserId { get; set; } = "test-user";
+        public bool IsAuthenticated => true;
     }
 
     public class InMemoryDespesaRepository : IDespesaRepository
@@ -51,7 +77,15 @@ namespace YourMoney.Tests.Fixtures
             return Task.FromResult(despesa);
         }
 
+        public Task<Despesa> GetByIdAsync(Guid id, string usuarioId)
+        {
+            var despesa = Despesas.FirstOrDefault(d => d.Id == id && d.UsuarioId == usuarioId)
+                ?? throw new InvalidOperationException("Despesa não encontrada.");
+            return Task.FromResult(despesa);
+        }
+
         public Task<List<Despesa>> GetAllAsync() => Task.FromResult(Despesas.ToList());
+        public Task<List<Despesa>> GetAllAsync(string usuarioId) => Task.FromResult(Despesas.Where(d => d.UsuarioId == usuarioId).ToList());
 
         public Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim)
         {
@@ -60,10 +94,24 @@ namespace YourMoney.Tests.Fixtures
                 .ToList());
         }
 
+        public Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId)
+        {
+            return Task.FromResult(Despesas
+                .Where(d => d.UsuarioId == usuarioId && d.Data >= dataInicio && d.Data <= dataFim)
+                .ToList());
+        }
+
         public Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano)
         {
             return Task.FromResult(Despesas
                 .Where(d => d.Data.Month == mes && d.Data.Year == ano)
+                .ToList());
+        }
+
+        public Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano, string usuarioId)
+        {
+            return Task.FromResult(Despesas
+                .Where(d => d.UsuarioId == usuarioId && d.Data.Month == mes && d.Data.Year == ano)
                 .ToList());
         }
 
@@ -75,9 +123,22 @@ namespace YourMoney.Tests.Fixtures
                 .ToList());
         }
 
+        public Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId, Guid? idContaFinanceira)
+        {
+            return Task.FromResult(Despesas
+                .Where(d => d.UsuarioId == usuarioId && d.Data.Month == mes && d.Data.Year == ano)
+                .Where(d => idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira)
+                .ToList());
+        }
+
         public Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
         {
             return Task.FromResult(Despesas.Where(d => d.IdCategoria == categoriaId).ToList());
+        }
+
+        public Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId, string usuarioId)
+        {
+            return Task.FromResult(Despesas.Where(d => d.UsuarioId == usuarioId && d.IdCategoria == categoriaId).ToList());
         }
 
         public Task AdicionarAsync(Despesa despesa)
@@ -106,7 +167,14 @@ namespace YourMoney.Tests.Fixtures
             return Task.CompletedTask;
         }
 
+        public Task RemoverAsync(Guid id, string usuarioId)
+        {
+            Despesas.RemoveAll(d => d.Id == id && d.UsuarioId == usuarioId);
+            return Task.CompletedTask;
+        }
+
         public Task<List<Despesa>> ListarAsync() => Task.FromResult(Despesas.ToList());
+        public Task<List<Despesa>> ListarAsync(string usuarioId) => Task.FromResult(Despesas.Where(d => d.UsuarioId == usuarioId).ToList());
     }
 
     public class ContaFinanceiraRepositoryStub : IContaFinanceiraRepository
@@ -119,11 +187,15 @@ namespace YourMoney.Tests.Fixtures
         }
 
         public Task<ContaFinanceira> GetByIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<ContaFinanceira> GetByIdAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task AdicionarAsync(ContaFinanceira contaFinanceira) => throw new NotImplementedException();
         public Task AtualizarAsync(ContaFinanceira contaFinanceira) => throw new NotImplementedException();
         public Task RemoverAsync(Guid id) => throw new NotImplementedException();
+        public Task RemoverAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task<List<ContaFinanceira>> ListarAsync() => throw new NotImplementedException();
+        public Task<List<ContaFinanceira>> ListarAsync(string usuarioId) => throw new NotImplementedException();
         public Task<bool> ExisteAsync(Guid id) => Task.FromResult(_exists && id != Guid.Empty);
+        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(_exists && id != Guid.Empty && !string.IsNullOrWhiteSpace(usuarioId));
     }
 
     public class CategoriaRepositoryStub : ICategoriaRepository
@@ -136,19 +208,30 @@ namespace YourMoney.Tests.Fixtures
         }
 
         public Task<Categoria> GetByIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<Categoria> GetByIdAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task AdicionarAsync(Categoria categoria) => throw new NotImplementedException();
         public Task AtualizarAsync(Categoria categoria) => throw new NotImplementedException();
         public Task RemoverAsync(Guid id) => throw new NotImplementedException();
+        public Task RemoverAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task<List<Categoria>> GetAllAsync() => throw new NotImplementedException();
+        public Task<List<Categoria>> GetAllAsync(string usuarioId) => throw new NotImplementedException();
         public Task<bool> ExisteAsync(Guid id) => Task.FromResult(_exists && id != Guid.Empty);
+        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(_exists && id != Guid.Empty && !string.IsNullOrWhiteSpace(usuarioId));
     }
 
     public class FakeDespesaService : IDespesaService
     {
+        public CriarDespesaResponse CriarDespesaResponse { get; set; } = new();
+        public CriarDespesaRequest? LastCriarDespesaRequest { get; private set; }
         public ParcelamentoDespesaResponse ParcelamentoResponse { get; set; } = new();
         public List<DespesaDTO> QueryResponse { get; set; } = new();
 
         public Task AdicionarDespesaAsync(Despesa despesa) => Task.CompletedTask;
+        public Task<CriarDespesaResponse> CriarDespesaAsync(CriarDespesaRequest request)
+        {
+            LastCriarDespesaRequest = request;
+            return Task.FromResult(CriarDespesaResponse);
+        }
         public Task<Despesa> GetDespesaByIdAsync(Guid id) => throw new NotImplementedException();
         public Task RemoverDespesaAsync(Guid id) => Task.CompletedTask;
         public Task AtualizarAsync(Despesa despesa) => Task.CompletedTask;

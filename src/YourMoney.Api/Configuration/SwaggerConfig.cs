@@ -50,7 +50,7 @@ namespace YourMoney.Api.Configuration
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "YourMoney API v1");
-                c.RoutePrefix = string.Empty; // abre swagger na raiz
+                c.RoutePrefix = "swagger";
             });
 
             return app;

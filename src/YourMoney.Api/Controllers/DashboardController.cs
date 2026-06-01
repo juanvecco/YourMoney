@@ -4,6 +4,7 @@ using YourMoney.Application.Interfaces;
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase
     {

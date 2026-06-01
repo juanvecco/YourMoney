@@ -5,6 +5,9 @@ namespace YourMoney.Api.Models
     public class UsuarioRegistro
     {
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        public string Nome { get; set; }
+
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [EmailAddress(ErrorMessage = "O campo {0} está em formato inválido")]
         public string Email { get; set; }
 
@@ -59,6 +62,7 @@ namespace YourMoney.Api.Models
     public class UsuarioToken
     {
         public string Id { get; set; }
+        public string Nome { get; set; }
         public string Email { get; set; }
         public IEnumerable<UsuarioClaim> Claims { get; set; }
     }

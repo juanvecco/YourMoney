@@ -25,10 +25,25 @@ namespace YourMoney.Infrastructure.Repositories
             return despesa == null ? throw new InvalidOperationException("Despesa não encontrada.") : despesa;
         }
 
+        public async Task<Despesa> GetByIdAsync(Guid id, string usuarioId)
+        {
+            var despesa = await _context.Despesas
+                .FirstOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId);
+            return despesa == null ? throw new InvalidOperationException("Despesa não encontrada.") : despesa;
+        }
+
         public async Task<List<Despesa>> GetAllAsync()
         {
             return await _context.Despesas
                 //.Include(r => r.Categoria)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetAllAsync(string usuarioId)
+        {
+            return await _context.Despesas
+                .Where(r => r.UsuarioId == usuarioId)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -42,11 +57,27 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Despesa>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId)
+        {
+            return await _context.Despesas
+                .Where(r => r.UsuarioId == usuarioId && r.Data >= dataInicio && r.Data <= dataFim)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
         public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Despesas
                 //.Include(r => r.Categoria)
                 .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano, string usuarioId)
+        {
+            return await _context.Despesas
+                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -59,11 +90,28 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId, Guid? idContaFinanceira = null)
+        {
+            return await _context.Despesas
+                .Where(d => d.UsuarioId == usuarioId
+                            && d.Data.Month == mes && d.Data.Year == ano
+                            && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
+                .ToListAsync();
+        }
+
         public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Despesas
                 //.Include(r => r.Categoria)
                 //.Where(r => r.CategoriaId == categoriaId)
+                .OrderByDescending(r => r.Data)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId, string usuarioId)
+        {
+            return await _context.Despesas
+                .Where(r => r.UsuarioId == usuarioId && r.IdCategoria == categoriaId)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -105,10 +153,24 @@ namespace YourMoney.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task RemoverAsync(Guid id, string usuarioId)
+        {
+            var despesa = await GetByIdAsync(id, usuarioId);
+            _context.Despesas.Remove(despesa);
+            await _context.SaveChangesAsync();
+        }
         public async Task<List<Despesa>> ListarAsync()
         {
             return await _context.Despesas
                 //.Include(d => d.Categoria)
+                .ToListAsync();
+        }
+
+        public async Task<List<Despesa>> ListarAsync(string usuarioId)
+        {
+            return await _context.Despesas
+                .Where(d => d.UsuarioId == usuarioId)
                 .ToListAsync();
         }
     }

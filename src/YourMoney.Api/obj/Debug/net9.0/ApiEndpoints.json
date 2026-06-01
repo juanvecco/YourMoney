@@ -8,8 +8,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "categoria",
-        "Type": "YourMoney.Domain.Entities.Categoria",
+        "Name": "dto",
+        "Type": "YourMoney.Application.DTOs.CategoriaDTO",
         "IsRequired": true
       }
     ],
@@ -30,6 +30,22 @@
     "Method": "RemoverCategoria",
     "RelativePath": "api/Categoria/{id}",
     "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.CategoriaController",
+    "Method": "ObterCategoria",
+    "RelativePath": "api/Categoria/{id}",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -246,6 +262,22 @@
       {
         "Name": "dto",
         "Type": "YourMoney.Application.DTOs.DespesaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "YourMoney.Api.Controllers.DespesasController",
+    "Method": "CriarParcelamento",
+    "RelativePath": "api/Despesas/parcelamento",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "YourMoney.Application.DTOs.ParcelamentoDespesaRequest",
         "IsRequired": true
       }
     ],

@@ -50,6 +50,11 @@ namespace YourMoney.Api.Controllers
                 return CustomResponse();
             }
 
+            if (!string.IsNullOrWhiteSpace(usuarioRegistro.Nome))
+            {
+                await _userManager.AddClaimAsync(user, new Claim("name", usuarioRegistro.Nome.Trim()));
+            }
+
             var token = await GerarJwt(user.Email);
             return CustomResponse(token);
         }
@@ -152,6 +157,10 @@ namespace YourMoney.Api.Controllers
 
             claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            if (!claims.Any(c => c.Type == "name") && !string.IsNullOrWhiteSpace(user.UserName))
+            {
+                claims.Add(new Claim("name", user.UserName));
+            }
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
             foreach (var userRole in userRoles)
@@ -189,6 +198,7 @@ namespace YourMoney.Api.Controllers
                 UsuarioToken = new UsuarioToken
                 {
                     Id = user.Id,
+                    Nome = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? user.UserName,
                     Email = user.Email,
                     Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
                 }

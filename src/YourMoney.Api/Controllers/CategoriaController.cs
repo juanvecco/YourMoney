@@ -6,6 +6,7 @@ using YourMoney.Domain.Entities;
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/[controller]")]
     public class CategoriaController : ControllerBase
     {

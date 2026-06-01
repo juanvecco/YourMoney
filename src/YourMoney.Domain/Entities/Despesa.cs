@@ -38,6 +38,12 @@ namespace YourMoney.Domain.Entities
             //DataCriacao = DateTime.Now;
         }
 
+        public Despesa(string descricao, Decimal valor, DateTime data, Guid idContaFinanceira, Guid idCategoria, string usuarioId)
+            : this(descricao, valor, data, idContaFinanceira, idCategoria)
+        {
+            DefinirUsuario(usuarioId);
+        }
+
         public void AtualizarDescricao(string descricao)
         {
             if (string.IsNullOrWhiteSpace(descricao))
