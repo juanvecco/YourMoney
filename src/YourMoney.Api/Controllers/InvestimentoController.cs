@@ -23,13 +23,10 @@ namespace YourMoney.Api.Controllers
             try
             {
                 var response = await _investimentoService.CriarInvestimentoAsync(request);
+                var referencia = response.MesReferencia!.Value;
                 return CreatedAtAction(
                     nameof(ObterPorReferencia),
-                    new
-                    {
-                        mes = response.DataInvestimento.Month,
-                        ano = response.DataInvestimento.Year
-                    },
+                    new { mes = referencia.Month, ano = referencia.Year },
                     response);
             }
             catch (ArgumentException ex)
@@ -38,11 +35,7 @@ namespace YourMoney.Api.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    title = "Não foi possível salvar o investimento.",
-                    status = StatusCodes.Status500InternalServerError
-                });
+                return FalhaInesperada();
             }
         }
 
@@ -56,50 +49,52 @@ namespace YourMoney.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
 
         [HttpGet]
         public async Task<IActionResult> ListarInvestimentos()
         {
-            try
-            {
-                return Ok(await _investimentoService.ListarAsync());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(await _investimentoService.ListarAsync());
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> AtualizarInvestimento(Guid id, [FromBody] InvestimentoDto dto)
+        public async Task<IActionResult> AtualizarInvestimento(
+            Guid id,
+            [FromBody] AtualizarInvestimentoRequest request)
         {
-            var investimento = await _investimentoService.GetInvestimentoByIdAsync(id);
-
-            if (!string.IsNullOrWhiteSpace(dto.Nome))
-                investimento.AtualizarNome(dto.Nome);
-
-            investimento.AtualizarDescricao(dto.Descricao ?? string.Empty);
-            investimento.AtualizarValorAtual(dto.ValorAtual);
-            investimento.AtualizarData(dto.DataInvestimento);
-
-            if (!string.IsNullOrWhiteSpace(dto.Tipo))
-                investimento.AtualizarTipo(dto.Tipo);
-            if (dto.Quantidade > 0)
-                investimento.AtualizarQuantidade(dto.Quantidade);
-            if (dto.PrecoMedio > 0)
-                investimento.AtualizarPrecoMedio(dto.PrecoMedio);
-
-            await _investimentoService.AtualizarAsync(investimento);
-            return NoContent();
+            try
+            {
+                return Ok(await _investimentoService.AtualizarInvestimentoAsync(id, request));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return FalhaInesperada();
+            }
         }
 
         [HttpGet("por-referencia")]
         public async Task<IActionResult> ObterPorReferencia([FromQuery] int mes, [FromQuery] int ano)
         {
             return Ok(await _investimentoService.ObterPorMesAnoAsync(mes, ano));
+        }
+
+        private ObjectResult FalhaInesperada()
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                title = "Não foi possível salvar o investimento.",
+                status = StatusCodes.Status500InternalServerError
+            });
         }
     }
 }

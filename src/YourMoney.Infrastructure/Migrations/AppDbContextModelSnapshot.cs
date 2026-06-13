@@ -134,6 +134,10 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<DateTime?>("DataResgate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("MesReferencia")
+                        .HasColumnType("date")
+                        .HasColumnName("mesReferencia");
+
                     b.Property<string>("Descricao")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -159,6 +163,9 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("DataInvestimento")
                         .HasDatabaseName("IX_Investimento_Data");
+
+                    b.HasIndex("MesReferencia")
+                        .HasDatabaseName("IX_Investimento_MesReferencia");
 
                     b.ToTable("tbInvestimento", (string)null);
                 });

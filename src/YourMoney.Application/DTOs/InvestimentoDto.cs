@@ -10,6 +10,7 @@ namespace YourMoney.Application.DTOs
         public decimal PrecoMedio { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
+        public DateTime? MesReferencia { get; set; }
         public DateTime? DataResgate { get; set; }
         public bool Ativo { get; set; }
     }
@@ -23,9 +24,14 @@ namespace YourMoney.Application.DTOs
         public decimal PrecoMedio { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
+        public DateTime MesReferencia { get; set; }
     }
 
-    public class CriarInvestimentoResponse
+    public class AtualizarInvestimentoRequest : CriarInvestimentoRequest
+    {
+    }
+
+    public class InvestimentoResponse
     {
         public Guid Id { get; set; }
         public string Nome { get; set; } = string.Empty;
@@ -35,7 +41,12 @@ namespace YourMoney.Application.DTOs
         public decimal PrecoMedio { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
+        public DateTime? MesReferencia { get; set; }
         public DateTime? DataResgate { get; set; }
         public bool Ativo { get; set; }
+    }
+
+    public class CriarInvestimentoResponse : InvestimentoResponse
+    {
     }
 }
