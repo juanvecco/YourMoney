@@ -23,17 +23,10 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(r => r.Data)
                 .IsRequired();
 
-            //builder.Property(r => r.Recebida)
-            //    .IsRequired()
-            //    .HasDefaultValue(false);
-
-            //builder.Property(r => r.DataRecebimento);
-
-            //builder.Property(r => r.DataCriacao)
-            //    .IsRequired();
-
-            //builder.HasIndex(r => r.Data)
-            //    .HasDatabaseName("IX_Receita_Data");
+            builder.Property(r => r.MesReferencia)
+                .HasColumnName("mesReferencia")
+                .HasColumnType("date")
+                .IsRequired(false);
         }
     }
 }

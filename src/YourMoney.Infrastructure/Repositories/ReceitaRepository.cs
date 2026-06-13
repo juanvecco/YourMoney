@@ -63,8 +63,10 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
-                //.Include(r => r.Categoria)
-                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => (r.MesReferencia.HasValue
+                    && r.MesReferencia.Value.Month == mes
+                    && r.MesReferencia.Value.Year == ano)
+                    || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano))
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -72,7 +74,11 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> GetByMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Receitas
-                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => r.UsuarioId == usuarioId
+                    && ((r.MesReferencia.HasValue
+                        && r.MesReferencia.Value.Month == mes
+                        && r.MesReferencia.Value.Year == ano)
+                        || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano)))
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -80,14 +86,21 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
-                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => (r.MesReferencia.HasValue
+                    && r.MesReferencia.Value.Month == mes
+                    && r.MesReferencia.Value.Year == ano)
+                    || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano))
                 .ToListAsync();
         }
 
         public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Receitas
-                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => r.UsuarioId == usuarioId
+                    && ((r.MesReferencia.HasValue
+                        && r.MesReferencia.Value.Month == mes
+                        && r.MesReferencia.Value.Year == ano)
+                        || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano)))
                 .ToListAsync();
         }
 
@@ -144,13 +157,20 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano)
         {
             return await _context.Receitas
-                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => (r.MesReferencia.HasValue
+                    && r.MesReferencia.Value.Month == mes
+                    && r.MesReferencia.Value.Year == ano)
+                    || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano))
                 .SumAsync(r => r.Valor);
         }
         public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Receitas
-                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => r.UsuarioId == usuarioId
+                    && ((r.MesReferencia.HasValue
+                        && r.MesReferencia.Value.Month == mes
+                        && r.MesReferencia.Value.Year == ano)
+                        || (!r.MesReferencia.HasValue && r.Data.Month == mes && r.Data.Year == ano)))
                 .SumAsync(r => r.Valor);
         }
         public async Task<List<Receita>> ListarAsync()
