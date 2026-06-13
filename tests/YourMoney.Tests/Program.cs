@@ -65,6 +65,10 @@ var tests = new (string Name, Func<Task> Run)[]
     ("financial queries use authenticated user after login", FinancialDataAfterLoginTests.FinancialQueriesUseAuthenticatedUserForPeriodData),
     ("financial reads do not mutate ownership", FinancialDataAfterLoginTests.FinancialServicesDoNotMutateExistingOwnershipForReads),
     ("financial data after login controllers stay authorized", FinancialDataAfterLoginAuthorizationTests.FinancialControllersStayProtectedAfterLoginFix),
+    ("financial controllers stay protected for local frontend origins", FinancialDataAfterLoginAuthorizationTests.FinancialControllersStayProtectedForLocalFrontendOrigins),
+    ("startup script opens hosted dashboard as primary frontend url", StaticApplicationHostingTests.StartupScriptOpensHostedDashboardAsPrimaryFrontendUrl),
+    ("startup script prints same frontend url it opens", StaticApplicationHostingTests.StartupScriptPrintsTheSameFrontendUrlItOpens),
+    ("cors allows local development origins without credential sharing", StaticApplicationHostingTests.CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing),
     ("api serves angular spa with route fallback", StaticApplicationHostingTests.ApiConfigurationServesAngularSpaWithRouteFallback),
     ("published entry point is angular app with bearer interceptor", PublishedAngularAppTests.PublishedEntryPointIsAngularAppWithBearerInterceptor)
 };
