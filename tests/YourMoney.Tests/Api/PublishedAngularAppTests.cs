@@ -24,6 +24,7 @@ namespace YourMoney.Tests.Api
             TestAssert.True(mainBundle.Contains("Authorization", StringComparison.Ordinal), "Published bundle should include Authorization header logic");
             TestAssert.True(mainBundle.Contains("Bearer", StringComparison.Ordinal), "Published bundle should attach bearer tokens");
             TestAssert.True(mainBundle.Contains("access_token", StringComparison.Ordinal), "Published bundle should read the stored access token");
+            TestAssert.True(mainBundle.Contains("https://localhost:5001/api", StringComparison.Ordinal), "Published bundle should call the local API base URL used by the hosted frontend");
             TestAssert.True(!File.Exists(Path.Combine(wwwrootPath, "script.json")), "Legacy static script should not be published");
             TestAssert.True(!File.Exists(Path.Combine(wwwrootPath, "styles.css")), "Legacy static stylesheet should not be published");
             TestAssert.True(!indexHtml.Contains("fetch('/api/transactions')", StringComparison.Ordinal), "Legacy unauthenticated transaction fetch should not be published");
