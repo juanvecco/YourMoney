@@ -34,6 +34,11 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(i => i.DataInvestimento)
                 .IsRequired();
 
+            builder.Property(i => i.MesReferencia)
+                .HasColumnName("mesReferencia")
+                .HasColumnType("date")
+                .IsRequired(false);
+
             builder.Property(i => i.DataResgate);
 
             builder.Property(i => i.Ativo)
@@ -42,6 +47,9 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.HasIndex(i => i.DataInvestimento)
                 .HasDatabaseName("IX_Investimento_Data");
+
+            builder.HasIndex(i => i.MesReferencia)
+                .HasDatabaseName("IX_Investimento_MesReferencia");
         }
     }
 }

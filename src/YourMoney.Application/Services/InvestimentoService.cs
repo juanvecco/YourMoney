@@ -29,7 +29,7 @@ namespace YourMoney.Application.Services
 
         public async Task<CriarInvestimentoResponse> CriarInvestimentoAsync(CriarInvestimentoRequest request)
         {
-            ValidarCriacao(request);
+            ValidarEscrita(request);
 
             var investimento = new Investimento(
                 request.Nome!,
@@ -39,10 +39,34 @@ namespace YourMoney.Application.Services
                 NormalizarDecimal(request.PrecoMedio),
                 NormalizarDecimal(request.ValorAtual),
                 request.DataInvestimento.Date,
+                request.MesReferencia,
                 _currentUserService.UserId);
 
             await _investimentoRepository.AdicionarAsync(investimento);
             return MapearCriacao(investimento);
+        }
+
+        public async Task<InvestimentoResponse> AtualizarInvestimentoAsync(
+            Guid id,
+            AtualizarInvestimentoRequest request)
+        {
+            ValidarEscrita(request);
+
+            var investimento = await _investimentoRepository.GetByIdAsync(id, _currentUserService.UserId);
+            if (investimento == null)
+                throw new InvalidOperationException("Investimento não encontrado.");
+
+            investimento.AtualizarNome(request.Nome!);
+            investimento.AtualizarDescricao(request.Descricao ?? string.Empty);
+            investimento.AtualizarTipo(request.Tipo!);
+            investimento.AtualizarQuantidade(NormalizarDecimal(request.Quantidade));
+            investimento.AtualizarPrecoMedio(NormalizarDecimal(request.PrecoMedio));
+            investimento.AtualizarValorAtual(NormalizarDecimal(request.ValorAtual));
+            investimento.AtualizarData(request.DataInvestimento);
+            investimento.AtualizarMesReferencia(request.MesReferencia);
+
+            await _investimentoRepository.AtualizarAsync(investimento);
+            return Mapear(investimento);
         }
 
         public async Task<Investimento> GetInvestimentoByIdAsync(Guid id)
@@ -73,20 +97,19 @@ namespace YourMoney.Application.Services
             await _investimentoRepository.AtualizarAsync(investimento);
         }
 
-        public Task<List<Investimento>> ListarAsync()
+        public async Task<List<InvestimentoResponse>> ListarAsync()
         {
-            return _investimentoRepository.ListarAsync(_currentUserService.UserId);
+            var investimentos = await _investimentoRepository.ListarAsync(_currentUserService.UserId);
+            return investimentos.Select(Mapear).ToList();
         }
 
-        public async Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano)
+        public async Task<List<InvestimentoResponse>> ObterPorMesAnoAsync(int mes, int ano)
         {
             var investimentos = await _investimentoRepository.ObterPorMesAnoAsync(mes, ano, _currentUserService.UserId);
-            return investimentos
-                .Where(i => i.DataInvestimento.Month == mes && i.DataInvestimento.Year == ano)
-                .ToList();
+            return investimentos.Select(Mapear).ToList();
         }
 
-        private static void ValidarCriacao(CriarInvestimentoRequest request)
+        private static void ValidarEscrita(CriarInvestimentoRequest request)
         {
             if (request == null)
                 throw new ArgumentException("Dados do investimento são obrigatórios.");
@@ -108,6 +131,8 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Valor atual deve ser maior que zero.");
             if (request.DataInvestimento == default)
                 throw new ArgumentException("Data do investimento é obrigatória.");
+            if (request.MesReferencia == default)
+                throw new ArgumentException("Mês de referência é obrigatório.");
         }
 
         private static decimal NormalizarDecimal(decimal valor)
@@ -117,19 +142,37 @@ namespace YourMoney.Application.Services
 
         private static CriarInvestimentoResponse MapearCriacao(Investimento investimento)
         {
-            return new CriarInvestimentoResponse
-            {
-                Id = investimento.Id,
-                Nome = investimento.Nome,
-                Descricao = investimento.Descricao,
-                Tipo = investimento.Tipo,
-                Quantidade = investimento.Quantidade,
-                PrecoMedio = investimento.PrecoMedio,
-                ValorAtual = investimento.ValorAtual,
-                DataInvestimento = investimento.DataInvestimento,
-                DataResgate = investimento.DataResgate,
-                Ativo = investimento.Ativo
-            };
+            var response = new CriarInvestimentoResponse();
+            PreencherResponse(response, investimento);
+            return response;
+        }
+
+        private static InvestimentoResponse Mapear(Investimento investimento)
+        {
+            var response = new InvestimentoResponse();
+            PreencherResponse(response, investimento);
+            response.MesReferencia ??= new DateTime(
+                investimento.DataInvestimento.Year,
+                investimento.DataInvestimento.Month,
+                1);
+            return response;
+        }
+
+        private static void PreencherResponse(
+            InvestimentoResponse response,
+            Investimento investimento)
+        {
+            response.Id = investimento.Id;
+            response.Nome = investimento.Nome;
+            response.Descricao = investimento.Descricao;
+            response.Tipo = investimento.Tipo;
+            response.Quantidade = investimento.Quantidade;
+            response.PrecoMedio = investimento.PrecoMedio;
+            response.ValorAtual = investimento.ValorAtual;
+            response.DataInvestimento = investimento.DataInvestimento;
+            response.MesReferencia = investimento.MesReferencia;
+            response.DataResgate = investimento.DataResgate;
+            response.Ativo = investimento.Ativo;
         }
     }
 }

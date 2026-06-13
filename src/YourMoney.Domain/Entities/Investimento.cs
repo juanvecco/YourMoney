@@ -9,6 +9,7 @@ namespace YourMoney.Domain.Entities
         public decimal PrecoMedio { get; private set; }
         public decimal ValorAtual { get; private set; }
         public DateTime DataInvestimento { get; private set; }
+        public DateTime? MesReferencia { get; private set; }
         public DateTime? DataResgate { get; private set; }
         public bool Ativo { get; private set; }
 
@@ -21,7 +22,8 @@ namespace YourMoney.Domain.Entities
             decimal quantidade,
             decimal precoMedio,
             decimal valorAtual,
-            DateTime dataInvestimento)
+            DateTime dataInvestimento,
+            DateTime mesReferencia)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
@@ -31,6 +33,7 @@ namespace YourMoney.Domain.Entities
             AtualizarPrecoMedio(precoMedio);
             AtualizarValorAtual(valorAtual);
             AtualizarData(dataInvestimento);
+            AtualizarMesReferencia(mesReferencia);
             Ativo = true;
             DataResgate = null;
         }
@@ -43,8 +46,9 @@ namespace YourMoney.Domain.Entities
             decimal precoMedio,
             decimal valorAtual,
             DateTime dataInvestimento,
+            DateTime mesReferencia,
             string usuarioId)
-            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento)
+            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia)
         {
             DefinirUsuario(usuarioId);
         }
@@ -101,6 +105,14 @@ namespace YourMoney.Domain.Entities
             if (data == default)
                 throw new ArgumentException("Data do investimento é obrigatória.");
             DataInvestimento = data.Date;
+        }
+
+        public void AtualizarMesReferencia(DateTime mesReferencia)
+        {
+            if (mesReferencia == default)
+                throw new ArgumentException("Mês de referência é obrigatório.");
+
+            MesReferencia = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
         }
 
         public void Resgatar()
