@@ -1,5 +1,6 @@
 using YourMoney.Tests.Api;
 using YourMoney.Tests.Application;
+using YourMoney.Tests.Domain;
 using YourMoney.Tests.Infrastructure;
 
 var tests = new (string Name, Func<Task> Run)[]
@@ -74,9 +75,21 @@ var tests = new (string Name, Func<Task> Run)[]
     ("financial controllers stay protected for local frontend origins", FinancialDataAfterLoginAuthorizationTests.FinancialControllersStayProtectedForLocalFrontendOrigins),
     ("startup script opens hosted dashboard as primary frontend url", StaticApplicationHostingTests.StartupScriptOpensHostedDashboardAsPrimaryFrontendUrl),
     ("startup script prints same frontend url it opens", StaticApplicationHostingTests.StartupScriptPrintsTheSameFrontendUrlItOpens),
+    ("startup script publishes angular build before opening hosted frontend", StaticApplicationHostingTests.StartupScriptPublishesAngularBuildBeforeOpeningHostedFrontend),
     ("cors allows local development origins without credential sharing", StaticApplicationHostingTests.CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing),
     ("api serves angular spa with route fallback", StaticApplicationHostingTests.ApiConfigurationServesAngularSpaWithRouteFallback),
     ("published entry point is angular app with bearer interceptor", PublishedAngularAppTests.PublishedEntryPointIsAngularAppWithBearerInterceptor)
+    ,
+    ("monthly goal entity normalizes and owns data", MetaMensalTests.CreatesNormalizedOwnedMeta),
+    ("monthly goal entity rejects invalid data", MetaMensalTests.RejectsInvalidData),
+    ("monthly goal service creates edits deletes and calculates", MetaMensalServiceTests.CreatesEditsDeletesAndCalculatesMeta),
+    ("monthly goal service calculates summary", MetaMensalServiceTests.CalculatesMonthlySummary),
+    ("monthly goal service shows exceeded planning alerts", MetaMensalServiceTests.ShowsAlertsForExceededPlanningAndZeroRevenue),
+    ("metas controller returns summary contract", MetasControllerTests.GetResumoReturnsTypedContract),
+    ("metas controller returns command contracts", MetasControllerTests.PostPutDeleteReturnExpectedContracts),
+    ("metas controller returns validation and not found contracts", MetasControllerTests.ReturnsValidationAndNotFoundContracts),
+    ("metas controller requires authorization", MetasControllerTests.RequiresAuthorization),
+    ("monthly goal repository and configuration stay owner scoped", MetaMensalRepositoryTests.RepositoryAndConfigurationStayOwnerScoped)
 };
 
 var failures = new List<string>();

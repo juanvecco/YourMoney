@@ -37,6 +37,25 @@ namespace YourMoney.Tests.Api
             return Task.CompletedTask;
         }
 
+        public static Task StartupScriptPublishesAngularBuildBeforeOpeningHostedFrontend()
+        {
+            var scriptPath = Path.Combine(FindRepositoryRoot(), "abrir-yourmoney.ps1");
+            var source = File.ReadAllText(scriptPath);
+
+            var publishCallIndex = source.IndexOf("Publish-AngularToApi", StringComparison.Ordinal);
+            var startApiCallIndex = source.IndexOf("Start-Api", publishCallIndex + 1, StringComparison.Ordinal);
+            var openFrontendIndex = source.IndexOf("Start-Process \"https://localhost:5001/dashboard\"", StringComparison.Ordinal);
+
+            TestAssert.True(source.Contains("& npm.cmd run build", StringComparison.Ordinal), "Startup script should build the Angular app before opening the hosted frontend");
+            TestAssert.True(source.Contains("dist\\yourmoney-app\\browser", StringComparison.Ordinal), "Startup script should use the Angular browser build output");
+            TestAssert.True(source.Contains("src\\YourMoney.Api\\wwwroot", StringComparison.Ordinal), "Startup script should publish the Angular build into the API wwwroot");
+            TestAssert.True(source.Contains("Copy-Item", StringComparison.Ordinal), "Startup script should copy the fresh Angular build into the hosted static files");
+            TestAssert.True(publishCallIndex >= 0 && publishCallIndex < startApiCallIndex, "Startup script should publish the Angular build before starting the API");
+            TestAssert.True(startApiCallIndex >= 0 && startApiCallIndex < openFrontendIndex, "Startup script should start the API before opening the hosted frontend");
+
+            return Task.CompletedTask;
+        }
+
         public static Task CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing()
         {
             var apiConfigPath = Path.Combine(

@@ -22,6 +22,8 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IInvestimentoService, InvestimentoService>();
             services.AddScoped<IInvestimentoRepository, InvestimentoRepository>();
             services.AddScoped<IMetaRepository, MetaRepository>();
+            services.AddScoped<IMetaMensalService, MetaMensalService>();
+            services.AddScoped<IMetaMensalRepository, MetaMensalRepository>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
             services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
