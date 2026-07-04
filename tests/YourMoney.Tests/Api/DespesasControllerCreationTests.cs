@@ -32,6 +32,33 @@ namespace YourMoney.Tests.Api
             TestAssert.True(service.LastCriarDespesaRequest != null, "POST despesa should pass typed request to service");
         }
 
+        public static async Task ListDespesaReturnsReimbursementAwareContract()
+        {
+            var response = new DespesaDTO
+            {
+                Id = Guid.NewGuid(),
+                Descricao = "Compra para terceiro",
+                Valor = 150m,
+                Data = new DateTime(2026, 7, 4),
+                IdContaFinanceira = DespesaTestFixtures.ContaId,
+                IdCategoria = DespesaTestFixtures.CategoriaId,
+                ValorReembolsado = 150m,
+                ValorLiquido = 0m,
+                PossuiReembolso = true
+            };
+            var service = new FakeDespesaService { QueryResponse = new List<DespesaDTO> { response } };
+
+            var result = await new DespesasController(service).ObterPorReferencia(7, 2026, null);
+
+            var ok = result as OkObjectResult;
+            var body = ok?.Value as List<DespesaDTO>;
+            TestAssert.True(body != null && body.Count == 1, "GET despesas should return typed list");
+            TestAssert.Equal(150m, body![0].Valor, "Response should keep gross expense");
+            TestAssert.Equal(150m, body[0].ValorReembolsado, "Response should expose reimbursed total");
+            TestAssert.Equal(0m, body[0].ValorLiquido, "Response should expose liquid expense");
+            TestAssert.True(body[0].PossuiReembolso, "Response should flag reimbursement");
+        }
+
         public static Task PostDespesaEndpointRequiresAuthorization()
         {
             var controllerHasAuthorize = typeof(DespesasController)

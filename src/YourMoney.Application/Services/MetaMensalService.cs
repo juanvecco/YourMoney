@@ -39,7 +39,7 @@ namespace YourMoney.Application.Services
             var meta = new MetaMensal(request.Nome!, request.PercentualReceita, referencia, usuarioId);
             await _metaMensalRepository.AdicionarAsync(meta);
 
-            var receitaTotal = await _receitaRepository.GetTotalByMesAnoAsync(
+            var receitaTotal = await _receitaRepository.GetTotalElegivelMetasByMesAnoAsync(
                 referencia.Month,
                 referencia.Year,
                 usuarioId);
@@ -64,7 +64,7 @@ namespace YourMoney.Application.Services
             meta.Atualizar(request.Nome!, request.PercentualReceita);
             await _metaMensalRepository.AtualizarAsync(meta);
 
-            var receitaTotal = await _receitaRepository.GetTotalByMesAnoAsync(
+            var receitaTotal = await _receitaRepository.GetTotalElegivelMetasByMesAnoAsync(
                 meta.MesReferencia.Month,
                 meta.MesReferencia.Year,
                 usuarioId);
@@ -88,8 +88,12 @@ namespace YourMoney.Application.Services
         private async Task<MetasMensaisResumoDTO> MontarResumoAsync(DateTime referencia)
         {
             var usuarioId = _currentUserService.UserId;
-            var receitaTotal = decimal.Round(
-                await _receitaRepository.GetTotalByMesAnoAsync(referencia.Month, referencia.Year, usuarioId),
+            var receitaElegivel = decimal.Round(
+                await _receitaRepository.GetTotalElegivelMetasByMesAnoAsync(referencia.Month, referencia.Year, usuarioId),
+                2,
+                MidpointRounding.AwayFromZero);
+            var receitaBruta = decimal.Round(
+                await _receitaRepository.GetTotalBrutoByMesAnoAsync(referencia.Month, referencia.Year, usuarioId),
                 2,
                 MidpointRounding.AwayFromZero);
             var despesas = await _despesaRepository.ObterPorMesAnoAsync(
@@ -97,22 +101,33 @@ namespace YourMoney.Application.Services
                 referencia.Year,
                 usuarioId,
                 null);
-            var despesaTotal = decimal.Round(despesas.Sum(despesa => despesa.Valor), 2, MidpointRounding.AwayFromZero);
+            var reembolsos = await _receitaRepository.GetTotaisReembolsadosPorDespesasAsync(
+                despesas.Select(d => d.Id).ToList(),
+                usuarioId);
+            var despesaTotalBruta = decimal.Round(despesas.Sum(despesa => despesa.Valor), 2, MidpointRounding.AwayFromZero);
+            var despesaTotalReembolsada = decimal.Round(despesas.Sum(despesa =>
+                Math.Min(despesa.Valor, reembolsos.TryGetValue(despesa.Id, out var valor) ? valor : 0m)), 2, MidpointRounding.AwayFromZero);
+            var despesaTotal = decimal.Round(despesaTotalBruta - despesaTotalReembolsada, 2, MidpointRounding.AwayFromZero);
             var metas = await _metaMensalRepository.ObterPorMesAnoAsync(referencia.Month, referencia.Year, usuarioId);
-            var metasDto = metas.Select(meta => MapearMeta(meta, receitaTotal)).ToList();
+            var metasDto = metas.Select(meta => MapearMeta(meta, receitaElegivel)).ToList();
             var percentualTotal = metas.Sum(meta => meta.PercentualReceita);
             var valorReservado = decimal.Round(metasDto.Sum(meta => meta.ValorCalculado), 2, MidpointRounding.AwayFromZero);
             var percentualRestante = 100m - percentualTotal;
-            var valorRestanteAntesDespesas = decimal.Round(receitaTotal - valorReservado, 2, MidpointRounding.AwayFromZero);
-            var saldoFinal = decimal.Round(receitaTotal - valorReservado - despesaTotal, 2, MidpointRounding.AwayFromZero);
+            var valorRestanteAntesDespesas = decimal.Round(receitaElegivel - valorReservado, 2, MidpointRounding.AwayFromZero);
+            var saldoFinal = decimal.Round(receitaElegivel - valorReservado - despesaTotal, 2, MidpointRounding.AwayFromZero);
             var valorFaltante = saldoFinal < 0 ? Math.Abs(saldoFinal) : 0m;
-            var alertas = CriarAlertas(receitaTotal, percentualTotal, saldoFinal);
+            var alertas = CriarAlertas(receitaElegivel, percentualTotal, saldoFinal);
 
             return new MetasMensaisResumoDTO
             {
                 MesReferencia = referencia,
-                ReceitaTotal = receitaTotal,
+                ReceitaTotal = receitaElegivel,
+                ReceitaTotalBruta = receitaBruta,
+                ReceitaElegivelMetas = receitaElegivel,
+                ReceitaExcluidaMetas = decimal.Round(receitaBruta - receitaElegivel, 2, MidpointRounding.AwayFromZero),
                 DespesaTotal = despesaTotal,
+                DespesaTotalBruta = despesaTotalBruta,
+                DespesaTotalReembolsada = despesaTotalReembolsada,
                 Metas = metasDto,
                 PercentualTotalComprometido = percentualTotal,
                 ValorTotalReservado = valorReservado,

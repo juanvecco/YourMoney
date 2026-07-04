@@ -43,6 +43,7 @@ namespace YourMoney.Tests.Api
             var source = File.ReadAllText(scriptPath);
 
             var publishCallIndex = source.IndexOf("Publish-AngularToApi", StringComparison.Ordinal);
+            var updateDatabaseCallIndex = source.IndexOf("Update-Database", publishCallIndex + 1, StringComparison.Ordinal);
             var startApiCallIndex = source.IndexOf("Start-Api", publishCallIndex + 1, StringComparison.Ordinal);
             var openFrontendIndex = source.IndexOf("Start-Process \"https://localhost:5001/dashboard\"", StringComparison.Ordinal);
 
@@ -50,8 +51,25 @@ namespace YourMoney.Tests.Api
             TestAssert.True(source.Contains("dist\\yourmoney-app\\browser", StringComparison.Ordinal), "Startup script should use the Angular browser build output");
             TestAssert.True(source.Contains("src\\YourMoney.Api\\wwwroot", StringComparison.Ordinal), "Startup script should publish the Angular build into the API wwwroot");
             TestAssert.True(source.Contains("Copy-Item", StringComparison.Ordinal), "Startup script should copy the fresh Angular build into the hosted static files");
+            TestAssert.True(source.Contains("dotnet ef database update", StringComparison.Ordinal), "Startup script should apply pending EF migrations before opening the hosted frontend");
             TestAssert.True(publishCallIndex >= 0 && publishCallIndex < startApiCallIndex, "Startup script should publish the Angular build before starting the API");
+            TestAssert.True(updateDatabaseCallIndex >= 0 && publishCallIndex < updateDatabaseCallIndex, "Startup script should apply database migrations after publishing the Angular build");
+            TestAssert.True(updateDatabaseCallIndex >= 0 && updateDatabaseCallIndex < startApiCallIndex, "Startup script should apply database migrations before starting or reusing the API");
             TestAssert.True(startApiCallIndex >= 0 && startApiCallIndex < openFrontendIndex, "Startup script should start the API before opening the hosted frontend");
+
+            return Task.CompletedTask;
+        }
+
+        public static Task StartupCmdDelegatesToPowerShellScript()
+        {
+            var commandPath = Path.Combine(FindRepositoryRoot(), "abrir-yourmoney.cmd");
+            var source = File.ReadAllText(commandPath);
+
+            TestAssert.True(source.Contains("abrir-yourmoney.ps1", StringComparison.Ordinal), "CMD startup should delegate to the PowerShell startup script");
+            TestAssert.True(source.Contains("cd /d \"%SCRIPT_DIR%\"", StringComparison.Ordinal), "CMD startup should execute from the repository root even when launched elsewhere");
+            TestAssert.True(source.Contains("pwsh.exe", StringComparison.Ordinal), "CMD startup should prefer PowerShell 7 when available");
+            TestAssert.True(source.Contains("powershell.exe", StringComparison.Ordinal), "CMD startup should fall back to Windows PowerShell");
+            TestAssert.True(source.Contains("exit /b %EXIT_CODE%", StringComparison.Ordinal), "CMD startup should preserve the PowerShell script exit code");
 
             return Task.CompletedTask;
         }

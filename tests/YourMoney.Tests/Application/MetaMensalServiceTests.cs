@@ -1,4 +1,5 @@
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 using YourMoney.Tests.Fixtures;
 
 namespace YourMoney.Tests.Application
@@ -57,6 +58,32 @@ namespace YourMoney.Tests.Application
             TestAssert.Equal(6500m, resumo.ValorRestanteAntesDespesas, "Remaining before expenses should subtract goals");
             TestAssert.Equal(4000m, resumo.SaldoFinal, "Final balance should subtract goals and expenses");
             TestAssert.Equal("disponivel", resumo.Status, "Positive balance should be available");
+        }
+
+        public static async Task CalculatesGoalsFromEligibleRevenue()
+        {
+            var metaRepository = new InMemoryMetaMensalRepository();
+            var receitaRepository = new InMemoryReceitaRepository();
+            var despesaRepository = new InMemoryDespesaRepository();
+            var service = MetaMensalTestFixtures.CreateService(metaRepository, receitaRepository, despesaRepository);
+            receitaRepository.Receitas.Add(new Receita("Salário", 5000m, new DateTime(2026, 7, 5), new DateTime(2026, 7, 1), "test-user"));
+            receitaRepository.Receitas.Add(new Receita("Vale alimentação", 800m, new DateTime(2026, 7, 5), new DateTime(2026, 7, 1), "test-user", NaturezaReceita.EntradaVinculadaDespesa));
+            var despesa = new Despesa("Compra para terceiro", 150m, new DateTime(2026, 7, 4), DespesaTestFixtures.ContaId, DespesaTestFixtures.CategoriaId, "test-user");
+            despesaRepository.Despesas.Add(despesa);
+            receitaRepository.Receitas.Add(new Receita("Reembolso", 150m, new DateTime(2026, 7, 5), new DateTime(2026, 7, 1), "test-user", NaturezaReceita.Reembolso, despesa.Id));
+
+            var meta = await service.CriarAsync(MetaMensalTestFixtures.CriarRequest("Reserva", 20m, new DateTime(2026, 7, 1)));
+            var resumo = await service.ObterResumoAsync(7, 2026);
+
+            TestAssert.Equal(1000m, meta.ValorCalculado, "Goal value should use only eligible revenue");
+            TestAssert.Equal(5000m, resumo.ReceitaTotal, "Legacy revenue total should expose eligible revenue");
+            TestAssert.Equal(5950m, resumo.ReceitaTotalBruta, "Gross revenue should include restricted income and reimbursements");
+            TestAssert.Equal(5000m, resumo.ReceitaElegivelMetas, "Eligible revenue should include only available income");
+            TestAssert.Equal(950m, resumo.ReceitaExcluidaMetas, "Excluded revenue should be gross minus eligible revenue");
+            TestAssert.Equal(150m, resumo.DespesaTotalBruta, "Gross expenses should be preserved");
+            TestAssert.Equal(150m, resumo.DespesaTotalReembolsada, "Reimbursed expense total should be exposed");
+            TestAssert.Equal(0m, resumo.DespesaTotal, "Liquid expenses should subtract reimbursements");
+            TestAssert.Equal(4000m, resumo.SaldoFinal, "Final balance should use eligible revenue and liquid expenses");
         }
 
         public static async Task ShowsAlertsForExceededPlanningAndZeroRevenue()

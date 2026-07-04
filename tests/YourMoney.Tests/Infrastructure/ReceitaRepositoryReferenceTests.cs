@@ -27,5 +27,28 @@ namespace YourMoney.Tests.Infrastructure
             TestAssert.True(source.Contains("IsRequired(false)"), "Existing legacy rows should allow null reference");
             return Task.CompletedTask;
         }
+
+        public static Task RepositorySupportsEligibleRevenueAndReimbursements()
+        {
+            var repositoryPath = RepositoryTestPaths.InYourMoney(
+                "src", "YourMoney.Infrastructure", "Repositories", "ReceitaRepository.cs");
+            var repositorySource = File.ReadAllText(repositoryPath);
+            var configurationPath = RepositoryTestPaths.InYourMoney(
+                "src", "YourMoney.Infrastructure", "Configurations", "ReceitaConfiguration.cs");
+            var configurationSource = File.ReadAllText(configurationPath);
+            var migrationPath = RepositoryTestPaths.InYourMoney(
+                "src", "YourMoney.Infrastructure", "Migrations", "20260704000000_AddReceitaNatureza.cs");
+            var migrationSource = File.ReadAllText(migrationPath);
+
+            TestAssert.True(repositorySource.Contains("GetTotalElegivelMetasByMesAnoAsync"), "Repository should expose eligible revenue query");
+            TestAssert.True(repositorySource.Contains("NaturezaReceita.RendaDisponivel"), "Eligible revenue query should filter available income");
+            TestAssert.True(repositorySource.Contains("GetTotalReembolsadoPorDespesaAsync"), "Repository should expose reimbursement lookup");
+            TestAssert.True(repositorySource.Contains("DespesaVinculadaId"), "Reimbursement query should use linked expense");
+            TestAssert.True(configurationSource.Contains("HasDefaultValue(NaturezaReceita.RendaDisponivel)"), "Configuration should default legacy rows to available income");
+            TestAssert.True(configurationSource.Contains("OnDelete(DeleteBehavior.SetNull)"), "Linked expense delete should not delete receitas");
+            TestAssert.True(migrationSource.Contains("Natureza"), "Migration should add nature column");
+            TestAssert.True(migrationSource.Contains("DespesaVinculadaId"), "Migration should add linked expense column");
+            return Task.CompletedTask;
+        }
     }
 }

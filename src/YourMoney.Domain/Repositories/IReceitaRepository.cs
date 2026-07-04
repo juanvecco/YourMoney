@@ -22,6 +22,10 @@ namespace YourMoney.Domain.Repositories
         Task RemoverAsync(Guid id, string usuarioId);
         Task<decimal> GetTotalByMesAnoAsync(int mes, int ano);
         Task<decimal> GetTotalByMesAnoAsync(int mes, int ano, string usuarioId);
+        Task<decimal> GetTotalBrutoByMesAnoAsync(int mes, int ano, string usuarioId);
+        Task<decimal> GetTotalElegivelMetasByMesAnoAsync(int mes, int ano, string usuarioId);
+        Task<decimal> GetTotalReembolsadoPorDespesaAsync(Guid despesaId, string usuarioId, Guid? receitaIgnoradaId = null);
+        Task<Dictionary<Guid, decimal>> GetTotaisReembolsadosPorDespesasAsync(IReadOnlyCollection<Guid> despesaIds, string usuarioId);
         Task<List<Receita>> ListarAsync();
         Task<List<Receita>> ListarAsync(string usuarioId);
     }
