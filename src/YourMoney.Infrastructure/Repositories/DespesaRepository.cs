@@ -99,6 +99,12 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> ExisteAsync(Guid id, string usuarioId)
+        {
+            return await _context.Despesas
+                .AnyAsync(d => d.Id == id && d.UsuarioId == usuarioId);
+        }
+
         public async Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
         {
             return await _context.Despesas

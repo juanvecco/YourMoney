@@ -48,29 +48,29 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>91yzcljniw</Fingerprint>
-      <Integrity>83h7zfV2keyEVPm/ciwD0QLbLM+iwLQ9ZrQn7pPHT/U=</Integrity>
+      <Fingerprint>g97qe8brbk</Fingerprint>
+      <Integrity>vPr/WIoSdYqbnZsG2GTUccDaRHhlo58rmtsde0bmBMI=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\index.html'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\main-ML3ZO3UJ.js'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\main-WCZYUVRI.js'))">
       <SourceType>Package</SourceType>
       <SourceId>YourMoney.Api</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/YourMoney.Api</BasePath>
-      <RelativePath>main-ML3ZO3UJ.js</RelativePath>
+      <RelativePath>main-WCZYUVRI.js</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>All</AssetMode>
       <AssetRole>Primary</AssetRole>
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>w69knhfgwp</Fingerprint>
-      <Integrity>iLa6xqDN/t1WtJb6U9XTTgqdDDVjpjlAISq2d8uup+0=</Integrity>
+      <Fingerprint>z2ifz0idav</Fingerprint>
+      <Integrity>S2yK96Q848RE9obIU4odffpScYan1e+KVkVQE08LsbM=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\main-ML3ZO3UJ.js'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\main-WCZYUVRI.js'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\polyfills-B6TNHZQ6.js'))">
       <SourceType>Package</SourceType>

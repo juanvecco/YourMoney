@@ -307,9 +307,19 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<Guid?>("DespesaVinculadaId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("MesReferencia")
                         .HasColumnType("date")
                         .HasColumnName("mesReferencia");
+
+                    b.Property<string>("Natureza")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("RendaDisponivel");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()
@@ -321,7 +331,13 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DespesaVinculadaId")
+                        .HasDatabaseName("IX_Receita_DespesaVinculadaId");
+
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "Natureza", "MesReferencia")
+                        .HasDatabaseName("IX_Receita_Usuario_Natureza_MesReferencia");
 
                     b.ToTable("tbReceita", (string)null);
                 });
@@ -362,6 +378,16 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.Despesa", "DespesaVinculada")
+                        .WithMany()
+                        .HasForeignKey("DespesaVinculadaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("DespesaVinculada");
                 });
 #pragma warning restore 612, 618
         }

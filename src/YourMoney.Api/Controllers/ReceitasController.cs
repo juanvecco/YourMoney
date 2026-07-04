@@ -72,15 +72,27 @@ namespace YourMoney.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarReceita(Guid id, [FromBody] ReceitaDTO dto)
         {
-            var receita = await _receitaService.GetReceitaByIdAsync(id);
-
-            receita.AtualizarDescricao(dto.Descricao);
-            receita.AtualizarValor(dto.Valor);
-            receita.AtualizarData(dto.Data);
-            if (dto.MesReferencia.HasValue)
-                receita.AtualizarMesReferencia(dto.MesReferencia.Value);
-            await _receitaService.AtualizarAsync(receita);
-            return NoContent();
+            try
+            {
+                var receita = await _receitaService.AtualizarReceitaAsync(id, dto);
+                return Ok(receita);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    title = "Não foi possível atualizar a receita.",
+                    status = StatusCodes.Status500InternalServerError
+                });
+            }
         }
 
         [HttpGet("por-referencia")]

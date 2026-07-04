@@ -4,7 +4,12 @@ namespace YourMoney.Application.DTOs
     {
         public DateTime MesReferencia { get; set; }
         public decimal ReceitaTotal { get; set; }
+        public decimal ReceitaTotalBruta { get; set; }
+        public decimal ReceitaElegivelMetas { get; set; }
+        public decimal ReceitaExcluidaMetas { get; set; }
         public decimal DespesaTotal { get; set; }
+        public decimal DespesaTotalBruta { get; set; }
+        public decimal DespesaTotalReembolsada { get; set; }
         public decimal PercentualTotalComprometido { get; set; }
         public decimal ValorTotalReservado { get; set; }
         public decimal PercentualRestante { get; set; }

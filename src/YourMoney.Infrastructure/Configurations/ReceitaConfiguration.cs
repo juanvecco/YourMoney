@@ -18,7 +18,8 @@ namespace YourMoney.Infrastructure.Configurations
                 .HasMaxLength(255);
 
             // Fix: Use the correct type for the 'Valor' property, assuming it's a ValueObject  
-            builder.Property(r => r.Valor);
+            builder.Property(r => r.Valor)
+                .HasColumnType("decimal(18,2)");
 
             builder.Property(r => r.Data)
                 .IsRequired();
@@ -27,6 +28,26 @@ namespace YourMoney.Infrastructure.Configurations
                 .HasColumnName("mesReferencia")
                 .HasColumnType("date")
                 .IsRequired(false);
+
+            builder.Property(r => r.Natureza)
+                .HasConversion<string>()
+                .HasMaxLength(40)
+                .IsRequired()
+                .HasDefaultValue(NaturezaReceita.RendaDisponivel);
+
+            builder.Property(r => r.DespesaVinculadaId)
+                .IsRequired(false);
+
+            builder.HasOne(r => r.DespesaVinculada)
+                .WithMany()
+                .HasForeignKey(r => r.DespesaVinculadaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasIndex(r => r.DespesaVinculadaId)
+                .HasDatabaseName("IX_Receita_DespesaVinculadaId");
+
+            builder.HasIndex(r => new { r.UsuarioId, r.Natureza, r.MesReferencia })
+                .HasDatabaseName("IX_Receita_Usuario_Natureza_MesReferencia");
         }
     }
 }

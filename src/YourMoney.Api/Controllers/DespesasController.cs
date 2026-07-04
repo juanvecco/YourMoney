@@ -45,7 +45,7 @@ namespace YourMoney.Api.Controllers
         {
             try
             {
-                var despesa = await _despesaService.GetDespesaByIdAsync(id);
+                var despesa = await _despesaService.ObterDtoPorIdAsync(id);
                 return Ok(despesa);
             }
             catch (InvalidOperationException ex)

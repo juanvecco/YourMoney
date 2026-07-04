@@ -15,6 +15,7 @@ namespace YourMoney.Application.Interfaces
         Task<Receita> GetReceitaByIdAsync(Guid id);
         Task RemoverReceitaAsync(Guid id);
         Task AtualizarAsync(Receita receita);
+        Task<ReceitaDTO> AtualizarReceitaAsync(Guid id, ReceitaDTO dto);
         Task<List<ReceitaDTO>> ListarAsync();
         Task<List<ReceitaDTO>> ObterPorMesAnoAsync(int mes, int ano);
     }
