@@ -48,11 +48,13 @@ namespace YourMoney.Tests.Fixtures
 
         public static DespesaService CreateService(
             InMemoryDespesaRepository? despesaRepository = null,
+            InMemoryReceitaRepository? receitaRepository = null,
             bool contaExists = true,
             bool categoriaExists = true)
         {
             return new DespesaService(
                 despesaRepository ?? new InMemoryDespesaRepository(),
+                receitaRepository ?? new InMemoryReceitaRepository(),
                 new ContaFinanceiraRepositoryStub(contaExists),
                 new CategoriaRepositoryStub(categoriaExists),
                 new FakeCurrentUserService());
@@ -129,6 +131,11 @@ namespace YourMoney.Tests.Fixtures
                 .Where(d => d.UsuarioId == usuarioId && d.Data.Month == mes && d.Data.Year == ano)
                 .Where(d => idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira)
                 .ToList());
+        }
+
+        public Task<bool> ExisteAsync(Guid id, string usuarioId)
+        {
+            return Task.FromResult(Despesas.Any(d => d.Id == id && d.UsuarioId == usuarioId));
         }
 
         public Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId)
@@ -233,6 +240,7 @@ namespace YourMoney.Tests.Fixtures
             return Task.FromResult(CriarDespesaResponse);
         }
         public Task<Despesa> GetDespesaByIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<DespesaDTO> ObterDtoPorIdAsync(Guid id) => Task.FromResult(QueryResponse.FirstOrDefault(d => d.Id == id) ?? new DespesaDTO { Id = id });
         public Task RemoverDespesaAsync(Guid id) => Task.CompletedTask;
         public Task AtualizarAsync(Despesa despesa) => Task.CompletedTask;
         public Task<List<Despesa>> ListarAsync() => Task.FromResult(new List<Despesa>());

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YourMoney.Domain.Entities;
 
@@ -9,7 +9,6 @@ namespace YourMoney.Infrastructure.Configurations
         public void Configure(EntityTypeBuilder<Investimento> builder)
         {
             builder.ToTable("tbInvestimento");
-
             builder.HasKey(i => i.Id);
 
             builder.Property(i => i.Nome)
@@ -19,22 +18,28 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(i => i.Descricao)
                 .HasMaxLength(500);
 
-            //builder.Property(i => i.ValorInvestido);
+            builder.Property(i => i.Tipo)
+                .IsRequired()
+                .HasMaxLength(100);
 
-            builder.Property(i => i.ValorAtual);
+            builder.Property(i => i.Quantidade)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(i => i.PrecoMedio)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(i => i.ValorAtual)
+                .HasColumnType("decimal(18,2)");
 
             builder.Property(i => i.DataInvestimento)
                 .IsRequired();
 
+            builder.Property(i => i.MesReferencia)
+                .HasColumnName("mesReferencia")
+                .HasColumnType("date")
+                .IsRequired(false);
+
             builder.Property(i => i.DataResgate);
-
-            //builder.Property(i => i.TipoInvestimento)
-            //    .IsRequired()
-            //    .HasMaxLength(50);
-
-            //builder.Property(i => i.TaxaRetorno)
-            //    .HasColumnType("decimal(5,2)")
-            //    .HasDefaultValue(0);
 
             builder.Property(i => i.Ativo)
                 .IsRequired()
@@ -43,8 +48,8 @@ namespace YourMoney.Infrastructure.Configurations
             builder.HasIndex(i => i.DataInvestimento)
                 .HasDatabaseName("IX_Investimento_Data");
 
-            //builder.HasIndex(i => i.TipoInvestimento)
-            //    .HasDatabaseName("IX_Investimento_Tipo");
+            builder.HasIndex(i => i.MesReferencia)
+                .HasDatabaseName("IX_Investimento_MesReferencia");
         }
     }
 }

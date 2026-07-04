@@ -11,17 +11,20 @@ namespace YourMoney.Application.Services
     public class DespesaService : IDespesaService
     {
         private readonly IDespesaRepository _despesaRepository;
+        private readonly IReceitaRepository _receitaRepository;
         private readonly IContaFinanceiraRepository _contaFinanceiraRepository;
         private readonly ICategoriaRepository _categoriaRepository;
         private readonly ICurrentUserService _currentUserService;
 
         public DespesaService(
             IDespesaRepository despesaRepository,
+            IReceitaRepository receitaRepository,
             IContaFinanceiraRepository contaFinanceiraRepository,
             ICategoriaRepository categoriaRepository,
             ICurrentUserService currentUserService)
         {
             _despesaRepository = despesaRepository;
+            _receitaRepository = receitaRepository;
             _contaFinanceiraRepository = contaFinanceiraRepository;
             _categoriaRepository = categoriaRepository;
             _currentUserService = currentUserService;
@@ -65,6 +68,15 @@ namespace YourMoney.Application.Services
             return despesa;
         }
 
+        public async Task<DespesaDTO> ObterDtoPorIdAsync(Guid id)
+        {
+            var despesa = await GetDespesaByIdAsync(id);
+            var valorReembolsado = await _receitaRepository.GetTotalReembolsadoPorDespesaAsync(
+                despesa.Id,
+                _currentUserService.UserId);
+            return MapearDespesa(despesa, valorReembolsado);
+        }
+
         public async Task RemoverDespesaAsync(Guid id)
         {
             var despesa = await _despesaRepository.GetByIdAsync(id, _currentUserService.UserId);
@@ -95,10 +107,16 @@ namespace YourMoney.Application.Services
         public async Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
         {
             var despesas = await _despesaRepository.ObterPorMesAnoAsync(mes, ano, _currentUserService.UserId, idContaFinanceira);
-            return despesas.Where(d => d.Data.Month == mes && d.Data.Year == ano
+            var filtradas = despesas.Where(d => d.Data.Month == mes && d.Data.Year == ano
                                         && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
-                           .Select(MapearDespesa)
                            .ToList();
+            var reembolsos = await _receitaRepository.GetTotaisReembolsadosPorDespesasAsync(
+                filtradas.Select(d => d.Id).ToList(),
+                _currentUserService.UserId);
+
+            return filtradas
+                .Select(d => MapearDespesa(d, reembolsos.TryGetValue(d.Id, out var valor) ? valor : 0m))
+                .ToList();
         }
 
         public async Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request)
@@ -234,8 +252,13 @@ namespace YourMoney.Application.Services
             return new DateTime(mesAlvo.Year, mesAlvo.Month, dia);
         }
 
-        private static DespesaDTO MapearDespesa(Despesa despesa)
+        private static DespesaDTO MapearDespesa(Despesa despesa, decimal valorReembolsado = 0m)
         {
+            var valorReembolsadoArredondado = decimal.Round(valorReembolsado, 2, MidpointRounding.AwayFromZero);
+            var valorLiquido = decimal.Round(despesa.Valor - valorReembolsadoArredondado, 2, MidpointRounding.AwayFromZero);
+            if (valorLiquido < 0)
+                valorLiquido = 0m;
+
             return new DespesaDTO
             {
                 Id = despesa.Id,
@@ -247,7 +270,10 @@ namespace YourMoney.Application.Services
                 ParcelamentoId = despesa.ParcelamentoId,
                 NumeroParcela = despesa.NumeroParcela,
                 TotalParcelas = despesa.TotalParcelas,
-                ValorTotalParcelamento = despesa.ValorTotalParcelamento
+                ValorTotalParcelamento = despesa.ValorTotalParcelamento,
+                ValorReembolsado = valorReembolsadoArredondado,
+                ValorLiquido = valorLiquido,
+                PossuiReembolso = valorReembolsadoArredondado > 0
             };
         }
 

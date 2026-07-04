@@ -10,6 +10,7 @@ namespace YourMoney.Tests.Application
             var currentUser = new FakeCurrentUserService { UserId = "user-a" };
             var service = new YourMoney.Application.Services.DespesaService(
                 repository,
+                new InMemoryReceitaRepository(),
                 new ContaFinanceiraRepositoryStub(true),
                 new CategoriaRepositoryStub(true),
                 currentUser);

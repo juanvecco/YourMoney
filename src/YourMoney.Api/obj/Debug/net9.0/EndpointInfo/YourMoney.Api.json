@@ -459,17 +459,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/CriarDespesaRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/CriarDespesaRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Despesa"
+                "$ref": "#/components/schemas/CriarDespesaRequest"
               }
             }
           }
@@ -491,38 +491,28 @@
         }
       }
     },
-    "/api/Despesas/parcelamento": {
-      "post": {
+    "/api/Despesas/{id}": {
+      "get": {
         "tags": [
           "Despesas"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
-              }
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK"
           }
         }
-      }
-    },
-    "/api/Despesas/{id}": {
+      },
       "delete": {
         "tags": [
           "Despesas"
@@ -585,6 +575,37 @@
         }
       }
     },
+    "/api/Despesas/parcelamento": {
+      "post": {
+        "tags": [
+          "Despesas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelamentoDespesaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Despesas/por-referencia": {
       "get": {
         "tags": [
@@ -632,17 +653,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Investimento"
+                "$ref": "#/components/schemas/CriarInvestimentoRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Investimento"
+                "$ref": "#/components/schemas/CriarInvestimentoRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Investimento"
+                "$ref": "#/components/schemas/CriarInvestimentoRequest"
               }
             }
           }
@@ -705,17 +726,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InvestimentoDto"
+                "$ref": "#/components/schemas/AtualizarInvestimentoRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/InvestimentoDto"
+                "$ref": "#/components/schemas/AtualizarInvestimentoRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/InvestimentoDto"
+                "$ref": "#/components/schemas/AtualizarInvestimentoRequest"
               }
             }
           }
@@ -757,6 +778,163 @@
         }
       }
     },
+    "/api/Metas/resumo": {
+      "get": {
+        "tags": [
+          "Metas"
+        ],
+        "parameters": [
+          {
+            "name": "mes",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ano",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Metas": {
+      "post": {
+        "tags": [
+          "Metas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarMetaMensalDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarMetaMensalDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarMetaMensalDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Metas/{id}": {
+      "put": {
+        "tags": [
+          "Metas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarMetaMensalDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarMetaMensalDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarMetaMensalDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Metas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/OpenFinance/sources": {
+      "get": {
+        "tags": [
+          "OpenFinance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/OpenFinance/transactions/preview": {
+      "get": {
+        "tags": [
+          "OpenFinance"
+        ],
+        "parameters": [
+          {
+            "name": "sourceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Receitas": {
       "post": {
         "tags": [
@@ -766,17 +944,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Receita"
+                "$ref": "#/components/schemas/CriarReceitaRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Receita"
+                "$ref": "#/components/schemas/CriarReceitaRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Receita"
+                "$ref": "#/components/schemas/CriarReceitaRequest"
               }
             }
           }
@@ -894,33 +1072,58 @@
   },
   "components": {
     "schemas": {
-      "Categoria": {
+      "AtualizarInvestimentoRequest": {
         "type": "object",
         "properties": {
-          "id": {
+          "nome": {
             "type": "string",
-            "format": "uuid",
-            "readOnly": true
-          },
-          "usuarioId": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           },
           "descricao": {
             "type": "string",
             "nullable": true
           },
-          "tipoTransacao": {
-            "$ref": "#/components/schemas/TipoTransacao"
-          },
-          "categoriaPaiId": {
+          "tipo": {
             "type": "string",
-            "format": "uuid",
             "nullable": true
           },
-          "categoriaPai": {
-            "$ref": "#/components/schemas/Categoria"
+          "quantidade": {
+            "type": "number",
+            "format": "double"
+          },
+          "precoMedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorAtual": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataInvestimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AtualizarMetaMensalDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentualReceita": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false
@@ -986,19 +1189,9 @@
         },
         "additionalProperties": false
       },
-      "Despesa": {
+      "CriarDespesaRequest": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "readOnly": true
-          },
-          "usuarioId": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
-          },
           "descricao": {
             "type": "string",
             "nullable": true
@@ -1011,43 +1204,96 @@
             "type": "string",
             "format": "date-time"
           },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time"
+          },
           "idContaFinanceira": {
             "type": "string",
             "format": "uuid"
           },
-          "contaFinanceira": {
-            "$ref": "#/components/schemas/ContaFinanceira"
-          },
           "idCategoria": {
             "type": "string",
             "format": "uuid"
-          },
-          "categoria": {
-            "$ref": "#/components/schemas/Categoria"
-          },
-          "parcelamentoId": {
+          }
+        },
+        "additionalProperties": false
+      },
+      "CriarInvestimentoRequest": {
+        "type": "object",
+        "properties": {
+          "nome": {
             "type": "string",
-            "format": "uuid",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           },
-          "numeroParcela": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "readOnly": true
+          "descricao": {
+            "type": "string",
+            "nullable": true
           },
-          "totalParcelas": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "readOnly": true
+          "tipo": {
+            "type": "string",
+            "nullable": true
           },
-          "valorTotalParcelamento": {
+          "quantidade": {
             "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+            "format": "double"
+          },
+          "precoMedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorAtual": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataInvestimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CriarMetaMensalDTO": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentualReceita": {
+            "type": "number",
+            "format": "double"
+          },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CriarReceitaRequest": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -1102,106 +1348,6 @@
         },
         "additionalProperties": false
       },
-      "Investimento": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "readOnly": true
-          },
-          "usuarioId": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
-          },
-          "nome": {
-            "type": "string",
-            "nullable": true
-          },
-          "descricao": {
-            "type": "string",
-            "nullable": true
-          },
-          "tipo": {
-            "type": "string",
-            "nullable": true
-          },
-          "quantidade": {
-            "type": "number",
-            "format": "double"
-          },
-          "precoMedio": {
-            "type": "number",
-            "format": "double"
-          },
-          "valorAtual": {
-            "type": "number",
-            "format": "double"
-          },
-          "dataInvestimento": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dataResgate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "readOnly": true
-          },
-          "ativo": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "InvestimentoDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "nome": {
-            "type": "string",
-            "nullable": true
-          },
-          "descricao": {
-            "type": "string",
-            "nullable": true
-          },
-          "tipo": {
-            "type": "string",
-            "nullable": true
-          },
-          "quantidade": {
-            "type": "number",
-            "format": "double"
-          },
-          "precoMedio": {
-            "type": "number",
-            "format": "double"
-          },
-          "valorAtual": {
-            "type": "number",
-            "format": "double"
-          },
-          "dataInvestimento": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dataResgate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "ativo": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
       "ParcelamentoDespesaRequest": {
         "type": "object",
         "properties": {
@@ -1232,34 +1378,6 @@
         },
         "additionalProperties": false
       },
-      "Receita": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "readOnly": true
-          },
-          "usuarioId": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
-          },
-          "descricao": {
-            "type": "string",
-            "nullable": true
-          },
-          "valor": {
-            "type": "number",
-            "format": "double"
-          },
-          "data": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
       "ReceitaDTO": {
         "type": "object",
         "properties": {
@@ -1278,6 +1396,11 @@
           "data": {
             "type": "string",
             "format": "date-time"
+          },
+          "mesReferencia": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false

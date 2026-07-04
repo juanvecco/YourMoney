@@ -143,21 +143,39 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<decimal> GetTotalByMesAnoAsync(int mes, int ano)
         {
             return await _context.Investimentos
-                .Where(r => r.DataInvestimento.Month == mes && r.DataInvestimento.Year == ano)
+                .Where(r => (r.MesReferencia.HasValue
+                    && r.MesReferencia.Value.Month == mes
+                    && r.MesReferencia.Value.Year == ano)
+                    || (!r.MesReferencia.HasValue
+                        && r.DataInvestimento.Month == mes
+                        && r.DataInvestimento.Year == ano))
                 .SumAsync(r => r.ValorAtual);
         }
 
         public async Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano)
         {
             return await _context.Investimentos
-                .Where(r => r.DataInvestimento.Month == mes && r.DataInvestimento.Year == ano)
+                .Where(r => (r.MesReferencia.HasValue
+                    && r.MesReferencia.Value.Month == mes
+                    && r.MesReferencia.Value.Year == ano)
+                    || (!r.MesReferencia.HasValue
+                        && r.DataInvestimento.Month == mes
+                        && r.DataInvestimento.Year == ano))
+                .OrderByDescending(r => r.DataInvestimento)
                 .ToListAsync();
         }
 
         public async Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Investimentos
-                .Where(r => r.UsuarioId == usuarioId && r.DataInvestimento.Month == mes && r.DataInvestimento.Year == ano)
+                .Where(r => r.UsuarioId == usuarioId
+                    && ((r.MesReferencia.HasValue
+                        && r.MesReferencia.Value.Month == mes
+                        && r.MesReferencia.Value.Year == ano)
+                        || (!r.MesReferencia.HasValue
+                            && r.DataInvestimento.Month == mes
+                            && r.DataInvestimento.Year == ano)))
+                .OrderByDescending(r => r.DataInvestimento)
                 .ToListAsync();
         }
 

@@ -38,10 +38,17 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<int>("TipoTransacao")
                         .HasColumnType("int");
 
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaPaiId")
                         .HasDatabaseName("IX_Categoria_CategoriaPaiId");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("tbCategoria", (string)null);
                 });
@@ -60,7 +67,14 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("tbContaFinanceira", (string)null);
                 });
@@ -94,6 +108,11 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<int?>("TotalParcelas")
                         .HasColumnType("int");
 
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
@@ -110,6 +129,8 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("ParcelamentoId")
                         .HasDatabaseName("IX_Despesa_ParcelamentoId");
+
+                    b.HasIndex("UsuarioId");
 
                     b.HasIndex("ParcelamentoId", "NumeroParcela")
                         .HasDatabaseName("IX_Despesa_Parcelamento_Parcela");
@@ -138,6 +159,10 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<DateTime?>("MesReferencia")
+                        .HasColumnType("date")
+                        .HasColumnName("mesReferencia");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -150,7 +175,14 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Tipo")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("ValorAtual")
                         .HasColumnType("decimal(18,2)");
@@ -159,6 +191,11 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("DataInvestimento")
                         .HasDatabaseName("IX_Investimento_Data");
+
+                    b.HasIndex("MesReferencia")
+                        .HasDatabaseName("IX_Investimento_MesReferencia");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("tbInvestimento", (string)null);
                 });
@@ -192,6 +229,11 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(1);
 
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("ValorAtual")
                         .HasColumnType("decimal(18,2)");
 
@@ -208,7 +250,47 @@ namespace YourMoney.Infrastructure.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Meta_Status");
 
+                    b.HasIndex("UsuarioId");
+
                     b.ToTable("tbMeta", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.MetaMensal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("MesReferencia")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("PercentualReceita")
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "MesReferencia")
+                        .HasDatabaseName("IX_MetaMensal_Usuario_MesReferencia");
+
+                    b.ToTable("tbMetaMensal", (string)null);
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>
@@ -225,10 +307,37 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<Guid?>("DespesaVinculadaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("MesReferencia")
+                        .HasColumnType("date")
+                        .HasColumnName("mesReferencia");
+
+                    b.Property<string>("Natureza")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("RendaDisponivel");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DespesaVinculadaId")
+                        .HasDatabaseName("IX_Receita_DespesaVinculadaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "Natureza", "MesReferencia")
+                        .HasDatabaseName("IX_Receita_Usuario_Natureza_MesReferencia");
 
                     b.ToTable("tbReceita", (string)null);
                 });
@@ -269,6 +378,16 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.Despesa", "DespesaVinculada")
+                        .WithMany()
+                        .HasForeignKey("DespesaVinculadaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("DespesaVinculada");
                 });
 #pragma warning restore 612, 618
         }

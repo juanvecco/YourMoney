@@ -12,6 +12,9 @@
         public int? NumeroParcela { get; set; }
         public int? TotalParcelas { get; set; }
         public decimal? ValorTotalParcelamento { get; set; }
+        public decimal ValorReembolsado { get; set; }
+        public decimal ValorLiquido { get; set; }
+        public bool PossuiReembolso { get; set; }
         //public bool Pago { get; set; }
         //public DateTime? DataPagamento { get; set; }
         //public TipoRecorrencia TipoRecorrencia { get; set; }

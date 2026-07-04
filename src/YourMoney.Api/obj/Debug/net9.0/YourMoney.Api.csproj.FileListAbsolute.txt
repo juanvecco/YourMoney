@@ -189,5 +189,10 @@ C:\dev\YourMoney\obj\codex-build\Debug\net9.0\YourMoney.Api.pdb
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\sosytr9v8y-vagikyz9qx.gz
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\2ve6ul3e4c-pjm38qobjh.gz
 C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\fabl5nek1i-81pv0r92lr.gz
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\topngqi2tx-233vzp62oq.gz
-C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\9pnykdiusl-xl4lp2b08f.gz
+C:\dev\YourMoney\obj\codex-build\Debug\net9.0\bin\Release\net9.0\appsettings.json
+C:\dev\YourMoney\obj\codex-build\Debug\net9.0\bin\Release\net9.0\YourMoney.Api.deps.json
+C:\dev\YourMoney\obj\codex-build\Debug\net9.0\bin\Release\net9.0\YourMoney.Api.runtimeconfig.json
+C:\dev\YourMoney\obj\codex-build\Debug\net9.0\bin\Release\net9.0\YourMoney.Api.staticwebassets.endpoints.json
+C:\dev\YourMoney\obj\codex-build\Debug\net9.0\bin\Release\net9.0\YourMoney.Api.staticwebassets.runtime.json
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\topngqi2tx-g97qe8brbk.gz
+C:\dev\YourMoney\src\YourMoney.Api\obj\Debug\net9.0\compressed\jx6viu6gjo-z2ifz0idav.gz
