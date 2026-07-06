@@ -14,6 +14,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano, string usuarioId);
         Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira);
         Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId, Guid? idContaFinanceira);
+        Task<List<Despesa>> ConsultarAsync(int mes, int ano, string usuarioId, Guid? idContaFinanceira, IReadOnlyCollection<Guid> idsCategoria);
         Task<bool> ExisteAsync(Guid id, string usuarioId);
         Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId);
         Task<List<Despesa>> GetByCategoriaAsync(Guid categoriaId, string usuarioId);

@@ -5,6 +5,7 @@ using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Repositories;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 
 namespace YourMoney.Application.Services
 {
@@ -119,6 +120,68 @@ namespace YourMoney.Application.Services
                 .ToList();
         }
 
+        public async Task<ConsultaDespesasResponse> ConsultarDespesasAsync(ConsultaDespesasRequest request)
+        {
+            await ValidarConsultaDespesasAsync(request);
+
+            var usuarioId = _currentUserService.UserId;
+            var pagina = Math.Max(request.Pagina, 1);
+            var tamanhoPagina = Math.Clamp(request.TamanhoPagina <= 0 ? 10 : request.TamanhoPagina, 1, 100);
+            var idsCategoria = await ResolverIdsCategoriaFiltroAsync(request, usuarioId);
+
+            var despesas = await _despesaRepository.ConsultarAsync(
+                request.Mes,
+                request.Ano,
+                usuarioId,
+                request.IdContaFinanceira,
+                idsCategoria);
+
+            var reembolsos = await _receitaRepository.GetTotaisReembolsadosPorDespesasAsync(
+                despesas.Select(d => d.Id).ToList(),
+                usuarioId);
+
+            var itensFiltrados = despesas
+                .Select(d => MapearDespesa(d, reembolsos.TryGetValue(d.Id, out var valor) ? valor : 0m))
+                .ToList();
+
+            var totalResultados = itensFiltrados.Count;
+            var totalPaginas = totalResultados == 0
+                ? 0
+                : (int)Math.Ceiling(totalResultados / (decimal)tamanhoPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+                pagina = totalPaginas;
+
+            var itensPagina = totalResultados == 0
+                ? new List<DespesaDTO>()
+                : itensFiltrados
+                    .Skip((pagina - 1) * tamanhoPagina)
+                    .Take(tamanhoPagina)
+                    .ToList();
+
+            return new ConsultaDespesasResponse
+            {
+                Itens = itensPagina,
+                PaginaAtual = totalResultados == 0 ? 1 : pagina,
+                TamanhoPagina = tamanhoPagina,
+                TotalResultados = totalResultados,
+                TotalPaginas = totalPaginas,
+                ValorTotalFiltrado = decimal.Round(
+                    itensFiltrados.Sum(d => d.ValorLiquido),
+                    2,
+                    MidpointRounding.AwayFromZero),
+                TotaisPorConta = itensFiltrados
+                    .GroupBy(d => d.IdContaFinanceira)
+                    .Select(g => new ConsultaDespesasTotalPorContaDTO
+                    {
+                        IdContaFinanceira = g.Key,
+                        Valor = decimal.Round(g.Sum(d => d.ValorLiquido), 2, MidpointRounding.AwayFromZero)
+                    })
+                    .OrderByDescending(t => t.Valor)
+                    .ToList()
+            };
+        }
+
         public async Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request)
         {
             await ValidarParcelamentoAsync(request);
@@ -227,6 +290,85 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Conta Financeira não encontrada.");
             if (!await _categoriaRepository.ExisteAsync(request.IdCategoria, usuarioId))
                 throw new ArgumentException("Categoria não encontrada.");
+        }
+
+        private async Task ValidarConsultaDespesasAsync(ConsultaDespesasRequest request)
+        {
+            if (request == null)
+                throw new ArgumentException("Filtros de despesa inválidos.");
+            if (request.Mes < 1 || request.Mes > 12)
+                throw new ArgumentException("Filtros de despesa inválidos.");
+            if (request.Ano < 1)
+                throw new ArgumentException("Filtros de despesa inválidos.");
+            if (request.Pagina < 1)
+                throw new ArgumentException("Filtros de despesa inválidos.");
+            if (request.TamanhoPagina < 1 || request.TamanhoPagina > 100)
+                throw new ArgumentException("Filtros de despesa inválidos.");
+
+            var usuarioId = _currentUserService.UserId;
+            if (request.IdContaFinanceira.HasValue
+                && !await _contaFinanceiraRepository.ExisteAsync(request.IdContaFinanceira.Value, usuarioId))
+                throw new ArgumentException("Filtros de despesa inválidos.");
+        }
+
+        private async Task<IReadOnlyCollection<Guid>> ResolverIdsCategoriaFiltroAsync(
+            ConsultaDespesasRequest request,
+            string usuarioId)
+        {
+            if (!request.IdTipoDespesa.HasValue && !request.IdNaturezaDespesa.HasValue)
+                return null!;
+
+            var categorias = await _categoriaRepository.GetAllAsync(usuarioId);
+            var categoriasDespesa = categorias
+                .Where(c => c.TipoTransacao == TipoTransacao.Despesa || c.TipoTransacao == TipoTransacao.Receita)
+                .ToList();
+
+            var filtros = new List<HashSet<Guid>>();
+
+            if (request.IdTipoDespesa.HasValue)
+            {
+                var tipo = categorias.FirstOrDefault(c => c.Id == request.IdTipoDespesa.Value)
+                    ?? throw new ArgumentException("Filtros de despesa inválidos.");
+                filtros.Add(ObterCategoriaEDescendentes(categoriasDespesa, tipo.Id));
+            }
+
+            if (request.IdNaturezaDespesa.HasValue)
+            {
+                var natureza = categorias.FirstOrDefault(c => c.Id == request.IdNaturezaDespesa.Value)
+                    ?? throw new ArgumentException("Filtros de despesa inválidos.");
+                filtros.Add(ObterCategoriaEDescendentes(categoriasDespesa, natureza.Id));
+            }
+
+            if (filtros.Count == 0)
+                return null!;
+
+            var ids = filtros[0];
+            foreach (var filtro in filtros.Skip(1))
+                ids.IntersectWith(filtro);
+
+            return ids;
+        }
+
+        private static HashSet<Guid> ObterCategoriaEDescendentes(List<Categoria> categorias, Guid raizId)
+        {
+            var ids = new HashSet<Guid> { raizId };
+            var adicionou = true;
+
+            while (adicionou)
+            {
+                adicionou = false;
+                foreach (var categoria in categorias)
+                {
+                    if (categoria.CategoriaPaiId.HasValue
+                        && ids.Contains(categoria.CategoriaPaiId.Value)
+                        && ids.Add(categoria.Id))
+                    {
+                        adicionou = true;
+                    }
+                }
+            }
+
+            return ids;
         }
 
         private static IReadOnlyList<decimal> CalcularValoresParcelas(decimal valorTotal, int quantidadeParcelas)

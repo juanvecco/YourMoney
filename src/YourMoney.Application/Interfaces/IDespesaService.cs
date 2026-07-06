@@ -16,6 +16,7 @@ namespace YourMoney.Application.Interfaces
         Task AtualizarAsync(Despesa despesa); // Novo método
         Task<List<Despesa>> ListarAsync();
         Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null);
+        Task<ConsultaDespesasResponse> ConsultarDespesasAsync(ConsultaDespesasRequest request);
         Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request);
     }
 }

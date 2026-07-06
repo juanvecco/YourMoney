@@ -99,6 +99,30 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Despesa>> ConsultarAsync(
+            int mes,
+            int ano,
+            string usuarioId,
+            Guid? idContaFinanceira,
+            IReadOnlyCollection<Guid> idsCategoria)
+        {
+            var query = _context.Despesas
+                .Where(d => d.UsuarioId == usuarioId
+                            && d.Data.Month == mes
+                            && d.Data.Year == ano
+                            && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira));
+
+            if (idsCategoria != null)
+            {
+                query = query.Where(d => idsCategoria.Contains(d.IdCategoria));
+            }
+
+            return await query
+                .OrderByDescending(d => d.Data)
+                .ThenByDescending(d => d.Id)
+                .ToListAsync();
+        }
+
         public async Task<bool> ExisteAsync(Guid id, string usuarioId)
         {
             return await _context.Despesas

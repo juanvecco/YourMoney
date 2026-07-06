@@ -9,7 +9,15 @@ namespace YourMoney.Tests.Fixtures
     public static class DespesaTestFixtures
     {
         public static readonly Guid ContaId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        public static readonly Guid ContaLazerId = Guid.Parse("11111111-1111-1111-1111-111111111112");
+        public static readonly Guid TipoEssencialId = Guid.Parse("22222222-2222-2222-2222-222222222220");
+        public static readonly Guid TipoLazerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+        public static readonly Guid NaturezaMoradiaId = Guid.Parse("22222222-2222-2222-2222-222222222230");
+        public static readonly Guid NaturezaMercadoId = Guid.Parse("22222222-2222-2222-2222-222222222231");
+        public static readonly Guid NaturezaPasseioId = Guid.Parse("22222222-2222-2222-2222-222222222232");
         public static readonly Guid CategoriaId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        public static readonly Guid CategoriaAluguelId = Guid.Parse("22222222-2222-2222-2222-222222222240");
+        public static readonly Guid CategoriaCinemaId = Guid.Parse("22222222-2222-2222-2222-222222222241");
 
         public static ParcelamentoDespesaRequest Request(
             decimal valorTotal = 100m,
@@ -50,14 +58,38 @@ namespace YourMoney.Tests.Fixtures
             InMemoryDespesaRepository? despesaRepository = null,
             InMemoryReceitaRepository? receitaRepository = null,
             bool contaExists = true,
-            bool categoriaExists = true)
+            bool categoriaExists = true,
+            CategoriaRepositoryStub? categoriaRepository = null,
+            ContaFinanceiraRepositoryStub? contaRepository = null)
         {
             return new DespesaService(
                 despesaRepository ?? new InMemoryDespesaRepository(),
                 receitaRepository ?? new InMemoryReceitaRepository(),
-                new ContaFinanceiraRepositoryStub(contaExists),
-                new CategoriaRepositoryStub(categoriaExists),
+                contaRepository ?? new ContaFinanceiraRepositoryStub(contaExists),
+                categoriaRepository ?? new CategoriaRepositoryStub(categoriaExists),
                 new FakeCurrentUserService());
+        }
+
+        public static List<Categoria> CategoriasPadrao(string usuarioId = "test-user")
+        {
+            return new List<Categoria>
+            {
+                NovaCategoria("Essencial", TipoEssencialId, null, usuarioId),
+                NovaCategoria("Lazer", TipoLazerId, null, usuarioId),
+                NovaCategoria("Moradia", NaturezaMoradiaId, TipoEssencialId, usuarioId),
+                NovaCategoria("Mercado", NaturezaMercadoId, TipoEssencialId, usuarioId),
+                NovaCategoria("Passeio", NaturezaPasseioId, TipoLazerId, usuarioId),
+                NovaCategoria("Aluguel", CategoriaAluguelId, NaturezaMoradiaId, usuarioId),
+                NovaCategoria("Cinema", CategoriaCinemaId, NaturezaPasseioId, usuarioId),
+                NovaCategoria("Categoria Base", CategoriaId, TipoEssencialId, usuarioId)
+            };
+        }
+
+        private static Categoria NovaCategoria(string descricao, Guid id, Guid? categoriaPaiId, string usuarioId)
+        {
+            var categoria = new Categoria(descricao, YourMoney.Domain.Enums.TipoTransacao.Despesa, usuarioId, categoriaPaiId);
+            typeof(Categoria).GetProperty(nameof(Categoria.Id))!.SetValue(categoria, id);
+            return categoria;
         }
     }
 
@@ -133,6 +165,22 @@ namespace YourMoney.Tests.Fixtures
                 .ToList());
         }
 
+        public Task<List<Despesa>> ConsultarAsync(
+            int mes,
+            int ano,
+            string usuarioId,
+            Guid? idContaFinanceira,
+            IReadOnlyCollection<Guid> idsCategoria)
+        {
+            return Task.FromResult(Despesas
+                .Where(d => d.UsuarioId == usuarioId && d.Data.Month == mes && d.Data.Year == ano)
+                .Where(d => idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira)
+                .Where(d => idsCategoria == null || idsCategoria.Contains(d.IdCategoria))
+                .OrderByDescending(d => d.Data)
+                .ThenByDescending(d => d.Id)
+                .ToList());
+        }
+
         public Task<bool> ExisteAsync(Guid id, string usuarioId)
         {
             return Task.FromResult(Despesas.Any(d => d.Id == id && d.UsuarioId == usuarioId));
@@ -187,10 +235,12 @@ namespace YourMoney.Tests.Fixtures
     public class ContaFinanceiraRepositoryStub : IContaFinanceiraRepository
     {
         private readonly bool _exists;
+        private readonly HashSet<Guid>? _existingIds;
 
-        public ContaFinanceiraRepositoryStub(bool exists)
+        public ContaFinanceiraRepositoryStub(bool exists, IEnumerable<Guid>? existingIds = null)
         {
             _exists = exists;
+            _existingIds = existingIds == null ? null : new HashSet<Guid>(existingIds);
         }
 
         public Task<ContaFinanceira> GetByIdAsync(Guid id) => throw new NotImplementedException();
@@ -201,37 +251,54 @@ namespace YourMoney.Tests.Fixtures
         public Task RemoverAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task<List<ContaFinanceira>> ListarAsync() => throw new NotImplementedException();
         public Task<List<ContaFinanceira>> ListarAsync(string usuarioId) => throw new NotImplementedException();
-        public Task<bool> ExisteAsync(Guid id) => Task.FromResult(_exists && id != Guid.Empty);
-        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(_exists && id != Guid.Empty && !string.IsNullOrWhiteSpace(usuarioId));
+        public Task<bool> ExisteAsync(Guid id) => Task.FromResult(Existe(id));
+        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(Existe(id) && !string.IsNullOrWhiteSpace(usuarioId));
+
+        private bool Existe(Guid id)
+        {
+            return _exists && id != Guid.Empty && (_existingIds == null || _existingIds.Contains(id));
+        }
     }
 
     public class CategoriaRepositoryStub : ICategoriaRepository
     {
         private readonly bool _exists;
+        private readonly List<Categoria> _categorias;
+        private readonly bool _enforceUsuarioId;
 
-        public CategoriaRepositoryStub(bool exists)
+        public CategoriaRepositoryStub(bool exists, List<Categoria>? categorias = null)
         {
             _exists = exists;
+            _categorias = categorias ?? DespesaTestFixtures.CategoriasPadrao();
+            _enforceUsuarioId = categorias != null;
         }
 
-        public Task<Categoria> GetByIdAsync(Guid id) => throw new NotImplementedException();
-        public Task<Categoria> GetByIdAsync(Guid id, string usuarioId) => throw new NotImplementedException();
+        public Task<Categoria> GetByIdAsync(Guid id) => Task.FromResult(_categorias.First(c => c.Id == id));
+        public Task<Categoria> GetByIdAsync(Guid id, string usuarioId) => Task.FromResult(_categorias.First(c => CategoriaPertenceAoUsuario(c, id, usuarioId)));
         public Task AdicionarAsync(Categoria categoria) => throw new NotImplementedException();
         public Task AtualizarAsync(Categoria categoria) => throw new NotImplementedException();
         public Task RemoverAsync(Guid id) => throw new NotImplementedException();
         public Task RemoverAsync(Guid id, string usuarioId) => throw new NotImplementedException();
-        public Task<List<Categoria>> GetAllAsync() => throw new NotImplementedException();
-        public Task<List<Categoria>> GetAllAsync(string usuarioId) => throw new NotImplementedException();
-        public Task<bool> ExisteAsync(Guid id) => Task.FromResult(_exists && id != Guid.Empty);
-        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(_exists && id != Guid.Empty && !string.IsNullOrWhiteSpace(usuarioId));
+        public Task<List<Categoria>> GetAllAsync() => Task.FromResult(_categorias.ToList());
+        public Task<List<Categoria>> GetAllAsync(string usuarioId) => Task.FromResult(_categorias.Where(c => !_enforceUsuarioId || c.UsuarioId == usuarioId).ToList());
+        public Task<bool> ExisteAsync(Guid id) => Task.FromResult(_exists && _categorias.Any(c => c.Id == id));
+        public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(_exists && _categorias.Any(c => CategoriaPertenceAoUsuario(c, id, usuarioId)));
+
+        private bool CategoriaPertenceAoUsuario(Categoria categoria, Guid id, string usuarioId)
+        {
+            return categoria.Id == id && (!_enforceUsuarioId || categoria.UsuarioId == usuarioId);
+        }
     }
 
     public class FakeDespesaService : IDespesaService
     {
         public CriarDespesaResponse CriarDespesaResponse { get; set; } = new();
         public CriarDespesaRequest? LastCriarDespesaRequest { get; private set; }
+        public ConsultaDespesasRequest? LastConsultaDespesasRequest { get; private set; }
         public ParcelamentoDespesaResponse ParcelamentoResponse { get; set; } = new();
         public List<DespesaDTO> QueryResponse { get; set; } = new();
+        public ConsultaDespesasResponse ConsultaResponse { get; set; } = new();
+        public Exception? ConsultaException { get; set; }
 
         public Task AdicionarDespesaAsync(Despesa despesa) => Task.CompletedTask;
         public Task<CriarDespesaResponse> CriarDespesaAsync(CriarDespesaRequest request)
@@ -245,6 +312,13 @@ namespace YourMoney.Tests.Fixtures
         public Task AtualizarAsync(Despesa despesa) => Task.CompletedTask;
         public Task<List<Despesa>> ListarAsync() => Task.FromResult(new List<Despesa>());
         public Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null) => Task.FromResult(QueryResponse);
+        public Task<ConsultaDespesasResponse> ConsultarDespesasAsync(ConsultaDespesasRequest request)
+        {
+            LastConsultaDespesasRequest = request;
+            if (ConsultaException != null)
+                throw ConsultaException;
+            return Task.FromResult(ConsultaResponse);
+        }
         public Task<ParcelamentoDespesaResponse> CriarParcelamentoAsync(ParcelamentoDespesaRequest request) => Task.FromResult(ParcelamentoResponse);
     }
 }
