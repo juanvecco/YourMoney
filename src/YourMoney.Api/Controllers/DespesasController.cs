@@ -115,6 +115,24 @@ namespace YourMoney.Api.Controllers
             }
         }
 
+        [HttpGet("consulta")]
+        public async Task<IActionResult> ConsultarDespesas([FromQuery] ConsultaDespesasRequest request)
+        {
+            try
+            {
+                var despesas = await _despesaService.ConsultarDespesasAsync(request);
+                return Ok(despesas);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new { message = "Filtros de despesa inválidos." });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Não foi possível consultar despesas." });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] DespesaDTO dto)
         {
