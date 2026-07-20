@@ -11,6 +11,8 @@ namespace YourMoney.Domain.Entities
         public DateTime Data { get; private set; }
         public DateTime? MesReferencia { get; private set; }
         public NaturezaReceita Natureza { get; private set; } = NaturezaReceita.RendaDisponivel;
+        public Guid? IdContaFinanceira { get; private set; }
+        public virtual ContaFinanceira? ContaFinanceira { get; private set; }
         public Guid? DespesaVinculadaId { get; private set; }
         public virtual Despesa DespesaVinculada { get; private set; }
         //public Guid CategoriaId { get; private set; }  
@@ -46,10 +48,19 @@ namespace YourMoney.Domain.Entities
             DefinirUsuario(usuarioId);
         }
 
-        public Receita(string descricao, Decimal valor, DateTime data, DateTime mesReferencia, string usuarioId, NaturezaReceita natureza, Guid? despesaVinculadaId = null)
+        public Receita(
+            string descricao,
+            Decimal valor,
+            DateTime data,
+            DateTime mesReferencia,
+            string usuarioId,
+            NaturezaReceita natureza,
+            Guid? despesaVinculadaId = null,
+            Guid? idContaFinanceira = null)
             : this(descricao, valor, data, mesReferencia, usuarioId)
         {
             AtualizarNatureza(natureza, despesaVinculadaId);
+            AtualizarContaFinanceira(idContaFinanceira);
         }
 
         public void AtualizarDescricao(string descricao)
@@ -109,6 +120,14 @@ namespace YourMoney.Domain.Entities
         public void LimparDespesaVinculada()
         {
             DespesaVinculadaId = null;
+        }
+
+        public void AtualizarContaFinanceira(Guid? idContaFinanceira)
+        {
+            if (idContaFinanceira.HasValue && idContaFinanceira.Value == Guid.Empty)
+                throw new ArgumentException("Conta Financeira é inválida.", nameof(idContaFinanceira));
+
+            IdContaFinanceira = idContaFinanceira;
         }
 
         public bool ConsideraNasMetas => Natureza == NaturezaReceita.RendaDisponivel;

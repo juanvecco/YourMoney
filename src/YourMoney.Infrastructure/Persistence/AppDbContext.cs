@@ -15,6 +15,10 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<Meta> Metas { get; set; }
         public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<ContaFinanceira> ContaFinanceira { get; set; }
+        public DbSet<DespesaRecorrente> DespesasRecorrentes { get; set; }
+        public DbSet<DespesaRecorrenteOcorrencia> DespesasRecorrentesOcorrencias { get; set; }
+        public DbSet<ReceitaRecorrente> ReceitasRecorrentes { get; set; }
+        public DbSet<ReceitaRecorrenteOcorrencia> ReceitasRecorrentesOcorrencias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +31,10 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new MetaConfiguration());
             modelBuilder.ApplyConfiguration(new MetaMensalConfiguration());
             modelBuilder.ApplyConfiguration(new ContaFinanceiraConfiguration());
+            modelBuilder.ApplyConfiguration(new DespesaRecorrenteConfiguration());
+            modelBuilder.ApplyConfiguration(new DespesaRecorrenteOcorrenciaConfiguration());
+            modelBuilder.ApplyConfiguration(new ReceitaRecorrenteConfiguration());
+            modelBuilder.ApplyConfiguration(new ReceitaRecorrenteOcorrenciaConfiguration());
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

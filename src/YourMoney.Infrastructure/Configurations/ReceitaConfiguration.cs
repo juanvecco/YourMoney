@@ -48,6 +48,17 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.HasIndex(r => new { r.UsuarioId, r.Natureza, r.MesReferencia })
                 .HasDatabaseName("IX_Receita_Usuario_Natureza_MesReferencia");
+
+            builder.Property(r => r.IdContaFinanceira)
+                .IsRequired(false);
+
+            builder.HasOne(r => r.ContaFinanceira)
+                .WithMany()
+                .HasForeignKey(r => r.IdContaFinanceira)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasIndex(r => r.IdContaFinanceira)
+                .HasDatabaseName("IX_Receita_IdContaFinanceira");
         }
     }
 }

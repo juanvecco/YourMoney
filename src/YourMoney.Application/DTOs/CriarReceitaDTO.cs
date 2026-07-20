@@ -8,6 +8,7 @@ namespace YourMoney.Application.DTOs
         public DateTime MesReferencia { get; set; }
         public string? Natureza { get; set; }
         public Guid? DespesaVinculadaId { get; set; }
+        public Guid? IdContaFinanceira { get; set; }
     }
 
     public class CriarReceitaResponse
@@ -22,5 +23,7 @@ namespace YourMoney.Application.DTOs
         public Guid? DespesaVinculadaId { get; set; }
         public string? DespesaVinculadaDescricao { get; set; }
         public decimal ValorAbatidoEmDespesa { get; set; }
+        public Guid? IdContaFinanceira { get; set; }
+        public string? ContaDescricao { get; set; }
     }
 }
