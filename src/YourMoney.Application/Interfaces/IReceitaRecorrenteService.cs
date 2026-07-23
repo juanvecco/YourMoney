@@ -14,5 +14,6 @@ namespace YourMoney.Application.Interfaces
         Task<CriarReceitaResponse> ConfirmarSugestaoAsync(Guid ocorrenciaId, ConfirmarSugestaoReceitaRecorrenteRequest request);
         Task IgnorarSugestaoAsync(Guid ocorrenciaId);
         Task<ProjecaoReservaEmergenciaResponse> ObterProjecaoReservaAsync();
+        Task<ListarSalariosElegiveisInvestimentoResponse> ListarElegiveisParaInvestimentoAsync();
     }
 }

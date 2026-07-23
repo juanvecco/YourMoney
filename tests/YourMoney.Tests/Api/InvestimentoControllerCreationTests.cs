@@ -29,11 +29,10 @@ namespace YourMoney.Tests.Api
 
             var created = result as CreatedAtActionResult;
             TestAssert.True(created != null, "POST should return CreatedAtActionResult");
-            TestAssert.Equal(nameof(InvestimentoController.ObterPorReferencia), created!.ActionName, "POST should link to monthly query");
+            TestAssert.Equal(nameof(InvestimentoController.ObterPorId), created!.ActionName, "POST should link to created investment");
             TestAssert.Equal(response, created.Value, "POST should return typed response");
             var routeValues = created.RouteValues!;
-            TestAssert.Equal(5, Convert.ToInt32(routeValues["mes"]), "Location should use reference month");
-            TestAssert.Equal(2026, Convert.ToInt32(routeValues["ano"]), "Location should use reference year");
+            TestAssert.Equal(response.Id, (Guid)routeValues["id"]!, "Location should use created investment id");
             TestAssert.True(service.LastRequest != null, "POST should pass typed request to service");
         }
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
 
 namespace YourMoney.Api.Controllers
 {
@@ -23,15 +24,20 @@ namespace YourMoney.Api.Controllers
             try
             {
                 var response = await _investimentoService.CriarInvestimentoAsync(request);
-                var referencia = response.MesReferencia!.Value;
+                if (!response.CriadoAgora)
+                    return Ok(response);
                 return CreatedAtAction(
-                    nameof(ObterPorReferencia),
-                    new { mes = referencia.Month, ano = referencia.Year },
+                    nameof(ObterPorId),
+                    new { id = response.Id },
                     response);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (ConflitoOperacaoInvestimentoException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
             catch (Exception)
             {
@@ -57,6 +63,21 @@ namespace YourMoney.Api.Controllers
         public async Task<IActionResult> ListarInvestimentos()
         {
             return Ok(await _investimentoService.ListarAsync());
+        }
+
+        [HttpGet("consolidado")]
+        public async Task<IActionResult> ObterConsolidado()
+        {
+            try { return Ok(await _investimentoService.ObterConsolidadoAsync()); }
+            catch (Exception) { return FalhaInesperada(); }
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> ObterPorId(Guid id)
+        {
+            try { return Ok(await _investimentoService.ObterPorIdAsync(id)); }
+            catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
+            catch (Exception) { return FalhaInesperada(); }
         }
 
         [HttpPut("{id}")]

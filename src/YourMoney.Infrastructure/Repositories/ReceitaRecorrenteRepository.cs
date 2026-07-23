@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using YourMoney.Domain.Entities;
 using YourMoney.Domain.Repositories;
+using YourMoney.Domain.Enums;
 using YourMoney.Infrastructure.Persistence;
 
 namespace YourMoney.Infrastructure.Repositories
@@ -69,6 +70,45 @@ namespace YourMoney.Infrastructure.Repositories
                 .Include(r => r.ContaFinanceira)
                 .Where(r => r.UsuarioId == usuarioId
                     && r.Ativa
+                    && r.ConsideraReservaEmergencia
+                    && r.DataInicio <= fimMes
+                    && (!r.DataTermino.HasValue || r.DataTermino.Value >= mes))
+                .OrderBy(r => r.Descricao)
+                .ThenBy(r => r.Id)
+                .ToListAsync();
+        }
+
+        public Task<List<ReceitaRecorrente>> ListarElegiveisParaInvestimentoAsync(string usuarioId, DateTime mesReferencia)
+        {
+            var mes = ReceitaRecorrente.NormalizarMesReferencia(mesReferencia);
+            var fimMes = new DateTime(mes.Year, mes.Month, DateTime.DaysInMonth(mes.Year, mes.Month));
+
+            return _context.ReceitasRecorrentes
+                .AsNoTracking()
+                .Include(r => r.ContaFinanceira)
+                .Where(r => r.UsuarioId == usuarioId
+                    && r.Ativa
+                    && r.EhSalario
+                    && r.Natureza == NaturezaReceita.RendaDisponivel
+                    && r.DataInicio <= fimMes
+                    && (!r.DataTermino.HasValue || r.DataTermino.Value >= mes))
+                .OrderBy(r => r.Descricao)
+                .ThenBy(r => r.Id)
+                .ToListAsync();
+        }
+
+        public Task<List<ReceitaRecorrente>> ListarReservasSalariaisAtivasAsync(string usuarioId, DateTime mesReferencia)
+        {
+            var mes = ReceitaRecorrente.NormalizarMesReferencia(mesReferencia);
+            var fimMes = new DateTime(mes.Year, mes.Month, DateTime.DaysInMonth(mes.Year, mes.Month));
+
+            return _context.ReceitasRecorrentes
+                .AsNoTracking()
+                .Include(r => r.ContaFinanceira)
+                .Where(r => r.UsuarioId == usuarioId
+                    && r.Ativa
+                    && r.EhSalario
+                    && r.Natureza == NaturezaReceita.RendaDisponivel
                     && r.ConsideraReservaEmergencia
                     && r.DataInicio <= fimMes
                     && (!r.DataTermino.HasValue || r.DataTermino.Value >= mes))

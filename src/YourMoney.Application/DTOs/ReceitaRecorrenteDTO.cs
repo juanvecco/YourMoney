@@ -85,4 +85,17 @@ namespace YourMoney.Application.DTOs
     {
         public List<ProjecaoReservaEmergenciaItemResponse> Itens { get; set; } = new();
     }
+
+    public class SalarioElegivelInvestimentoResponse
+    {
+        public Guid Id { get; set; }
+        public string Descricao { get; set; } = string.Empty;
+        public string ContaDescricao { get; set; } = string.Empty;
+        public decimal ValorPrevisto { get; set; }
+    }
+
+    public class ListarSalariosElegiveisInvestimentoResponse
+    {
+        public List<SalarioElegivelInvestimentoResponse> Itens { get; set; } = new();
+    }
 }

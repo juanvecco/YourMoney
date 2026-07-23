@@ -45,6 +45,22 @@ namespace YourMoney.Infrastructure.Configurations
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.HasOne(i => i.ReceitaRecorrente)
+                .WithMany()
+                .HasForeignKey(i => i.ReceitaRecorrenteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(i => new { i.UsuarioId, i.DataInvestimento })
+                .HasDatabaseName("IX_Investimento_UsuarioId_DataInvestimento");
+
+            builder.HasIndex(i => new { i.UsuarioId, i.ReceitaRecorrenteId })
+                .HasDatabaseName("IX_Investimento_UsuarioId_ReceitaRecorrenteId");
+
+            builder.HasIndex(i => new { i.UsuarioId, i.OperacaoId })
+                .IsUnique()
+                .HasFilter("[OperacaoId] IS NOT NULL")
+                .HasDatabaseName("UX_Investimento_UsuarioId_OperacaoId");
+
             builder.HasIndex(i => i.DataInvestimento)
                 .HasDatabaseName("IX_Investimento_Data");
 

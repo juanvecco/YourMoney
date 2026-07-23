@@ -22,6 +22,8 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<Investimento> GetByIdAsync(Guid id, string usuarioId)
         {
             return await _context.Investimentos
+                .Include(i => i.ReceitaRecorrente)
+                    .ThenInclude(r => r!.ContaFinanceira)
                 .FirstOrDefaultAsync(i => i.Id == id && i.UsuarioId == usuarioId);
         }
 
@@ -99,6 +101,24 @@ namespace YourMoney.Infrastructure.Repositories
             {
                 _context.Investimentos.Remove(investimento);
                 await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Investimento> AdicionarIdempotenteAsync(Investimento investimento)
+        {
+            try
+            {
+                await _context.Investimentos.AddAsync(investimento);
+                await _context.SaveChangesAsync();
+                return investimento;
+            }
+            catch (DbUpdateException) when (investimento.OperacaoId.HasValue)
+            {
+                _context.Entry(investimento).State = EntityState.Detached;
+                var existente = await ObterPorOperacaoIdAsync(investimento.OperacaoId.Value, investimento.UsuarioId);
+                if (existente == null)
+                    throw;
+                return existente;
             }
         }
 
@@ -191,6 +211,27 @@ namespace YourMoney.Infrastructure.Repositories
             return await _context.Investimentos
                 .Where(i => i.UsuarioId == usuarioId)
                 .ToListAsync();
+        }
+
+        public Task<List<Investimento>> ListarConsolidadoAsync(string usuarioId)
+        {
+            return _context.Investimentos
+                .AsNoTracking()
+                .Include(i => i.ReceitaRecorrente)
+                    .ThenInclude(r => r!.ContaFinanceira)
+                .Where(i => i.UsuarioId == usuarioId)
+                .OrderByDescending(i => i.DataInvestimento)
+                .ThenByDescending(i => i.Id)
+                .ToListAsync();
+        }
+
+        public Task<Investimento?> ObterPorOperacaoIdAsync(Guid operacaoId, string usuarioId)
+        {
+            return _context.Investimentos
+                .AsNoTracking()
+                .Include(i => i.ReceitaRecorrente)
+                    .ThenInclude(r => r!.ContaFinanceira)
+                .FirstOrDefaultAsync(i => i.UsuarioId == usuarioId && i.OperacaoId == operacaoId);
         }
     }
 }

@@ -10,6 +10,8 @@ namespace YourMoney.Domain.Repositories
         Task<List<ReceitaRecorrente>> ListarAsync(string usuarioId, bool? ativas = null);
         Task<List<ReceitaRecorrente>> ListarElegiveisParaMesAsync(string usuarioId, DateTime mesReferencia);
         Task<List<ReceitaRecorrente>> ListarElegiveisParaReservaAsync(string usuarioId, DateTime mesReferencia);
+        Task<List<ReceitaRecorrente>> ListarElegiveisParaInvestimentoAsync(string usuarioId, DateTime mesReferencia);
+        Task<List<ReceitaRecorrente>> ListarReservasSalariaisAtivasAsync(string usuarioId, DateTime mesReferencia);
         Task AdicionarOcorrenciaAsync(ReceitaRecorrenteOcorrencia ocorrencia);
         Task AtualizarOcorrenciaAsync(ReceitaRecorrenteOcorrencia ocorrencia);
         Task<ReceitaRecorrenteOcorrencia?> ObterOcorrenciaAsync(Guid recorrenciaId, DateTime mesReferencia, string usuarioId);

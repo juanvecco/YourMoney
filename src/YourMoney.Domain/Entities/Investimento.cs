@@ -12,6 +12,9 @@ namespace YourMoney.Domain.Entities
         public DateTime? MesReferencia { get; private set; }
         public DateTime? DataResgate { get; private set; }
         public bool Ativo { get; private set; }
+        public Guid? ReceitaRecorrenteId { get; private set; }
+        public virtual ReceitaRecorrente? ReceitaRecorrente { get; private set; }
+        public Guid? OperacaoId { get; private set; }
 
         private Investimento() { }
 
@@ -23,7 +26,9 @@ namespace YourMoney.Domain.Entities
             decimal precoMedio,
             decimal valorAtual,
             DateTime dataInvestimento,
-            DateTime mesReferencia)
+            DateTime mesReferencia,
+            Guid? receitaRecorrenteId = null,
+            Guid? operacaoId = null)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
@@ -34,6 +39,8 @@ namespace YourMoney.Domain.Entities
             AtualizarValorAtual(valorAtual);
             AtualizarData(dataInvestimento);
             AtualizarMesReferencia(mesReferencia);
+            DefinirReceitaRecorrente(receitaRecorrenteId);
+            DefinirOperacao(operacaoId);
             Ativo = true;
             DataResgate = null;
         }
@@ -47,8 +54,10 @@ namespace YourMoney.Domain.Entities
             decimal valorAtual,
             DateTime dataInvestimento,
             DateTime mesReferencia,
-            string usuarioId)
-            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia)
+            string usuarioId,
+            Guid? receitaRecorrenteId = null,
+            Guid? operacaoId = null)
+            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia, receitaRecorrenteId, operacaoId)
         {
             DefinirUsuario(usuarioId);
         }
@@ -65,6 +74,8 @@ namespace YourMoney.Domain.Entities
         public void AtualizarDescricao(string descricao)
         {
             var descricaoNormalizada = descricao?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(descricaoNormalizada))
+                throw new ArgumentException("Descrição do investimento é obrigatória.");
             if (descricaoNormalizada.Length > 500)
                 throw new ArgumentException("Descrição deve ter no máximo 500 caracteres.");
             Descricao = descricaoNormalizada;
@@ -113,6 +124,22 @@ namespace YourMoney.Domain.Entities
                 throw new ArgumentException("Mês de referência é obrigatório.");
 
             MesReferencia = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
+        }
+
+        public void DefinirReceitaRecorrente(Guid? receitaRecorrenteId)
+        {
+            if (receitaRecorrenteId == Guid.Empty)
+                throw new ArgumentException("Receita recorrente associada inválida.");
+
+            ReceitaRecorrenteId = receitaRecorrenteId;
+        }
+
+        private void DefinirOperacao(Guid? operacaoId)
+        {
+            if (operacaoId == Guid.Empty)
+                throw new ArgumentException("Identificador da operação inválido.");
+
+            OperacaoId = operacaoId;
         }
 
         public void Resgatar()

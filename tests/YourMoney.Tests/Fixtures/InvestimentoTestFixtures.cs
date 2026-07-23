@@ -16,7 +16,9 @@ namespace YourMoney.Tests.Fixtures
             decimal precoMedio = 153.424m,
             decimal valorAtual = 383.555m,
             DateTime? dataInvestimento = null,
-            DateTime? mesReferencia = null)
+            DateTime? mesReferencia = null,
+            Guid? receitaRecorrenteId = null,
+            Guid? operacaoId = null)
         {
             return new CriarInvestimentoRequest
             {
@@ -27,16 +29,20 @@ namespace YourMoney.Tests.Fixtures
                 PrecoMedio = precoMedio,
                 ValorAtual = valorAtual,
                 DataInvestimento = dataInvestimento ?? new DateTime(2026, 6, 9, 18, 30, 0),
-                MesReferencia = mesReferencia ?? new DateTime(2026, 5, 20, 12, 0, 0)
+                MesReferencia = mesReferencia ?? new DateTime(2026, 5, 20, 12, 0, 0),
+                ReceitaRecorrenteId = receitaRecorrenteId,
+                OperacaoId = operacaoId ?? Guid.NewGuid()
             };
         }
 
         public static InvestimentoService CreateService(
             InMemoryInvestimentoRepository? repository = null,
+            InMemoryReceitaInvestimentoRepository? receitaRepository = null,
             FakeCurrentUserService? currentUser = null)
         {
             return new InvestimentoService(
                 repository ?? new InMemoryInvestimentoRepository(),
+                receitaRepository ?? new InMemoryReceitaInvestimentoRepository(),
                 currentUser ?? new FakeCurrentUserService());
         }
     }
@@ -66,12 +72,41 @@ namespace YourMoney.Tests.Fixtures
         public Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId) => Task.FromResult(Investimentos.Where(i => i.UsuarioId == usuarioId && PertenceAoPeriodo(i, mes, ano)).ToList());
         public Task<List<Investimento>> ListarAsync() => Task.FromResult(Investimentos.ToList());
         public Task<List<Investimento>> ListarAsync(string usuarioId) => Task.FromResult(Investimentos.Where(i => i.UsuarioId == usuarioId).ToList());
+        public Task<List<Investimento>> ListarConsolidadoAsync(string usuarioId) => Task.FromResult(Investimentos.Where(i => i.UsuarioId == usuarioId).OrderByDescending(i => i.DataInvestimento).ThenByDescending(i => i.Id).ToList());
+        public Task<Investimento?> ObterPorOperacaoIdAsync(Guid operacaoId, string usuarioId) => Task.FromResult(Investimentos.FirstOrDefault(i => i.UsuarioId == usuarioId && i.OperacaoId == operacaoId));
+        public Task<Investimento> AdicionarIdempotenteAsync(Investimento investimento)
+        {
+            var existente = investimento.OperacaoId.HasValue
+                ? Investimentos.FirstOrDefault(i => i.UsuarioId == investimento.UsuarioId && i.OperacaoId == investimento.OperacaoId)
+                : null;
+            if (existente != null) return Task.FromResult(existente);
+            Investimentos.Add(investimento);
+            return Task.FromResult(investimento);
+        }
 
         private static bool PertenceAoPeriodo(Investimento investimento, int mes, int ano)
         {
             var referencia = investimento.MesReferencia ?? investimento.DataInvestimento;
             return referencia.Month == mes && referencia.Year == ano;
         }
+    }
+
+    public class InMemoryReceitaInvestimentoRepository : IReceitaRecorrenteRepository
+    {
+        public List<ReceitaRecorrente> Recorrencias { get; } = new();
+        public Task<ReceitaRecorrente?> ObterPorIdAsync(Guid id, string usuarioId) => Task.FromResult(Recorrencias.FirstOrDefault(r => r.Id == id && r.UsuarioId == usuarioId));
+        public Task<List<ReceitaRecorrente>> ListarReservasSalariaisAtivasAsync(string usuarioId, DateTime mes) => Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.ConsideraReservaEmergencia && r.EstaElegivelParaMes(mes)).ToList());
+        public Task<List<ReceitaRecorrente>> ListarElegiveisParaInvestimentoAsync(string usuarioId, DateTime mes) => Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.EstaElegivelParaMes(mes)).ToList());
+        public Task AdicionarAsync(ReceitaRecorrente recorrencia) { Recorrencias.Add(recorrencia); return Task.CompletedTask; }
+        public Task AtualizarAsync(ReceitaRecorrente recorrencia) => Task.CompletedTask;
+        public Task<List<ReceitaRecorrente>> ListarAsync(string usuarioId, bool? ativas = null) => Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId).ToList());
+        public Task<List<ReceitaRecorrente>> ListarElegiveisParaMesAsync(string usuarioId, DateTime mes) => ListarElegiveisParaInvestimentoAsync(usuarioId, mes);
+        public Task<List<ReceitaRecorrente>> ListarElegiveisParaReservaAsync(string usuarioId, DateTime mes) => ListarReservasSalariaisAtivasAsync(usuarioId, mes);
+        public Task AdicionarOcorrenciaAsync(ReceitaRecorrenteOcorrencia ocorrencia) => Task.CompletedTask;
+        public Task AtualizarOcorrenciaAsync(ReceitaRecorrenteOcorrencia ocorrencia) => Task.CompletedTask;
+        public Task<ReceitaRecorrenteOcorrencia?> ObterOcorrenciaAsync(Guid recorrenciaId, DateTime mesReferencia, string usuarioId) => Task.FromResult<ReceitaRecorrenteOcorrencia?>(null);
+        public Task<ReceitaRecorrenteOcorrencia?> ObterOcorrenciaPorIdAsync(Guid ocorrenciaId, string usuarioId) => Task.FromResult<ReceitaRecorrenteOcorrencia?>(null);
+        public Task<List<ReceitaRecorrenteOcorrencia>> ListarOcorrenciasPorMesAsync(string usuarioId, DateTime mesReferencia) => Task.FromResult(new List<ReceitaRecorrenteOcorrencia>());
     }
 
     public class FakeInvestimentoService : IInvestimentoService
@@ -82,6 +117,8 @@ namespace YourMoney.Tests.Fixtures
         public Exception? CreateException { get; set; }
         public Exception? UpdateException { get; set; }
         public InvestimentoResponse UpdateResponse { get; set; } = new();
+        public CarteiraInvestimentosConsolidadaResponse ConsolidatedResponse { get; set; } = new();
+        public Exception? ConsolidatedException { get; set; }
 
         public Task AdicionarInvestimentoAsync(Investimento investimento) => Task.CompletedTask;
         public Task<CriarInvestimentoResponse> CriarInvestimentoAsync(CriarInvestimentoRequest request)
@@ -99,6 +136,12 @@ namespace YourMoney.Tests.Fixtures
             return Task.FromResult(UpdateResponse);
         }
         public Task<Investimento> GetInvestimentoByIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<InvestimentoResponse> ObterPorIdAsync(Guid id) => Task.FromResult(UpdateResponse);
+        public Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync()
+        {
+            if (ConsolidatedException != null) throw ConsolidatedException;
+            return Task.FromResult(ConsolidatedResponse);
+        }
         public Task RemoverInvestimentoAsync(Guid id) => Task.CompletedTask;
         public Task AtualizarAsync(Investimento investimento) => Task.CompletedTask;
         public Task<List<InvestimentoResponse>> ListarAsync() => Task.FromResult(new List<InvestimentoResponse>());
