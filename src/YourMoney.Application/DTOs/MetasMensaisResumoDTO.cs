@@ -10,9 +10,9 @@ namespace YourMoney.Application.DTOs
         public decimal DespesaTotal { get; set; }
         public decimal DespesaTotalBruta { get; set; }
         public decimal DespesaTotalReembolsada { get; set; }
-        public decimal PercentualTotalComprometido { get; set; }
+        public decimal? PercentualTotalComprometido { get; set; }
         public decimal ValorTotalReservado { get; set; }
-        public decimal PercentualRestante { get; set; }
+        public decimal? PercentualRestante { get; set; }
         public decimal ValorRestanteAntesDespesas { get; set; }
         public decimal SaldoFinal { get; set; }
         public decimal ValorFaltante { get; set; }

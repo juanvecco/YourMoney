@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
 
 namespace YourMoney.Api.Controllers
 {
@@ -29,6 +30,10 @@ namespace YourMoney.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Não foi possível carregar as metas." });
+            }
         }
 
         [HttpPost]
@@ -42,6 +47,10 @@ namespace YourMoney.Api.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (ConflitoMetaMensalException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
@@ -64,6 +73,10 @@ namespace YourMoney.Api.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (ConflitoMetaMensalException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {

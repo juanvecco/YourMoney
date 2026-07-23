@@ -156,15 +156,24 @@ var tests = new (string Name, Func<Task> Run)[]
     ,
     ("monthly goal entity normalizes and owns data", MetaMensalTests.CreatesNormalizedOwnedMeta),
     ("monthly goal entity rejects invalid data", MetaMensalTests.RejectsInvalidData),
+    ("monthly goal entity supports value and mode transitions", MetaMensalTests.SupportsValueAndModeTransitions),
+    ("monthly goal entity rejects inconsistent definitions and precision", MetaMensalTests.RejectsInconsistentDefinitionsAndPrecision),
     ("monthly goal service creates edits deletes and calculates", MetaMensalServiceTests.CreatesEditsDeletesAndCalculatesMeta),
     ("monthly goal service calculates summary", MetaMensalServiceTests.CalculatesMonthlySummary),
     ("monthly goal service calculates goals from eligible revenue", MetaMensalServiceTests.CalculatesGoalsFromEligibleRevenue),
     ("monthly goal service shows exceeded planning alerts", MetaMensalServiceTests.ShowsAlertsForExceededPlanningAndZeroRevenue),
+    ("monthly goal service creates both modes and recalculates derived fields", MetaMensalServiceTests.CreatesBothModesAndRecalculatesDerivedFields),
+    ("monthly goal service edits modes and preserves reference month", MetaMensalServiceTests.EditsModesAndPreservesReferenceMonth),
+    ("monthly goal service handles zero-base value goals and safe rename", MetaMensalServiceTests.HandlesZeroBaseValueGoalsAndSafeRename),
+    ("monthly goal service rejects invalid payloads and foreign goals", MetaMensalServiceTests.RejectsInvalidDiscriminatedPayloadsAndForeignGoals),
+    ("monthly goal service rounds mixed goals and keeps hundred-percent boundary", MetaMensalServiceTests.RoundsMixedGoalsAndKeepsHundredPercentBoundary),
     ("metas controller returns summary contract", MetasControllerTests.GetResumoReturnsTypedContract),
     ("metas controller returns command contracts", MetasControllerTests.PostPutDeleteReturnExpectedContracts),
     ("metas controller returns validation and not found contracts", MetasControllerTests.ReturnsValidationAndNotFoundContracts),
+    ("metas controller returns conflict and safe unexpected failure", MetasControllerTests.ReturnsConflictAndSafeUnexpectedFailure),
     ("metas controller requires authorization", MetasControllerTests.RequiresAuthorization),
-    ("monthly goal repository and configuration stay owner scoped", MetaMensalRepositoryTests.RepositoryAndConfigurationStayOwnerScoped)
+    ("monthly goal repository and configuration stay owner scoped", MetaMensalRepositoryTests.RepositoryAndConfigurationStayOwnerScoped),
+    ("monthly goal migration preserves legacy and protects rollback", MetaMensalRepositoryTests.MigrationPreservesLegacyAndProtectsRollback)
 };
 
 var failures = new List<string>();

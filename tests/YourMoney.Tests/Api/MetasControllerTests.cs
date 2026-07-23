@@ -36,6 +36,7 @@ namespace YourMoney.Tests.Api
                 {
                     Id = metaId,
                     Nome = "Investimento",
+                    TipoDefinicao = "Percentual",
                     PercentualReceita = 25m,
                     ValorCalculado = 2500m,
                     MesReferencia = new DateTime(2026, 6, 1)
@@ -52,7 +53,9 @@ namespace YourMoney.Tests.Api
             {
                 Id = metaId,
                 Nome = "Investimento",
-                PercentualReceita = 25m
+                TipoDefinicao = "Percentual",
+                PercentualReceita = 25m,
+                ValorMeta = null
             });
             TestAssert.True(put is OkObjectResult, "PUT should return 200");
 
@@ -72,8 +75,32 @@ namespace YourMoney.Tests.Api
             var notFound = await new MetasController(new FakeMetaMensalService
             {
                 Exception = new InvalidOperationException("Meta não encontrada.")
-            }).Atualizar(Guid.NewGuid(), new AtualizarMetaMensalDTO { Id = Guid.NewGuid(), Nome = "Meta", PercentualReceita = 1m });
+            }).Atualizar(Guid.NewGuid(), new AtualizarMetaMensalDTO
+            {
+                Id = Guid.NewGuid(),
+                Nome = "Meta",
+                TipoDefinicao = "Percentual",
+                PercentualReceita = 1m
+            });
             TestAssert.True(notFound is NotFoundObjectResult, "Missing meta should return 404 on update");
+        }
+
+        public static async Task ReturnsConflictAndSafeUnexpectedFailure()
+        {
+            var conflict = await new MetasController(new FakeMetaMensalService
+            {
+                Exception = new YourMoney.Application.Services.ConflitoMetaMensalException(
+                    "Não é possível definir uma meta por valor sem receita elegível positiva no mês.")
+            }).Criar(MetaMensalTestFixtures.CriarRequestPorValor());
+            TestAssert.True(conflict is ConflictObjectResult, "Missing revenue for value mode should return 409");
+
+            var failure = await new MetasController(new FakeMetaMensalService
+            {
+                Exception = new Exception("database detail")
+            }).Criar(MetaMensalTestFixtures.CriarRequest());
+            var status = failure as ObjectResult;
+            TestAssert.Equal(500, status?.StatusCode, "Unexpected create failures should return 500");
+            TestAssert.True(!status!.Value!.ToString()!.Contains("database detail"), "Unexpected failures should not leak details");
         }
 
         public static Task RequiresAuthorization()
