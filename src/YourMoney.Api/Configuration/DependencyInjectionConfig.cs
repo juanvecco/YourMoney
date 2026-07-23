@@ -15,10 +15,14 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IDespesaService, DespesaService>();
             services.AddScoped<IDespesaRepository, DespesaRepository>();
+            services.AddScoped<IDespesaRecorrenteService, DespesaRecorrenteService>();
+            services.AddScoped<IDespesaRecorrenteRepository, DespesaRecorrenteRepository>();
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<ICategoriaRepository, CategoriaRepository>();
             services.AddScoped<IReceitaService, ReceitaService>();
             services.AddScoped<IReceitaRepository, ReceitaRepository>();
+            services.AddScoped<IReceitaRecorrenteService, ReceitaRecorrenteService>();
+            services.AddScoped<IReceitaRecorrenteRepository, ReceitaRecorrenteRepository>();
             services.AddScoped<IInvestimentoService, InvestimentoService>();
             services.AddScoped<IInvestimentoRepository, InvestimentoRepository>();
             services.AddScoped<IMetaRepository, MetaRepository>();

@@ -25,6 +25,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<Receita> GetByIdAsync(Guid id, string usuarioId)
         {
             return await _context.Receitas
+                .Include(r => r.ContaFinanceira)
                 .Include(r => r.DespesaVinculada)
                 .FirstOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId);
         }
@@ -90,6 +91,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await ReceitaPorReferencia(mes, ano, usuarioId)
+                .Include(r => r.ContaFinanceira)
                 .Include(r => r.DespesaVinculada)
                 .ToListAsync();
         }
@@ -198,6 +200,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Receita>> ListarAsync(string usuarioId)
         {
             return await _context.Receitas
+                .Include(r => r.ContaFinanceira)
                 .Include(r => r.DespesaVinculada)
                 .Where(r => r.UsuarioId == usuarioId)
                 .ToListAsync();

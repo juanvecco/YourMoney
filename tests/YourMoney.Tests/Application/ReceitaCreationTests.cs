@@ -54,5 +54,33 @@ namespace YourMoney.Tests.Application
             foreach (var request in invalidRequests)
                 await TestAssert.ThrowsAsync<ArgumentException>(() => service.CriarReceitaAsync(request), "Invalid receita data should be rejected");
         }
+
+        public static async Task KeepsLegacyAccountOptionalAndPersistsConfirmedAccount()
+        {
+            var legacy = new YourMoney.Domain.Entities.Receita("Legado", 100m, new DateTime(2026, 5, 10));
+            TestAssert.True(!legacy.IdContaFinanceira.HasValue, "Legacy Receita should remain valid without account");
+
+            var repository = new InMemoryReceitaRepository();
+            var service = ReceitaTestFixtures.CreateService(repository);
+            var request = ReceitaTestFixtures.CriarRequest();
+            request.IdContaFinanceira = DespesaTestFixtures.ContaId;
+
+            var response = await service.CriarReceitaAsync(request);
+
+            TestAssert.Equal(DespesaTestFixtures.ContaId, repository.Receitas.Single().IdContaFinanceira!.Value, "Confirmed Receita should persist selected account");
+            TestAssert.Equal(DespesaTestFixtures.ContaId, response.IdContaFinanceira!.Value, "Response should expose selected account");
+        }
+
+        public static Task RejectsAccountOutsideAuthenticatedUser()
+        {
+            var service = ReceitaTestFixtures.CreateService(
+                contaRepository: new ContaFinanceiraRepositoryStub(false));
+            var request = ReceitaTestFixtures.CriarRequest();
+            request.IdContaFinanceira = DespesaTestFixtures.ContaId;
+
+            return TestAssert.ThrowsAsync<ArgumentException>(
+                () => service.CriarReceitaAsync(request),
+                "Receita should reject an account outside the authenticated user");
+        }
     }
 }

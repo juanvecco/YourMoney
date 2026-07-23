@@ -12,5 +12,7 @@
         public Guid? DespesaVinculadaId { get; set; }
         public string? DespesaVinculadaDescricao { get; set; }
         public decimal ValorAbatidoEmDespesa { get; set; }
+        public Guid? IdContaFinanceira { get; set; }
+        public string? ContaDescricao { get; set; }
     }
 }

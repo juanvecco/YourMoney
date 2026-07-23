@@ -8,7 +8,11 @@ namespace YourMoney.Tests.Application
         public static async Task CreatedReceitaIsListedOnlyForOwner()
         {
             var repository = new InMemoryReceitaRepository();
-            var service = new ReceitaService(repository, new InMemoryDespesaRepository(), new FakeCurrentUserService { UserId = "user-a" });
+            var service = new ReceitaService(
+                repository,
+                new InMemoryDespesaRepository(),
+                new ContaFinanceiraRepositoryStub(true),
+                new FakeCurrentUserService { UserId = "user-a" });
 
             await service.CriarReceitaAsync(ReceitaTestFixtures.CriarRequest());
 

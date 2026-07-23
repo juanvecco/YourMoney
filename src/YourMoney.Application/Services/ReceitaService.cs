@@ -10,15 +10,18 @@ namespace YourMoney.Application.Services
     {
         private readonly IReceitaRepository _receitaRepository;
         private readonly IDespesaRepository _despesaRepository;
+        private readonly IContaFinanceiraRepository _contaRepository;
         private readonly ICurrentUserService _currentUserService;
 
         public ReceitaService(
             IReceitaRepository receitaRepository,
             IDespesaRepository despesaRepository,
+            IContaFinanceiraRepository contaRepository,
             ICurrentUserService currentUserService)
         {
             _receitaRepository = receitaRepository;
             _despesaRepository = despesaRepository;
+            _contaRepository = contaRepository;
             _currentUserService = currentUserService;
         }
 
@@ -29,6 +32,7 @@ namespace YourMoney.Application.Services
 
             var usuarioId = _currentUserService.UserId;
             await ValidarNaturezaAsync(receita.Natureza, receita.DespesaVinculadaId, receita.Valor, usuarioId, receita.Id);
+            await ValidarContaAsync(receita.IdContaFinanceira, usuarioId);
             receita.DefinirUsuario(usuarioId);
             await _receitaRepository.AdicionarAsync(receita);
         }
@@ -41,6 +45,7 @@ namespace YourMoney.Application.Services
             var natureza = ParseNatureza(request.Natureza);
             var valor = decimal.Round(request.Valor, 2, MidpointRounding.AwayFromZero);
             await ValidarNaturezaAsync(natureza, request.DespesaVinculadaId, valor, usuarioId);
+            await ValidarContaAsync(request.IdContaFinanceira, usuarioId);
 
             var receita = new Receita(
                 request.Descricao!,
@@ -49,7 +54,8 @@ namespace YourMoney.Application.Services
                 request.MesReferencia,
                 usuarioId,
                 natureza,
-                request.DespesaVinculadaId);
+                request.DespesaVinculadaId,
+                request.IdContaFinanceira);
 
             await _receitaRepository.AdicionarAsync(receita);
 
@@ -81,6 +87,7 @@ namespace YourMoney.Application.Services
                 throw new InvalidOperationException("Receita não encontrada.");
 
             await ValidarNaturezaAsync(receita.Natureza, receita.DespesaVinculadaId, receita.Valor, _currentUserService.UserId, receita.Id);
+            await ValidarContaAsync(receita.IdContaFinanceira, _currentUserService.UserId);
             receita.DefinirUsuario(_currentUserService.UserId);
             await _receitaRepository.AtualizarAsync(receita);
         }
@@ -97,6 +104,7 @@ namespace YourMoney.Application.Services
             var valor = decimal.Round(dto.Valor, 2, MidpointRounding.AwayFromZero);
 
             await ValidarNaturezaAsync(natureza, dto.DespesaVinculadaId, valor, _currentUserService.UserId, id);
+            await ValidarContaAsync(dto.IdContaFinanceira, _currentUserService.UserId);
 
             receita.AtualizarDescricao(dto.Descricao ?? string.Empty);
             receita.AtualizarValor(valor);
@@ -104,6 +112,7 @@ namespace YourMoney.Application.Services
             if (dto.MesReferencia.HasValue)
                 receita.AtualizarMesReferencia(dto.MesReferencia.Value);
             receita.AtualizarNatureza(natureza, dto.DespesaVinculadaId);
+            receita.AtualizarContaFinanceira(dto.IdContaFinanceira);
 
             await _receitaRepository.AtualizarAsync(receita);
             return MapearReceita(receita);
@@ -157,6 +166,15 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Total de reembolsos não pode ultrapassar o valor pendente da despesa.");
         }
 
+        private async Task ValidarContaAsync(Guid? idContaFinanceira, string usuarioId)
+        {
+            if (!idContaFinanceira.HasValue)
+                return;
+            if (idContaFinanceira.Value == Guid.Empty
+                || !await _contaRepository.ExisteAsync(idContaFinanceira.Value, usuarioId))
+                throw new ArgumentException("Conta Financeira não encontrada.");
+        }
+
         private static void ValidarCriacao(CriarReceitaRequest request)
         {
             if (request == null)
@@ -199,7 +217,9 @@ namespace YourMoney.Application.Services
                 ConsideraNasMetas = dto.ConsideraNasMetas,
                 DespesaVinculadaId = dto.DespesaVinculadaId,
                 DespesaVinculadaDescricao = dto.DespesaVinculadaDescricao,
-                ValorAbatidoEmDespesa = dto.ValorAbatidoEmDespesa
+                ValorAbatidoEmDespesa = dto.ValorAbatidoEmDespesa,
+                IdContaFinanceira = dto.IdContaFinanceira,
+                ContaDescricao = dto.ContaDescricao
             };
         }
 
@@ -217,7 +237,9 @@ namespace YourMoney.Application.Services
                 ConsideraNasMetas = receita.ConsideraNasMetas,
                 DespesaVinculadaId = receita.DespesaVinculadaId,
                 DespesaVinculadaDescricao = receita.DespesaVinculada?.Descricao,
-                ValorAbatidoEmDespesa = receita.Natureza == NaturezaReceita.Reembolso ? receita.Valor : 0m
+                ValorAbatidoEmDespesa = receita.Natureza == NaturezaReceita.Reembolso ? receita.Valor : 0m,
+                IdContaFinanceira = receita.IdContaFinanceira,
+                ContaDescricao = receita.ContaFinanceira?.Descricao
             };
         }
     }
