@@ -243,8 +243,14 @@ namespace YourMoney.Tests.Fixtures
             _existingIds = existingIds == null ? null : new HashSet<Guid>(existingIds);
         }
 
-        public Task<ContaFinanceira> GetByIdAsync(Guid id) => throw new NotImplementedException();
-        public Task<ContaFinanceira> GetByIdAsync(Guid id, string usuarioId) => throw new NotImplementedException();
+        public Task<ContaFinanceira> GetByIdAsync(Guid id) => Task.FromResult(CriarConta(id, "Conta Principal", "test-user"));
+        public Task<ContaFinanceira> GetByIdAsync(Guid id, string usuarioId)
+        {
+            if (!Existe(id) || string.IsNullOrWhiteSpace(usuarioId))
+                throw new InvalidOperationException("Conta Financeira não encontrada.");
+
+            return Task.FromResult(CriarConta(id, "Conta Principal", usuarioId));
+        }
         public Task AdicionarAsync(ContaFinanceira contaFinanceira) => throw new NotImplementedException();
         public Task AtualizarAsync(ContaFinanceira contaFinanceira) => throw new NotImplementedException();
         public Task RemoverAsync(Guid id) => throw new NotImplementedException();
@@ -257,6 +263,13 @@ namespace YourMoney.Tests.Fixtures
         private bool Existe(Guid id)
         {
             return _exists && id != Guid.Empty && (_existingIds == null || _existingIds.Contains(id));
+        }
+
+        private static ContaFinanceira CriarConta(Guid id, string descricao, string usuarioId)
+        {
+            var conta = new ContaFinanceira(descricao, usuarioId);
+            typeof(ContaFinanceira).GetProperty(nameof(ContaFinanceira.Id))!.SetValue(conta, id);
+            return conta;
         }
     }
 

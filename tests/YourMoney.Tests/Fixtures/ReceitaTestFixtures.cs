@@ -31,11 +31,13 @@ namespace YourMoney.Tests.Fixtures
         public static ReceitaService CreateService(
             InMemoryReceitaRepository? repository = null,
             FakeCurrentUserService? currentUser = null,
-            InMemoryDespesaRepository? despesaRepository = null)
+            InMemoryDespesaRepository? despesaRepository = null,
+            ContaFinanceiraRepositoryStub? contaRepository = null)
         {
             return new ReceitaService(
                 repository ?? new InMemoryReceitaRepository(),
                 despesaRepository ?? new InMemoryDespesaRepository(),
+                contaRepository ?? new ContaFinanceiraRepositoryStub(true),
                 currentUser ?? new FakeCurrentUserService());
         }
     }

@@ -60,6 +60,23 @@ namespace YourMoney.Tests.Api
             return Task.CompletedTask;
         }
 
+        public static Task StartupScriptStopsOnlyProjectApiBeforeBuildAndMigration()
+        {
+            var scriptPath = Path.Combine(FindRepositoryRoot(), "abrir-yourmoney.ps1");
+            var source = File.ReadAllText(scriptPath);
+            var stopCallIndex = source.LastIndexOf("Stop-ExistingApi", StringComparison.Ordinal);
+            var publishCallIndex = source.LastIndexOf("Publish-AngularToApi", StringComparison.Ordinal);
+            var updateDatabaseCallIndex = source.LastIndexOf("Update-Database", StringComparison.Ordinal);
+
+            TestAssert.True(source.Contains("Get-Process -Name \"YourMoney.Api\"", StringComparison.Ordinal), "Startup script should target only YourMoney.Api processes");
+            TestAssert.True(source.Contains("resolvedProcessPath.StartsWith($apiExecutableRoot", StringComparison.Ordinal), "Startup script should verify the API executable belongs to this project");
+            TestAssert.True(source.Contains("Stop-Process -Id $process.Id", StringComparison.Ordinal), "Startup script should release locked API assemblies");
+            TestAssert.True(stopCallIndex >= 0 && stopCallIndex < publishCallIndex, "Startup script should stop the old API before publishing Angular files");
+            TestAssert.True(stopCallIndex < updateDatabaseCallIndex, "Startup script should stop the old API before EF builds and applies migrations");
+
+            return Task.CompletedTask;
+        }
+
         public static Task StartupCmdDelegatesToPowerShellScript()
         {
             var commandPath = Path.Combine(FindRepositoryRoot(), "abrir-yourmoney.cmd");
