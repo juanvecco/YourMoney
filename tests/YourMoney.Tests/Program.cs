@@ -173,7 +173,29 @@ var tests = new (string Name, Func<Task> Run)[]
     ("metas controller returns conflict and safe unexpected failure", MetasControllerTests.ReturnsConflictAndSafeUnexpectedFailure),
     ("metas controller requires authorization", MetasControllerTests.RequiresAuthorization),
     ("monthly goal repository and configuration stay owner scoped", MetaMensalRepositoryTests.RepositoryAndConfigurationStayOwnerScoped),
-    ("monthly goal migration preserves legacy and protects rollback", MetaMensalRepositoryTests.MigrationPreservesLegacyAndProtectsRollback)
+    ("monthly goal migration preserves legacy and protects rollback", MetaMensalRepositoryTests.MigrationPreservesLegacyAndProtectsRollback),
+    ("investment organization normalizes and limits group names", InvestimentoOrganizacaoDomainTests.NormalizesAndLimitsGroupNames),
+    ("investment organization keeps optional controlled state", InvestimentoOrganizacaoDomainTests.KeepsOrganizationOptionalAndControlled),
+    ("investment organization persistence is additive and owner safe", InvestimentoOrganizacaoPersistenceTests.MapsNullableOwnedOrganizationSafely),
+    ("investment groups create list and rename for owner", GrupoObjetivoInvestimentoServiceTests.CreatesListsAndRenamesOwnerGroups),
+    ("investment groups reject duplicates and isolate owners", GrupoObjetivoInvestimentoServiceTests.RejectsDuplicateAndForeignGroups),
+    ("investment objective participates in idempotency", GrupoObjetivoInvestimentoServiceTests.AssociatesGroupAndIncludesItInIdempotency),
+    ("investment asset types accept stable codes", InvestimentoTipoAtivoTests.AcceptsEveryStableCodeAndPreservesLegacyType),
+    ("investment asset type clears and validates", InvestimentoTipoAtivoTests.ClearsAndRejectsInvalidClassification),
+    ("investment organization filters and totals exactly", InvestimentoOrganizacaoConsultaTests.FiltersWithAndAndExactBuckets),
+    ("investment organization validates absence and ownership", InvestimentoOrganizacaoConsultaTests.ValidatesContradictionsNullBucketsAndForeignGroup),
+    ("investment organization handles planned maximum", InvestimentoOrganizacaoConsultaTests.HandlesPlannedMaximumDeterministically),
+    ("used objective requires explicit deletion decision", GrupoObjetivoInvestimentoExclusaoTests.RequiresExplicitDecisionForUsedGroup),
+    ("objective transfer preserves investments and money", GrupoObjetivoInvestimentoExclusaoTests.UnlinksOrTransfersWithoutDeletingInvestments),
+    ("objective deletion rejects invalid destinations", GrupoObjetivoInvestimentoExclusaoTests.RejectsInvalidSelfAndForeignDestinations),
+    ("objective deletion repository is atomic and set based", GrupoObjetivoInvestimentoTransacaoTests.UsesSerializableSetBasedAtomicCommand),
+    ("objective deletion repository rolls back injected SQL failure", GrupoObjetivoInvestimentoTransacaoTests.RollsBackInjectedDeleteFailureWhenSqlServerIsConfigured),
+    ("objective group controller exposes protected CRUD", GrupoObjetivoInvestimentoControllerTests.CrudReturnsProtectedTypedContracts),
+    ("objective group controller maps safe errors", GrupoObjetivoInvestimentoControllerTests.MapsValidationNotFoundConflictAndFailure),
+    ("investment type controller binds additive fields", InvestimentoTipoAtivoControllerTests.AdditiveTypeFieldsRoundTripOnCommands),
+    ("investment organization controller binds filters", InvestimentoOrganizacaoConsultaControllerTests.BindsEveryConsolidatedFilter),
+    ("investment organization controller maps query errors", InvestimentoOrganizacaoConsultaControllerTests.MapsInvalidUnavailableAndUnexpectedQueries),
+    ("objective exclusion controller maps atomic command", GrupoObjetivoInvestimentoExclusaoControllerTests.ExclusionReturnsNoContentAndStableConflicts)
 };
 
 var failures = new List<string>();

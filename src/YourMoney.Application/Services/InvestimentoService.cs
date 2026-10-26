@@ -16,15 +16,18 @@ namespace YourMoney.Application.Services
     {
         private readonly IInvestimentoRepository _investimentoRepository;
         private readonly IReceitaRecorrenteRepository _receitaRecorrenteRepository;
+        private readonly IGrupoObjetivoInvestimentoRepository _grupoRepository;
         private readonly ICurrentUserService _currentUserService;
 
         public InvestimentoService(
             IInvestimentoRepository investimentoRepository,
             IReceitaRecorrenteRepository receitaRecorrenteRepository,
+            IGrupoObjetivoInvestimentoRepository grupoRepository,
             ICurrentUserService currentUserService)
         {
             _investimentoRepository = investimentoRepository;
             _receitaRecorrenteRepository = receitaRecorrenteRepository;
+            _grupoRepository = grupoRepository;
             _currentUserService = currentUserService;
         }
 
@@ -49,6 +52,8 @@ namespace YourMoney.Application.Services
                 return ResolverRepeticao(existente, request);
 
             await ValidarNovaAssociacaoAsync(request.ReceitaRecorrenteId);
+            var grupo = await ValidarGrupoAsync(request.GrupoObjetivoId);
+            var tipoAtivo = LerTipoAtivo(request.TipoAtivo);
             var investimento = new Investimento(
                 request.Nome!,
                 request.Descricao!,
@@ -60,7 +65,10 @@ namespace YourMoney.Application.Services
                 request.MesReferencia,
                 usuarioId,
                 request.ReceitaRecorrenteId,
-                request.OperacaoId);
+                request.OperacaoId,
+                request.GrupoObjetivoId,
+                tipoAtivo);
+            investimento.AssociarGrupoObjetivo(grupo);
 
             var persistido = await _investimentoRepository.AdicionarIdempotenteAsync(investimento);
             if (persistido.Id != investimento.Id)
@@ -76,6 +84,10 @@ namespace YourMoney.Application.Services
 
             if (request.ReceitaRecorrenteId != investimento.ReceitaRecorrenteId)
                 await ValidarNovaAssociacaoAsync(request.ReceitaRecorrenteId);
+            GrupoObjetivoInvestimento? grupo = investimento.GrupoObjetivoInvestimento;
+            if (request.GrupoObjetivoId != investimento.GrupoObjetivoInvestimentoId)
+                grupo = await ValidarGrupoAsync(request.GrupoObjetivoId);
+            var tipoAtivo = LerTipoAtivo(request.TipoAtivo);
 
             investimento.AtualizarNome(request.Nome!);
             investimento.AtualizarDescricao(request.Descricao!);
@@ -86,6 +98,8 @@ namespace YourMoney.Application.Services
             investimento.AtualizarData(request.DataInvestimento);
             investimento.AtualizarMesReferencia(request.MesReferencia);
             investimento.DefinirReceitaRecorrente(request.ReceitaRecorrenteId);
+            investimento.AssociarGrupoObjetivo(grupo);
+            investimento.ClassificarTipoAtivo(tipoAtivo);
 
             await _investimentoRepository.AtualizarAsync(investimento);
             return Mapear(investimento);
@@ -98,9 +112,15 @@ namespace YourMoney.Application.Services
             return Mapear(await ObterInvestimentoAsync(id));
         }
 
-        public async Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync()
+        public async Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync(FiltroOrganizacaoInvestimentos? filtro = null)
         {
+            filtro ??= new FiltroOrganizacaoInvestimentos();
+            ValidarFiltro(filtro);
             var usuarioId = _currentUserService.UserId;
+            var tipoAtivoFiltro = LerTipoAtivo(filtro.TipoAtivo);
+            if (filtro.GrupoObjetivoId.HasValue &&
+                await _grupoRepository.ObterAsync(filtro.GrupoObjetivoId.Value, usuarioId, false) == null)
+                throw new KeyNotFoundException("Objetivo financeiro não encontrado.");
             var mesAtual = ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today);
             var investimentos = await _investimentoRepository.ListarConsolidadoAsync(usuarioId);
             var marcadas = await _receitaRecorrenteRepository.ListarReservasSalariaisAtivasAsync(usuarioId, mesAtual);
@@ -119,14 +139,56 @@ namespace YourMoney.Application.Services
                 .ThenBy(r => r.Id)
                 .ToList();
 
+            IEnumerable<Investimento> consulta = investimentos;
+            if (filtro.GrupoObjetivoId.HasValue)
+                consulta = consulta.Where(i => i.GrupoObjetivoInvestimentoId == filtro.GrupoObjetivoId.Value);
+            else if (filtro.SemGrupo)
+                consulta = consulta.Where(i => i.GrupoObjetivoInvestimentoId == null);
+
+            if (tipoAtivoFiltro.HasValue)
+                consulta = consulta.Where(i => i.TipoAtivo == tipoAtivoFiltro.Value);
+            else if (filtro.NaoClassificado)
+                consulta = consulta.Where(i => i.TipoAtivo == null);
+
+            var filtrados = consulta
+                .OrderByDescending(i => i.DataInvestimento)
+                .ThenByDescending(i => i.Id)
+                .ToList();
+
             return new CarteiraInvestimentosConsolidadaResponse
             {
                 TotalInvestido = investimentos.Sum(i => i.ValorAtual),
-                Itens = investimentos.Select(Mapear).ToList(),
+                TotalFiltrado = filtrados.Sum(i => i.ValorAtual),
+                Itens = filtrados.Select(Mapear).ToList(),
                 Reservas = rendas.Select(r => MapearReserva(
                     r,
                     acumulados.GetValueOrDefault(r.Id),
-                    mesAtual)).ToList()
+                    mesAtual)).ToList(),
+                SubtotaisPorGrupo = filtrados
+                    .GroupBy(i => new { i.GrupoObjetivoInvestimentoId, Nome = i.GrupoObjetivoInvestimento?.Nome ?? "Sem grupo" })
+                    .Select(g => new SubtotalGrupoInvestimentoResponse
+                    {
+                        GrupoObjetivoId = g.Key.GrupoObjetivoInvestimentoId,
+                        Nome = g.Key.Nome,
+                        QuantidadeInvestimentos = g.Count(),
+                        ValorAtual = g.Sum(i => i.ValorAtual)
+                    })
+                    .OrderBy(g => g.GrupoObjetivoId == null ? 1 : 0)
+                    .ThenBy(g => g.Nome)
+                    .ThenBy(g => g.GrupoObjetivoId)
+                    .ToList(),
+                SubtotaisPorTipoAtivo = filtrados
+                    .GroupBy(i => i.TipoAtivo)
+                    .Select(g => new SubtotalTipoAtivoInvestimentoResponse
+                    {
+                        TipoAtivo = g.Key?.ToString(),
+                        Nome = RotuloTipoAtivo(g.Key),
+                        QuantidadeInvestimentos = g.Count(),
+                        ValorAtual = g.Sum(i => i.ValorAtual)
+                    })
+                    .OrderBy(g => g.TipoAtivo == null ? 1 : 0)
+                    .ThenBy(g => g.Nome)
+                    .ToList()
             };
         }
 
@@ -171,6 +233,31 @@ namespace YourMoney.Application.Services
                 _currentUserService.UserId);
             if (receita == null || !Elegivel(receita, ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today)))
                 throw new ArgumentException("A receita recorrente selecionada não é um salário de renda disponível elegível.");
+        }
+
+        private async Task<GrupoObjetivoInvestimento?> ValidarGrupoAsync(Guid? grupoObjetivoId)
+        {
+            if (!grupoObjetivoId.HasValue)
+                return null;
+            return await _grupoRepository.ObterAsync(grupoObjetivoId.Value, _currentUserService.UserId, false)
+                ?? throw new KeyNotFoundException("Objetivo financeiro selecionado não está disponível.");
+        }
+
+        private static TipoAtivo? LerTipoAtivo(string? codigo)
+        {
+            if (string.IsNullOrWhiteSpace(codigo))
+                return null;
+            if (!Enum.TryParse<TipoAtivo>(codigo, false, out var tipo) || !Enum.IsDefined(tipo))
+                throw new ArgumentException("Tipo de ativo inválido.");
+            return tipo;
+        }
+
+        private static void ValidarFiltro(FiltroOrganizacaoInvestimentos filtro)
+        {
+            if (filtro.GrupoObjetivoId.HasValue && filtro.SemGrupo)
+                throw new ArgumentException("Informe um objetivo ou selecione apenas investimentos sem grupo, não ambos.");
+            if (!string.IsNullOrWhiteSpace(filtro.TipoAtivo) && filtro.NaoClassificado)
+                throw new ArgumentException("Informe um tipo de ativo ou selecione apenas investimentos não classificados, não ambos.");
         }
 
         private static bool Elegivel(ReceitaRecorrente receita, DateTime mes)
@@ -226,7 +313,9 @@ namespace YourMoney.Application.Services
                 && investimento.ValorAtual == NormalizarDecimal(request.ValorAtual)
                 && investimento.DataInvestimento == request.DataInvestimento.Date
                 && investimento.MesReferencia == mes
-                && investimento.ReceitaRecorrenteId == request.ReceitaRecorrenteId;
+                && investimento.ReceitaRecorrenteId == request.ReceitaRecorrenteId
+                && investimento.GrupoObjetivoInvestimentoId == request.GrupoObjetivoId
+                && investimento.TipoAtivo == LerTipoAtivo(request.TipoAtivo);
         }
 
         private static decimal NormalizarDecimal(decimal valor) =>
@@ -261,6 +350,16 @@ namespace YourMoney.Application.Services
             response.DataResgate = investimento.DataResgate;
             response.Ativo = investimento.Ativo;
             response.ReceitaRecorrenteId = investimento.ReceitaRecorrenteId;
+            response.GrupoObjetivoId = investimento.GrupoObjetivoInvestimentoId;
+            response.TipoAtivo = investimento.TipoAtivo?.ToString();
+            if (investimento.GrupoObjetivoInvestimento != null)
+            {
+                response.GrupoObjetivo = new GrupoObjetivoResumoResponse
+                {
+                    Id = investimento.GrupoObjetivoInvestimento.Id,
+                    Nome = investimento.GrupoObjetivoInvestimento.Nome
+                };
+            }
             if (investimento.ReceitaRecorrente != null)
             {
                 var mes = ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today);
@@ -303,5 +402,16 @@ namespace YourMoney.Application.Services
                     : decimal.Round(acumulado / meta * 100m, 2, MidpointRounding.AwayFromZero)
             };
         }
+
+        private static string RotuloTipoAtivo(TipoAtivo? tipo) => tipo switch
+        {
+            TipoAtivo.FundoInvestimento => "Fundo de investimento",
+            TipoAtivo.Exterior => "Investimento no exterior",
+            TipoAtivo.Criptomoeda => "Criptomoeda",
+            TipoAtivo.RendaFixa => "Renda fixa",
+            TipoAtivo.Acoes => "Ações",
+            TipoAtivo.Outros => "Outros",
+            _ => "Não classificado"
+        };
     }
 }

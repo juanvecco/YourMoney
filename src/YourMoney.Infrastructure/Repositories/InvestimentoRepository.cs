@@ -22,6 +22,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<Investimento> GetByIdAsync(Guid id, string usuarioId)
         {
             return await _context.Investimentos
+                .Include(i => i.GrupoObjetivoInvestimento)
                 .Include(i => i.ReceitaRecorrente)
                     .ThenInclude(r => r!.ContaFinanceira)
                 .FirstOrDefaultAsync(i => i.Id == id && i.UsuarioId == usuarioId);
@@ -188,6 +189,9 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Investimentos
+                .Include(i => i.GrupoObjetivoInvestimento)
+                .Include(i => i.ReceitaRecorrente)
+                    .ThenInclude(r => r!.ContaFinanceira)
                 .Where(r => r.UsuarioId == usuarioId
                     && ((r.MesReferencia.HasValue
                         && r.MesReferencia.Value.Month == mes
@@ -209,7 +213,13 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Investimento>> ListarAsync(string usuarioId)
         {
             return await _context.Investimentos
+                .AsNoTracking()
+                .Include(i => i.GrupoObjetivoInvestimento)
+                .Include(i => i.ReceitaRecorrente)
+                    .ThenInclude(r => r!.ContaFinanceira)
                 .Where(i => i.UsuarioId == usuarioId)
+                .OrderByDescending(i => i.DataInvestimento)
+                .ThenByDescending(i => i.Id)
                 .ToListAsync();
         }
 
@@ -217,6 +227,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return _context.Investimentos
                 .AsNoTracking()
+                .Include(i => i.GrupoObjetivoInvestimento)
                 .Include(i => i.ReceitaRecorrente)
                     .ThenInclude(r => r!.ContaFinanceira)
                 .Where(i => i.UsuarioId == usuarioId)
@@ -229,6 +240,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return _context.Investimentos
                 .AsNoTracking()
+                .Include(i => i.GrupoObjetivoInvestimento)
                 .Include(i => i.ReceitaRecorrente)
                     .ThenInclude(r => r!.ContaFinanceira)
                 .FirstOrDefaultAsync(i => i.UsuarioId == usuarioId && i.OperacaoId == operacaoId);

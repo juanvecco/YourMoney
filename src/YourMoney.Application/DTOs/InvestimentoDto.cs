@@ -14,6 +14,8 @@ namespace YourMoney.Application.DTOs
         public DateTime? DataResgate { get; set; }
         public bool Ativo { get; set; }
         public Guid? ReceitaRecorrenteId { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
     public class InvestimentoWriteRequest
@@ -27,6 +29,8 @@ namespace YourMoney.Application.DTOs
         public DateTime DataInvestimento { get; set; }
         public DateTime MesReferencia { get; set; }
         public Guid? ReceitaRecorrenteId { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
     public class CriarInvestimentoRequest : InvestimentoWriteRequest
@@ -53,6 +57,9 @@ namespace YourMoney.Application.DTOs
         public bool Ativo { get; set; }
         public Guid? ReceitaRecorrenteId { get; set; }
         public ReservaAssociadaInvestimentoResponse? ReservaAssociada { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public GrupoObjetivoResumoResponse? GrupoObjetivo { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
     public class CriarInvestimentoResponse : InvestimentoResponse
@@ -93,7 +100,40 @@ namespace YourMoney.Application.DTOs
     public class CarteiraInvestimentosConsolidadaResponse
     {
         public decimal TotalInvestido { get; set; }
+        public decimal TotalFiltrado { get; set; }
         public List<InvestimentoResponse> Itens { get; set; } = new();
         public List<ReservaSalarialResponse> Reservas { get; set; } = new();
+        public List<SubtotalGrupoInvestimentoResponse> SubtotaisPorGrupo { get; set; } = new();
+        public List<SubtotalTipoAtivoInvestimentoResponse> SubtotaisPorTipoAtivo { get; set; } = new();
+    }
+
+    public sealed class GrupoObjetivoResumoResponse
+    {
+        public Guid Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+    }
+
+    public sealed class FiltroOrganizacaoInvestimentos
+    {
+        public Guid? GrupoObjetivoId { get; set; }
+        public bool SemGrupo { get; set; }
+        public string? TipoAtivo { get; set; }
+        public bool NaoClassificado { get; set; }
+    }
+
+    public sealed class SubtotalGrupoInvestimentoResponse
+    {
+        public Guid? GrupoObjetivoId { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public int QuantidadeInvestimentos { get; set; }
+        public decimal ValorAtual { get; set; }
+    }
+
+    public sealed class SubtotalTipoAtivoInvestimentoResponse
+    {
+        public string? TipoAtivo { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public int QuantidadeInvestimentos { get; set; }
+        public decimal ValorAtual { get; set; }
     }
 }

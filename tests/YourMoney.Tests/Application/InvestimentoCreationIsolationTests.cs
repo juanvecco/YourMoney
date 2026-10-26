@@ -8,7 +8,7 @@ namespace YourMoney.Tests.Application
         public static async Task CreatedInvestmentIsListedOnlyForOwner()
         {
             var repository = new InMemoryInvestimentoRepository();
-            var service = new InvestimentoService(repository, new InMemoryReceitaInvestimentoRepository(), new FakeCurrentUserService { UserId = "user-a" });
+            var service = new InvestimentoService(repository, new InMemoryReceitaInvestimentoRepository(), new InMemoryGrupoObjetivoInvestimentoRepository(), new FakeCurrentUserService { UserId = "user-a" });
 
             await service.CriarInvestimentoAsync(InvestimentoTestFixtures.CriarRequest());
 
@@ -20,8 +20,8 @@ namespace YourMoney.Tests.Application
         {
             var repository = new InMemoryInvestimentoRepository();
             var receitas = new InMemoryReceitaInvestimentoRepository();
-            var ownerService = new InvestimentoService(repository, receitas, new FakeCurrentUserService { UserId = "user-a" });
-            var otherService = new InvestimentoService(repository, receitas, new FakeCurrentUserService { UserId = "user-b" });
+            var ownerService = new InvestimentoService(repository, receitas, new InMemoryGrupoObjetivoInvestimentoRepository(), new FakeCurrentUserService { UserId = "user-a" });
+            var otherService = new InvestimentoService(repository, receitas, new InMemoryGrupoObjetivoInvestimentoRepository(), new FakeCurrentUserService { UserId = "user-b" });
 
             await ownerService.CriarInvestimentoAsync(InvestimentoTestFixtures.CriarRequest(
                 dataInvestimento: new DateTime(2026, 6, 9),

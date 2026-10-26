@@ -12,6 +12,7 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Receita> Receitas { get; set; }
         public DbSet<Investimento> Investimentos { get; set; }
+        public DbSet<GrupoObjetivoInvestimento> GruposObjetivoInvestimento { get; set; }
         public DbSet<Meta> Metas { get; set; }
         public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<ContaFinanceira> ContaFinanceira { get; set; }
@@ -28,6 +29,7 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new CategoriaConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaConfiguration());
             modelBuilder.ApplyConfiguration(new InvestimentoConfiguration());
+            modelBuilder.ApplyConfiguration(new GrupoObjetivoInvestimentoConfiguration());
             modelBuilder.ApplyConfiguration(new MetaConfiguration());
             modelBuilder.ApplyConfiguration(new MetaMensalConfiguration());
             modelBuilder.ApplyConfiguration(new ContaFinanceiraConfiguration());

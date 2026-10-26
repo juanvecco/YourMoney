@@ -31,7 +31,17 @@ namespace YourMoney.Api.Configuration
 
             var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+                {
+                    // AddIdentity registers its application cookie as the default
+                    // scheme. API clients (Flutter and the Angular interceptor)
+                    // authenticate with the JWT returned by /autenticar, so the
+                    // API must explicitly prefer Bearer instead of redirecting an
+                    // unauthenticated request to /Account/Login.
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = true;

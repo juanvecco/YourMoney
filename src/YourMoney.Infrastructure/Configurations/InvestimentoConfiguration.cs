@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 
 namespace YourMoney.Infrastructure.Configurations
 {
@@ -8,7 +9,9 @@ namespace YourMoney.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Investimento> builder)
         {
-            builder.ToTable("tbInvestimento");
+            builder.ToTable("tbInvestimento", table => table.HasCheckConstraint(
+                "CK_Investimento_TipoAtivo",
+                "[TipoAtivo] IS NULL OR [TipoAtivo] IN ('FundoInvestimento','Exterior','Criptomoeda','RendaFixa','Acoes','Outros')"));
             builder.HasKey(i => i.Id);
 
             builder.Property(i => i.Nome)
@@ -50,11 +53,28 @@ namespace YourMoney.Infrastructure.Configurations
                 .HasForeignKey(i => i.ReceitaRecorrenteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(i => i.TipoAtivo)
+                .HasConversion<string>()
+                .HasMaxLength(32)
+                .IsRequired(false);
+
+            builder.HasOne(i => i.GrupoObjetivoInvestimento)
+                .WithMany(g => g.Investimentos)
+                .HasForeignKey(i => new { i.GrupoObjetivoInvestimentoId, i.UsuarioId })
+                .HasPrincipalKey(g => new { g.Id, g.UsuarioId })
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(i => new { i.UsuarioId, i.DataInvestimento })
                 .HasDatabaseName("IX_Investimento_UsuarioId_DataInvestimento");
 
             builder.HasIndex(i => new { i.UsuarioId, i.ReceitaRecorrenteId })
                 .HasDatabaseName("IX_Investimento_UsuarioId_ReceitaRecorrenteId");
+
+            builder.HasIndex(i => new { i.UsuarioId, i.GrupoObjetivoInvestimentoId })
+                .HasDatabaseName("IX_Investimento_UsuarioId_GrupoObjetivoId");
+
+            builder.HasIndex(i => new { i.UsuarioId, i.TipoAtivo })
+                .HasDatabaseName("IX_Investimento_UsuarioId_TipoAtivo");
 
             builder.HasIndex(i => new { i.UsuarioId, i.OperacaoId })
                 .IsUnique()

@@ -8,7 +8,10 @@ namespace YourMoney.Infrastructure.Persistence
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Server=localhost,1433;Database=dbYourMoney;User Id=sa;Password=Top@2024!;Encrypt=False;TrustServerCertificate=True;");
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+                ?? "Server=localhost,1433;Database=dbYourMoney;User Id=sa;Password=Top@2024!;Encrypt=False;TrustServerCertificate=True;";
+
+            optionsBuilder.UseSqlServer(connectionString);
 
             return new AppDbContext(optionsBuilder.Options);
         }

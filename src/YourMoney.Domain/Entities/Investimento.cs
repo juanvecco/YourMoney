@@ -1,3 +1,5 @@
+using YourMoney.Domain.Enums;
+
 namespace YourMoney.Domain.Entities
 {
     public class Investimento : BaseEntity
@@ -15,6 +17,9 @@ namespace YourMoney.Domain.Entities
         public Guid? ReceitaRecorrenteId { get; private set; }
         public virtual ReceitaRecorrente? ReceitaRecorrente { get; private set; }
         public Guid? OperacaoId { get; private set; }
+        public Guid? GrupoObjetivoInvestimentoId { get; private set; }
+        public virtual GrupoObjetivoInvestimento? GrupoObjetivoInvestimento { get; private set; }
+        public TipoAtivo? TipoAtivo { get; private set; }
 
         private Investimento() { }
 
@@ -28,7 +33,9 @@ namespace YourMoney.Domain.Entities
             DateTime dataInvestimento,
             DateTime mesReferencia,
             Guid? receitaRecorrenteId = null,
-            Guid? operacaoId = null)
+            Guid? operacaoId = null,
+            Guid? grupoObjetivoInvestimentoId = null,
+            TipoAtivo? tipoAtivo = null)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
@@ -41,6 +48,8 @@ namespace YourMoney.Domain.Entities
             AtualizarMesReferencia(mesReferencia);
             DefinirReceitaRecorrente(receitaRecorrenteId);
             DefinirOperacao(operacaoId);
+            AssociarGrupoObjetivo(grupoObjetivoInvestimentoId);
+            ClassificarTipoAtivo(tipoAtivo);
             Ativo = true;
             DataResgate = null;
         }
@@ -56,8 +65,10 @@ namespace YourMoney.Domain.Entities
             DateTime mesReferencia,
             string usuarioId,
             Guid? receitaRecorrenteId = null,
-            Guid? operacaoId = null)
-            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia, receitaRecorrenteId, operacaoId)
+            Guid? operacaoId = null,
+            Guid? grupoObjetivoInvestimentoId = null,
+            TipoAtivo? tipoAtivo = null)
+            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia, receitaRecorrenteId, operacaoId, grupoObjetivoInvestimentoId, tipoAtivo)
         {
             DefinirUsuario(usuarioId);
         }
@@ -133,6 +144,26 @@ namespace YourMoney.Domain.Entities
 
             ReceitaRecorrenteId = receitaRecorrenteId;
         }
+
+        public void AssociarGrupoObjetivo(Guid? grupoObjetivoInvestimentoId)
+        {
+            if (grupoObjetivoInvestimentoId == Guid.Empty)
+                throw new ArgumentException("Objetivo financeiro associado é inválido.");
+
+            GrupoObjetivoInvestimentoId = grupoObjetivoInvestimentoId;
+        }
+
+        public void DesassociarGrupoObjetivo() => GrupoObjetivoInvestimentoId = null;
+
+        public void AssociarGrupoObjetivo(GrupoObjetivoInvestimento? grupo)
+        {
+            GrupoObjetivoInvestimento = grupo;
+            GrupoObjetivoInvestimentoId = grupo?.Id;
+        }
+
+        public void ClassificarTipoAtivo(TipoAtivo? tipoAtivo) => TipoAtivo = tipoAtivo;
+
+        public void RemoverClassificacaoTipoAtivo() => TipoAtivo = null;
 
         private void DefinirOperacao(Guid? operacaoId)
         {

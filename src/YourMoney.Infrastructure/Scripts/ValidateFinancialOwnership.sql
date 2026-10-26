@@ -30,6 +30,7 @@ VALUES
     (N'tbContaFinanceira'),
     (N'tbDespesa'),
     (N'tbInvestimento'),
+    (N'tbInvestimentoGrupoObjetivo'),
     (N'tbMeta'),
     (N'tbReceita');
 
@@ -162,6 +163,20 @@ BEGIN
            MIN(DataInvestimento) AS MinDate,
            MAX(DataInvestimento) AS MaxDate
     FROM dbo.tbInvestimento;
+END;
+
+IF OBJECT_ID(N'dbo.tbInvestimento', N'U') IS NOT NULL
+   AND COL_LENGTH(N'dbo.tbInvestimento', N'GrupoObjetivoInvestimentoId') IS NOT NULL
+   AND OBJECT_ID(N'dbo.tbInvestimentoGrupoObjetivo', N'U') IS NOT NULL
+BEGIN
+    EXEC sp_executesql N'
+    SELECT ''RelationshipOwnerMismatch'' AS CheckName,
+           ''tbInvestimento->tbInvestimentoGrupoObjetivo'' AS RelationshipName,
+           COUNT_BIG(*) AS CountValue
+    FROM dbo.tbInvestimento i
+    INNER JOIN dbo.tbInvestimentoGrupoObjetivo g ON g.Id = i.GrupoObjetivoInvestimentoId
+    WHERE i.GrupoObjetivoInvestimentoId IS NOT NULL
+      AND i.UsuarioId <> g.UsuarioId;';
 END;
 
 IF OBJECT_ID(N'dbo.tbMeta', N'U') IS NOT NULL

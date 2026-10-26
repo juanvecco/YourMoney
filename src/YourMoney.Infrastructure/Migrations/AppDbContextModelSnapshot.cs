@@ -262,6 +262,44 @@ namespace YourMoney.Infrastructure.Migrations
                     b.ToTable("tbDespesaRecorrenteOcorrencia", (string)null);
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NomeNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte[]>("Versao")
+                        .IsRequired()
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "NomeNormalizado")
+                        .IsUnique()
+                        .HasDatabaseName("UX_InvestimentoGrupoObjetivo_UsuarioId_NomeNormalizado");
+
+                    b.ToTable("tbInvestimentoGrupoObjetivo", (string)null);
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Investimento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -282,6 +320,9 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<string>("Descricao")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("GrupoObjetivoInvestimentoId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("MesReferencia")
                         .HasColumnType("date")
@@ -309,6 +350,10 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("TipoAtivo")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<string>("UsuarioId")
                         .IsRequired()
                         .HasMaxLength(450)
@@ -329,8 +374,13 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
+                    b.HasIndex("GrupoObjetivoInvestimentoId", "UsuarioId");
+
                     b.HasIndex("UsuarioId", "DataInvestimento")
                         .HasDatabaseName("IX_Investimento_UsuarioId_DataInvestimento");
+
+                    b.HasIndex("UsuarioId", "GrupoObjetivoInvestimentoId")
+                        .HasDatabaseName("IX_Investimento_UsuarioId_GrupoObjetivoId");
 
                     b.HasIndex("UsuarioId", "OperacaoId")
                         .IsUnique()
@@ -340,7 +390,13 @@ namespace YourMoney.Infrastructure.Migrations
                     b.HasIndex("UsuarioId", "ReceitaRecorrenteId")
                         .HasDatabaseName("IX_Investimento_UsuarioId_ReceitaRecorrenteId");
 
-                    b.ToTable("tbInvestimento", (string)null);
+                    b.HasIndex("UsuarioId", "TipoAtivo")
+                        .HasDatabaseName("IX_Investimento_UsuarioId_TipoAtivo");
+
+                    b.ToTable("tbInvestimento", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Investimento_TipoAtivo", "[TipoAtivo] IS NULL OR [TipoAtivo] IN ('FundoInvestimento','Exterior','Criptomoeda','RendaFixa','Acoes','Outros')");
+                        });
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.Meta", b =>
@@ -707,6 +763,14 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasForeignKey("ReceitaRecorrenteId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", "GrupoObjetivoInvestimento")
+                        .WithMany("Investimentos")
+                        .HasForeignKey("GrupoObjetivoInvestimentoId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("GrupoObjetivoInvestimento");
+
                     b.Navigation("ReceitaRecorrente");
                 });
 
@@ -769,6 +833,11 @@ namespace YourMoney.Infrastructure.Migrations
             modelBuilder.Entity("YourMoney.Domain.Entities.DespesaRecorrente", b =>
                 {
                     b.Navigation("Ocorrencias");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>
+                {
+                    b.Navigation("Investimentos");
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.ReceitaRecorrente", b =>

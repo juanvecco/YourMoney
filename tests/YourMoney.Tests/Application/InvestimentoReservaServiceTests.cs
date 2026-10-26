@@ -28,7 +28,7 @@ namespace YourMoney.Tests.Application
             var salaries = new InMemoryReceitaInvestimentoRepository();
             var salary = Salary("Salário de João", 5000m, "user-a", true);
             salaries.Recorrencias.Add(salary);
-            var service = InvestimentoTestFixtures.CreateService(investments, salaries, new FakeCurrentUserService { UserId = "user-a" });
+            var service = InvestimentoTestFixtures.CreateService(investments, salaries, currentUser: new FakeCurrentUserService { UserId = "user-a" });
 
             await service.CriarInvestimentoAsync(InvestimentoTestFixtures.CriarRequest(valorAtual: 15000m, receitaRecorrenteId: salary.Id));
             await service.CriarInvestimentoAsync(InvestimentoTestFixtures.CriarRequest(valorAtual: 2500m));
@@ -75,7 +75,7 @@ namespace YourMoney.Tests.Application
             var salaries = new InMemoryReceitaInvestimentoRepository();
             var salary = Salary("Salário histórico", 4000m, "user-a", true);
             salaries.Recorrencias.Add(salary);
-            var service = InvestimentoTestFixtures.CreateService(investments, salaries, new FakeCurrentUserService { UserId = "user-a" });
+            var service = InvestimentoTestFixtures.CreateService(investments, salaries, currentUser: new FakeCurrentUserService { UserId = "user-a" });
             var created = await service.CriarInvestimentoAsync(InvestimentoTestFixtures.CriarRequest(receitaRecorrenteId: salary.Id));
             salary.Desativar();
 

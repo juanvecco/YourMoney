@@ -38,13 +38,65 @@ namespace YourMoney.Tests.Fixtures
         public static InvestimentoService CreateService(
             InMemoryInvestimentoRepository? repository = null,
             InMemoryReceitaInvestimentoRepository? receitaRepository = null,
+            InMemoryGrupoObjetivoInvestimentoRepository? grupoRepository = null,
             FakeCurrentUserService? currentUser = null)
         {
             return new InvestimentoService(
                 repository ?? new InMemoryInvestimentoRepository(),
                 receitaRepository ?? new InMemoryReceitaInvestimentoRepository(),
+                grupoRepository ?? new InMemoryGrupoObjetivoInvestimentoRepository(),
                 currentUser ?? new FakeCurrentUserService());
         }
+    }
+
+    public class InMemoryGrupoObjetivoInvestimentoRepository : IGrupoObjetivoInvestimentoRepository
+    {
+        public List<GrupoObjetivoInvestimento> Grupos { get; } = new();
+        public InMemoryInvestimentoRepository? Investimentos { get; set; }
+
+        public Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId) =>
+            Task.FromResult(Grupos.Where(g => g.UsuarioId == usuarioId).OrderBy(g => g.Nome).ToList());
+        public Task<GrupoObjetivoInvestimento?> ObterAsync(Guid id, string usuarioId, bool rastrear = true) =>
+            Task.FromResult(Grupos.FirstOrDefault(g => g.Id == id && g.UsuarioId == usuarioId));
+        public Task<int> ContarInvestimentosAsync(Guid id, string usuarioId) => Task.FromResult(
+            Investimentos?.Investimentos.Count(i => i.UsuarioId == usuarioId && i.GrupoObjetivoInvestimentoId == id) ?? 0);
+        public Task AdicionarAsync(GrupoObjetivoInvestimento grupo)
+        {
+            if (Grupos.Any(g => g.UsuarioId == grupo.UsuarioId && g.NomeNormalizado == grupo.NomeNormalizado))
+                throw new GrupoObjetivoConflitoException("grupo_nome_duplicado", "Já existe um objetivo financeiro com esse nome.");
+            DefinirVersao(grupo, new byte[] { 1 });
+            Grupos.Add(grupo);
+            return Task.CompletedTask;
+        }
+        public Task AtualizarAsync(GrupoObjetivoInvestimento grupo, byte[] versaoEsperada)
+        {
+            if (!grupo.Versao.SequenceEqual(versaoEsperada))
+                throw new GrupoObjetivoConflitoException("grupo_desatualizado", "O objetivo foi alterado.");
+            if (Grupos.Any(g => g.Id != grupo.Id && g.UsuarioId == grupo.UsuarioId && g.NomeNormalizado == grupo.NomeNormalizado))
+                throw new GrupoObjetivoConflitoException("grupo_nome_duplicado", "Já existe um objetivo financeiro com esse nome.");
+            DefinirVersao(grupo, new byte[] { (byte)(grupo.Versao[0] + 1) });
+            return Task.CompletedTask;
+        }
+        public Task ExcluirAsync(ExcluirGrupoObjetivoCommand command)
+        {
+            var origem = Grupos.FirstOrDefault(g => g.Id == command.GrupoOrigemId && g.UsuarioId == command.UsuarioId)
+                ?? throw new KeyNotFoundException();
+            var ligados = Investimentos?.Investimentos.Where(i => i.UsuarioId == command.UsuarioId && i.GrupoObjetivoInvestimentoId == origem.Id).ToList()
+                ?? new List<Investimento>();
+            if (command.AcaoVinculos == AcaoVinculosGrupoObjetivo.ExigirVazio && ligados.Count > 0)
+                throw new GrupoObjetivoConflitoException("grupo_em_uso", "O objetivo possui investimentos associados.");
+            GrupoObjetivoInvestimento? destino = null;
+            if (command.AcaoVinculos == AcaoVinculosGrupoObjetivo.Transferir)
+                destino = Grupos.FirstOrDefault(g => g.Id == command.GrupoDestinoId && g.UsuarioId == command.UsuarioId)
+                    ?? throw new KeyNotFoundException();
+            foreach (var investimento in ligados)
+                investimento.AssociarGrupoObjetivo(destino);
+            Grupos.Remove(origem);
+            return Task.CompletedTask;
+        }
+
+        private static void DefinirVersao(GrupoObjetivoInvestimento grupo, byte[] versao) =>
+            typeof(GrupoObjetivoInvestimento).GetProperty(nameof(GrupoObjetivoInvestimento.Versao))!.SetValue(grupo, versao);
     }
 
     public class InMemoryInvestimentoRepository : IInvestimentoRepository
@@ -119,6 +171,7 @@ namespace YourMoney.Tests.Fixtures
         public InvestimentoResponse UpdateResponse { get; set; } = new();
         public CarteiraInvestimentosConsolidadaResponse ConsolidatedResponse { get; set; } = new();
         public Exception? ConsolidatedException { get; set; }
+        public FiltroOrganizacaoInvestimentos? LastFilter { get; private set; }
 
         public Task AdicionarInvestimentoAsync(Investimento investimento) => Task.CompletedTask;
         public Task<CriarInvestimentoResponse> CriarInvestimentoAsync(CriarInvestimentoRequest request)
@@ -137,8 +190,9 @@ namespace YourMoney.Tests.Fixtures
         }
         public Task<Investimento> GetInvestimentoByIdAsync(Guid id) => throw new NotImplementedException();
         public Task<InvestimentoResponse> ObterPorIdAsync(Guid id) => Task.FromResult(UpdateResponse);
-        public Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync()
+        public Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync(FiltroOrganizacaoInvestimentos? filtro = null)
         {
+            LastFilter = filtro;
             if (ConsolidatedException != null) throw ConsolidatedException;
             return Task.FromResult(ConsolidatedResponse);
         }
@@ -146,5 +200,21 @@ namespace YourMoney.Tests.Fixtures
         public Task AtualizarAsync(Investimento investimento) => Task.CompletedTask;
         public Task<List<InvestimentoResponse>> ListarAsync() => Task.FromResult(new List<InvestimentoResponse>());
         public Task<List<InvestimentoResponse>> ObterPorMesAnoAsync(int mes, int ano) => Task.FromResult(new List<InvestimentoResponse>());
+    }
+
+    public class FakeGrupoObjetivoInvestimentoService : IGrupoObjetivoInvestimentoService
+    {
+        public List<GrupoObjetivoInvestimentoResponse> Groups { get; } = new();
+        public Exception? Exception { get; set; }
+        public ExcluirGrupoObjetivoRequest? LastDelete { get; private set; }
+        public Task<List<GrupoObjetivoInvestimentoResponse>> ListarAsync() => Exception == null ? Task.FromResult(Groups) : Task.FromException<List<GrupoObjetivoInvestimentoResponse>>(Exception);
+        public Task<GrupoObjetivoInvestimentoResponse> ObterAsync(Guid id) => Exception == null ? Task.FromResult(Groups.FirstOrDefault(g => g.Id == id) ?? new GrupoObjetivoInvestimentoResponse { Id = id }) : Task.FromException<GrupoObjetivoInvestimentoResponse>(Exception);
+        public Task<GrupoObjetivoInvestimentoResponse> CriarAsync(CriarGrupoObjetivoRequest request) => Exception == null ? Task.FromResult(new GrupoObjetivoInvestimentoResponse { Id = Guid.NewGuid(), Nome = request.Nome ?? string.Empty }) : Task.FromException<GrupoObjetivoInvestimentoResponse>(Exception);
+        public Task<GrupoObjetivoInvestimentoResponse> RenomearAsync(Guid id, RenomearGrupoObjetivoRequest request) => Exception == null ? Task.FromResult(new GrupoObjetivoInvestimentoResponse { Id = id, Nome = request.Nome ?? string.Empty }) : Task.FromException<GrupoObjetivoInvestimentoResponse>(Exception);
+        public Task ExcluirAsync(Guid id, ExcluirGrupoObjetivoRequest request)
+        {
+            LastDelete = request;
+            return Exception == null ? Task.CompletedTask : Task.FromException(Exception);
+        }
     }
 }
