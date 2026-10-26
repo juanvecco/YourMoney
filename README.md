@@ -96,6 +96,16 @@ dotnet run --project src/YourMoney.Api/YourMoney.Api.csproj
 
 Em desenvolvimento, a API usa `https://localhost:5001`. O Swagger fica disponível em `https://localhost:5001/swagger`.
 
+### Inicialização integrada no Windows
+
+Com os repositórios `YourMoney` e `YourMoney-angular` na mesma pasta, use o atalho abaixo para instalar e compilar o frontend, publicar os arquivos no `wwwroot`, aplicar as migrations, iniciar a API e abrir o dashboard:
+
+```powershell
+.\abrir-yourmoney.ps1
+```
+
+Também é possível executar `abrir-yourmoney.cmd` ou informar outro caminho para o frontend com `-FrontendPath`.
+
 ## Build e testes
 
 ```bash

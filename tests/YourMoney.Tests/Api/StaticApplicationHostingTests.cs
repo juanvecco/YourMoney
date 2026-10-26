@@ -145,6 +145,10 @@ namespace YourMoney.Tests.Api
         private static string FindRepositoryRoot()
         {
             var solutionRoot = FindSolutionRoot();
+
+            if (File.Exists(Path.Combine(solutionRoot, "abrir-yourmoney.ps1")))
+                return solutionRoot;
+
             var repositoryRoot = Directory.GetParent(solutionRoot)?.FullName;
 
             if (repositoryRoot != null && File.Exists(Path.Combine(repositoryRoot, "abrir-yourmoney.ps1")))
