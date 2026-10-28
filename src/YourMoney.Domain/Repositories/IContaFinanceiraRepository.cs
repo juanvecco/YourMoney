@@ -14,5 +14,6 @@ namespace YourMoney.Domain.Repositories
         Task<List<ContaFinanceira>> ListarAsync(string usuarioId);
         Task<bool> ExisteAsync(Guid id);
         Task<bool> ExisteAsync(Guid id, string usuarioId);
+        Task<bool> TemVinculosAsync(Guid id, string usuarioId);
     }
 }

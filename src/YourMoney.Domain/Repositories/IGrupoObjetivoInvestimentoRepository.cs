@@ -26,8 +26,10 @@ public class GrupoObjetivoConflitoException : InvalidOperationException
 public interface IGrupoObjetivoInvestimentoRepository
 {
     Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId);
+    Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId, bool incluirArquivados) => ListarAsync(usuarioId);
     Task<GrupoObjetivoInvestimento?> ObterAsync(Guid id, string usuarioId, bool rastrear = true);
     Task<int> ContarInvestimentosAsync(Guid id, string usuarioId);
+    Task<bool> PossuiHistoricoAsync(Guid id, string usuarioId) => Task.FromResult(false);
     Task AdicionarAsync(GrupoObjetivoInvestimento grupo);
     Task AtualizarAsync(GrupoObjetivoInvestimento grupo, byte[] versaoEsperada);
     Task ExcluirAsync(ExcluirGrupoObjetivoCommand command);

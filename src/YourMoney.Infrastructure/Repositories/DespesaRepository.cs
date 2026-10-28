@@ -65,6 +65,21 @@ namespace YourMoney.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Despesa>> GetByReferenciaPeriodoAsync(
+            DateTime inicio,
+            DateTime fimExclusivo,
+            string usuarioId)
+        {
+            return await _context.Despesas
+                .AsNoTracking()
+                .Include(d => d.ContaFinanceira)
+                .Include(d => d.Categoria)
+                .Where(d => d.UsuarioId == usuarioId
+                    && d.Data >= inicio
+                    && d.Data < fimExclusivo)
+                .ToListAsync();
+        }
+
         public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano)
         {
             return await _context.Despesas

@@ -19,17 +19,23 @@ namespace YourMoney.Application.Services
         private readonly IReceitaRepository _receitaRepository;
         private readonly IDespesaRepository _despesaRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IGrupoObjetivoInvestimentoRepository? _grupoRepository;
+        private readonly IAporteObjetivoInvestimentoRepository? _aporteRepository;
 
         public MetaMensalService(
             IMetaMensalRepository metaMensalRepository,
             IReceitaRepository receitaRepository,
             IDespesaRepository despesaRepository,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IGrupoObjetivoInvestimentoRepository? grupoRepository = null,
+            IAporteObjetivoInvestimentoRepository? aporteRepository = null)
         {
             _metaMensalRepository = metaMensalRepository;
             _receitaRepository = receitaRepository;
             _despesaRepository = despesaRepository;
             _currentUserService = currentUserService;
+            _grupoRepository = grupoRepository;
+            _aporteRepository = aporteRepository;
         }
 
         public async Task<MetasMensaisResumoDTO> ObterResumoAsync(int? mes = null, int? ano = null)
@@ -45,6 +51,7 @@ namespace YourMoney.Application.Services
             var usuarioId = _currentUserService.UserId;
             var tipoDefinicao = ParseTipoDefinicao(request.TipoDefinicao);
             var receitaTotal = await ObterReceitaElegivelAsync(referencia, usuarioId);
+            var grupo = await ValidarGrupoAsync(request.GrupoObjetivoInvestimentoId, usuarioId);
 
             if (tipoDefinicao == TipoDefinicaoMeta.Valor && receitaTotal <= 0)
                 throw CriarConflitoSemReceita();
@@ -56,9 +63,10 @@ namespace YourMoney.Application.Services
                 request.ValorMeta,
                 referencia,
                 usuarioId);
+            meta.AssociarGrupoObjetivo(request.GrupoObjetivoInvestimentoId);
             await _metaMensalRepository.AdicionarAsync(meta);
 
-            return MapearMeta(meta, receitaTotal);
+            return MapearMeta(meta, receitaTotal, grupo?.Nome);
         }
 
         public async Task<MetaMensalDTO> AtualizarAsync(Guid id, AtualizarMetaMensalDTO request)
@@ -78,6 +86,11 @@ namespace YourMoney.Application.Services
             var meta = await _metaMensalRepository.GetByIdAsync(id, usuarioId);
             if (meta == null)
                 throw new InvalidOperationException("Meta não encontrada.");
+
+            var grupo = await ValidarGrupoAsync(request.GrupoObjetivoInvestimentoId, usuarioId);
+            if (meta.GrupoObjetivoInvestimentoId != request.GrupoObjetivoInvestimentoId
+                && _aporteRepository != null && await _aporteRepository.ExistePorMetaAsync(id, usuarioId))
+                throw new ConflitoMetaMensalException("O objetivo da meta não pode ser alterado após o primeiro aporte.");
 
             var receitaTotal = await ObterReceitaElegivelAsync(meta.MesReferencia, usuarioId);
             var definicaoAlterada = !meta.PossuiMesmaDefinicao(
@@ -101,9 +114,11 @@ namespace YourMoney.Application.Services
                 meta.Renomear(request.Nome!);
             }
 
+            meta.AssociarGrupoObjetivo(request.GrupoObjetivoInvestimentoId);
+
             await _metaMensalRepository.AtualizarAsync(meta);
 
-            return MapearMeta(meta, receitaTotal);
+            return MapearMeta(meta, receitaTotal, grupo?.Nome);
         }
 
         public async Task RemoverAsync(Guid id)
@@ -115,6 +130,9 @@ namespace YourMoney.Application.Services
             var meta = await _metaMensalRepository.GetByIdAsync(id, usuarioId);
             if (meta == null)
                 throw new InvalidOperationException("Meta não encontrada.");
+
+            if (_aporteRepository != null && await _aporteRepository.ExistePorMetaAsync(id, usuarioId))
+                throw new ConflitoMetaMensalException("A meta possui aportes confirmados e não pode ser excluída.");
 
             await _metaMensalRepository.RemoverAsync(id, usuarioId);
         }
@@ -143,7 +161,18 @@ namespace YourMoney.Application.Services
                 Math.Min(despesa.Valor, reembolsos.TryGetValue(despesa.Id, out var valor) ? valor : 0m)), 2, MidpointRounding.AwayFromZero);
             var despesaTotal = decimal.Round(despesaTotalBruta - despesaTotalReembolsada, 2, MidpointRounding.AwayFromZero);
             var metas = await _metaMensalRepository.ObterPorMesAnoAsync(referencia.Month, referencia.Year, usuarioId);
-            var metasDto = metas.Select(meta => MapearMeta(meta, receitaElegivel)).ToList();
+            var aportes = _aporteRepository == null
+                ? new List<AporteObjetivoInvestimento>()
+                : await _aporteRepository.ListarPorMesAsync(referencia.Month, referencia.Year, usuarioId);
+            var grupos = _grupoRepository == null
+                ? new List<GrupoObjetivoInvestimento>()
+                : await _grupoRepository.ListarAsync(usuarioId, true);
+            var nomes = grupos.ToDictionary(g => g.Id, g => g.Nome);
+            var metasDto = metas.Select(meta => MapearMeta(
+                meta,
+                receitaElegivel,
+                meta.GrupoObjetivoInvestimentoId.HasValue && nomes.TryGetValue(meta.GrupoObjetivoInvestimentoId.Value, out var nome) ? nome : null,
+                aportes.Where(a => a.MetaMensalId == meta.Id).ToList())).ToList();
             var existeMetaValorSemBase = receitaElegivel <= 0
                 && metas.Any(meta => meta.TipoDefinicao == TipoDefinicaoMeta.Valor);
             decimal? percentualTotal = existeMetaValorSemBase
@@ -183,7 +212,8 @@ namespace YourMoney.Application.Services
             };
         }
 
-        private static MetaMensalDTO MapearMeta(MetaMensal meta, decimal receitaTotal)
+        private static MetaMensalDTO MapearMeta(MetaMensal meta, decimal receitaTotal, string? objetivoNome = null,
+            IReadOnlyCollection<AporteObjetivoInvestimento>? aportes = null)
         {
             decimal valorCalculado;
             decimal? percentualEfetivo;
@@ -207,6 +237,9 @@ namespace YourMoney.Application.Services
                     : null;
             }
 
+            var listaAportes = aportes ?? Array.Empty<AporteObjetivoInvestimento>();
+            var confirmado = decimal.Round(listaAportes.Sum(a => a.Valor), 2, MidpointRounding.AwayFromZero);
+            var diferenca = decimal.Round(confirmado - valorCalculado, 2, MidpointRounding.AwayFromZero);
             return new MetaMensalDTO
             {
                 Id = meta.Id,
@@ -215,8 +248,34 @@ namespace YourMoney.Application.Services
                 PercentualReceita = percentualEfetivo,
                 ValorMeta = meta.ValorMeta,
                 MesReferencia = meta.MesReferencia,
-                ValorCalculado = valorCalculado
+                ValorCalculado = valorCalculado,
+                GrupoObjetivoInvestimentoId = meta.GrupoObjetivoInvestimentoId,
+                ObjetivoNome = objetivoNome,
+                ValorConfirmado = confirmado,
+                ValorRestante = Math.Max(0m, -diferenca),
+                Diferenca = diferenca,
+                StatusPlanejamento = diferenca < 0 ? "AbaixoPlanejado" : diferenca > 0 ? "AcimaPlanejado" : "PlanejadoAtingido",
+                ValorAguardandoAlocacao = listaAportes.Where(a => !a.InvestimentoId.HasValue).Sum(a => a.Valor),
+                Aportes = listaAportes.Select(MapearAporte).ToList()
             };
+        }
+
+        private static AporteObjetivoInvestimentoDTO MapearAporte(AporteObjetivoInvestimento aporte) => new()
+        {
+            Id = aporte.Id, MetaMensalId = aporte.MetaMensalId,
+            GrupoObjetivoInvestimentoId = aporte.GrupoObjetivoInvestimentoId,
+            InvestimentoId = aporte.InvestimentoId, Valor = aporte.Valor,
+            MesReferencia = aporte.MesReferencia, DataConfirmacao = aporte.DataConfirmacao
+        };
+
+        private async Task<GrupoObjetivoInvestimento?> ValidarGrupoAsync(Guid? grupoId, string usuarioId)
+        {
+            if (!grupoId.HasValue) return null;
+            if (_grupoRepository == null) throw new InvalidOperationException("Repositório de objetivos não configurado.");
+            var grupo = await _grupoRepository.ObterAsync(grupoId.Value, usuarioId, false)
+                ?? throw new InvalidOperationException("Objetivo financeiro não encontrado.");
+            if (!grupo.Ativo) throw new ConflitoMetaMensalException("Objetivos arquivados não podem receber novas metas.");
+            return grupo;
         }
 
         private static List<string> CriarAlertas(

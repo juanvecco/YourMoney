@@ -13,13 +13,15 @@ public sealed class GrupoObjetivoInvestimentoRepository : IGrupoObjetivoInvestim
 
     public GrupoObjetivoInvestimentoRepository(AppDbContext context) => _context = context;
 
-    public Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId) =>
+    public Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId, bool incluirArquivados = false) =>
         _context.GruposObjetivoInvestimento
             .AsNoTracking()
-            .Where(g => g.UsuarioId == usuarioId)
+            .Where(g => g.UsuarioId == usuarioId && (incluirArquivados || g.Ativo))
             .OrderBy(g => g.Nome)
             .ThenBy(g => g.Id)
             .ToListAsync();
+
+    public Task<List<GrupoObjetivoInvestimento>> ListarAsync(string usuarioId) => ListarAsync(usuarioId, false);
 
     public Task<GrupoObjetivoInvestimento?> ObterAsync(Guid id, string usuarioId, bool rastrear = true)
     {
@@ -29,6 +31,13 @@ public sealed class GrupoObjetivoInvestimentoRepository : IGrupoObjetivoInvestim
 
     public Task<int> ContarInvestimentosAsync(Guid id, string usuarioId) =>
         _context.Investimentos.CountAsync(i => i.UsuarioId == usuarioId && i.GrupoObjetivoInvestimentoId == id);
+
+    public async Task<bool> PossuiHistoricoAsync(Guid id, string usuarioId)
+    {
+        if (await _context.MetasMensais.AnyAsync(m => m.UsuarioId == usuarioId && m.GrupoObjetivoInvestimentoId == id))
+            return true;
+        return await _context.AportesObjetivoInvestimento.AnyAsync(a => a.UsuarioId == usuarioId && a.GrupoObjetivoInvestimentoId == id);
+    }
 
     public async Task AdicionarAsync(GrupoObjetivoInvestimento grupo)
     {
@@ -70,6 +79,8 @@ public sealed class GrupoObjetivoInvestimentoRepository : IGrupoObjetivoInvestim
                 ?? throw new KeyNotFoundException("Objetivo financeiro não encontrado.");
 
             ValidarVersao(origem.Versao, command.VersaoOrigem);
+            if (await PossuiHistoricoAsync(origem.Id, command.UsuarioId))
+                throw new GrupoObjetivoConflitoException("grupo_possui_historico", "O objetivo possui metas ou aportes; arquive-o para preservar o histórico.");
             var quantidade = await _context.Investimentos.CountAsync(i =>
                 i.UsuarioId == command.UsuarioId && i.GrupoObjetivoInvestimentoId == origem.Id);
 

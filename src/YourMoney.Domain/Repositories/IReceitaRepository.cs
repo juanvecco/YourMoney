@@ -10,6 +10,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Receita>> GetAllAsync(string usuarioId);
         Task<List<Receita>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim);
         Task<List<Receita>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId);
+        Task<List<Receita>> GetByReferenciaPeriodoAsync(DateTime inicio, DateTime fimExclusivo, string usuarioId);
         Task<List<Receita>> GetByMesAnoAsync(int mes, int ano);
         Task<List<Receita>> GetByMesAnoAsync(int mes, int ano, string usuarioId);
         Task<List<Receita>> ObterPorMesAnoAsync(int mes, int ano);

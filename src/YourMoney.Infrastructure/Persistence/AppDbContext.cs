@@ -13,6 +13,7 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<Receita> Receitas { get; set; }
         public DbSet<Investimento> Investimentos { get; set; }
         public DbSet<GrupoObjetivoInvestimento> GruposObjetivoInvestimento { get; set; }
+        public DbSet<AporteObjetivoInvestimento> AportesObjetivoInvestimento { get; set; }
         public DbSet<Meta> Metas { get; set; }
         public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<ContaFinanceira> ContaFinanceira { get; set; }
@@ -20,6 +21,9 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<DespesaRecorrenteOcorrencia> DespesasRecorrentesOcorrencias { get; set; }
         public DbSet<ReceitaRecorrente> ReceitasRecorrentes { get; set; }
         public DbSet<ReceitaRecorrenteOcorrencia> ReceitasRecorrentesOcorrencias { get; set; }
+        public DbSet<PluggyConnection> PluggyConnections { get; set; }
+        public DbSet<PluggyCredential> PluggyCredentials { get; set; }
+        public DbSet<PluggyTransactionImport> PluggyTransactionImports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +34,7 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ReceitaConfiguration());
             modelBuilder.ApplyConfiguration(new InvestimentoConfiguration());
             modelBuilder.ApplyConfiguration(new GrupoObjetivoInvestimentoConfiguration());
+            modelBuilder.ApplyConfiguration(new AporteObjetivoInvestimentoConfiguration());
             modelBuilder.ApplyConfiguration(new MetaConfiguration());
             modelBuilder.ApplyConfiguration(new MetaMensalConfiguration());
             modelBuilder.ApplyConfiguration(new ContaFinanceiraConfiguration());
@@ -37,6 +42,9 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new DespesaRecorrenteOcorrenciaConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaRecorrenteConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaRecorrenteOcorrenciaConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyConnectionConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyCredentialConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyTransactionImportConfiguration());
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

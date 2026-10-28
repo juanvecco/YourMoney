@@ -13,6 +13,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Investimento>> GetByTipoAsync(string tipo);
         Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim);
         Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId);
+        Task<List<Investimento>> GetByReferenciaPeriodoAsync(DateTime inicio, DateTime fimExclusivo, string usuarioId);
         Task AdicionarAsync(Investimento investimento);
         Task AtualizarAsync(Investimento investimento);
         Task RemoverAsync(Guid id);

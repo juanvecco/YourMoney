@@ -16,6 +16,7 @@ namespace YourMoney.Infrastructure.Configurations
                     "([TipoDefinicao] = N'Valor' AND [ValorMeta] IS NOT NULL AND [ValorMeta] > 0 AND [PercentualReceita] IS NULL)"));
 
             builder.HasKey(m => m.Id);
+            builder.HasAlternateKey(m => new { m.Id, m.UsuarioId });
 
             builder.Property(m => m.Nome)
                 .IsRequired()
@@ -44,8 +45,15 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.Property(m => m.AtualizadoEm);
 
+            builder.HasOne(m => m.GrupoObjetivoInvestimento)
+                .WithMany(g => g.MetasMensais)
+                .HasForeignKey(m => new { m.GrupoObjetivoInvestimentoId, m.UsuarioId })
+                .HasPrincipalKey(g => new { g.Id, g.UsuarioId })
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(m => new { m.UsuarioId, m.MesReferencia })
                 .HasDatabaseName("IX_MetaMensal_Usuario_MesReferencia");
+            builder.HasIndex(m => new { m.UsuarioId, m.GrupoObjetivoInvestimentoId });
         }
     }
 }

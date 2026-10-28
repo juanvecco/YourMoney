@@ -7,5 +7,6 @@ namespace YourMoney.Application.DTOs
         public decimal? PercentualReceita { get; set; }
         public decimal? ValorMeta { get; set; }
         public DateTime? MesReferencia { get; set; }
+        public Guid? GrupoObjetivoInvestimentoId { get; set; }
     }
 }

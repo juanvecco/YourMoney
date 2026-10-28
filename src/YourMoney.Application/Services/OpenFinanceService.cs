@@ -44,7 +44,7 @@ namespace YourMoney.Application.Services
                         Name = "Consentimento Open Finance real",
                         Type = "future-consent",
                         Status = "not-configured",
-                        Message = "Dados bancarios reais exigem integracao consentida futura.",
+                        Message = "O fluxo direto ainda não está configurado. Conexões Pluggy ficam disponíveis na seção acima.",
                         SupportsTransactionPreview = false
                     }
                 }

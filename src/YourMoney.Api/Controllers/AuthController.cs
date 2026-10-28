@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
 {
@@ -16,14 +17,26 @@ namespace YourMoney.Api.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly JwtSettings _jwtSettings;
+        private readonly IPasswordResetDeliveryService _passwordResetDelivery;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthController> _logger;
+        private readonly IUsuarioDemonstracaoService _usuarioDemonstracaoService;
 
         public AuthController(SignInManager<IdentityUser> signInManager,
                               UserManager<IdentityUser> userManager,
-                              IOptions<JwtSettings> jwtSettings)
+                              IOptions<JwtSettings> jwtSettings,
+                              IPasswordResetDeliveryService passwordResetDelivery,
+                              IConfiguration configuration,
+                              ILogger<AuthController> logger,
+                              IUsuarioDemonstracaoService usuarioDemonstracaoService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _jwtSettings = jwtSettings.Value;
+            _passwordResetDelivery = passwordResetDelivery;
+            _configuration = configuration;
+            _logger = logger;
+            _usuarioDemonstracaoService = usuarioDemonstracaoService;
         }
 
         [HttpPost("nova-conta")]
@@ -53,6 +66,30 @@ namespace YourMoney.Api.Controllers
             if (!string.IsNullOrWhiteSpace(usuarioRegistro.Nome))
             {
                 await _userManager.AddClaimAsync(user, new Claim("name", usuarioRegistro.Nome.Trim()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(usuarioRegistro.OrigemConhecimento))
+            {
+                var origem = usuarioRegistro.OrigemConhecimento.Trim();
+                var claimResult = await _userManager.AddClaimAsync(user, new Claim("referral_source", origem));
+                if (!claimResult.Succeeded)
+                {
+                    _logger.LogWarning("Não foi possível salvar a origem opcional informada no cadastro.");
+                }
+            }
+
+            try
+            {
+                await _usuarioDemonstracaoService.CriarDadosIniciaisAsync(user.Id, HttpContext.RequestAborted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Não foi possível preparar os dados iniciais da nova conta.");
+                await _userManager.DeleteAsync(user);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    mensagem = "Não foi possível preparar sua conta. Tente novamente."
+                });
             }
 
             var token = await GerarJwt(user.Email);
@@ -85,22 +122,27 @@ namespace YourMoney.Api.Controllers
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var user = await _userManager.FindByEmailAsync(usuarioEsqueceuSenha.Email);
-
-            if (user == null)
+            if (user != null)
             {
-                return CustomResponse(new
+                try
                 {
-                    mensagem = "Se o e-mail estiver cadastrado, enviaremos as instruções para redefinir a senha."
-                });
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var frontendBaseUrl = _configuration["Frontend:BaseUrl"]?.TrimEnd('/')
+                        ?? $"{Request.Scheme}://{Request.Host}";
+                    var resetUrl = frontendBaseUrl
+                        + "/redefinir-senha?email=" + Uri.EscapeDataString(user.Email ?? usuarioEsqueceuSenha.Email)
+                        + "&token=" + Uri.EscapeDataString(token);
+                    await _passwordResetDelivery.DeliverAsync(user.Email!, resetUrl, HttpContext.RequestAborted);
+                }
+                catch (Exception)
+                {
+                    _logger.LogWarning("A solicitação de recuperação foi aceita, mas a entrega não pôde ser concluída.");
+                }
             }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             return CustomResponse(new
             {
-                mensagem = "Token de redefinição gerado com sucesso.",
-                email = user.Email,
-                token
+                mensagem = "Se o e-mail estiver cadastrado, enviaremos as instruções para redefinir a senha."
             });
         }
 
@@ -113,7 +155,7 @@ namespace YourMoney.Api.Controllers
 
             if (user == null)
             {
-                AdicionarErroProcessamento("Token inválido ou expirado.");
+                AdicionarErroProcessamento("Não foi possível redefinir a senha. Solicite um novo link.");
                 return CustomResponse();
             }
 
@@ -121,11 +163,7 @@ namespace YourMoney.Api.Controllers
 
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
-                {
-                    AdicionarErroProcessamento(error.Description);
-                }
-
+                AdicionarErroProcessamento("Não foi possível redefinir a senha. Solicite um novo link ou revise os requisitos da nova senha.");
                 return CustomResponse();
             }
 

@@ -11,6 +11,9 @@ namespace YourMoney.Domain.Entities
         public DateTime MesReferencia { get; private set; }
         public DateTime CriadoEm { get; private set; }
         public DateTime? AtualizadoEm { get; private set; }
+        public Guid? GrupoObjetivoInvestimentoId { get; private set; }
+        public virtual GrupoObjetivoInvestimento? GrupoObjetivoInvestimento { get; private set; }
+        public virtual ICollection<AporteObjetivoInvestimento> AportesObjetivo { get; private set; } = new List<AporteObjetivoInvestimento>();
 
         private MetaMensal() { }
 
@@ -69,6 +72,14 @@ namespace YourMoney.Domain.Entities
         public void Renomear(string nome)
         {
             AtualizarNome(nome);
+            AtualizadoEm = DateTime.UtcNow;
+        }
+
+        public void AssociarGrupoObjetivo(Guid? grupoObjetivoInvestimentoId)
+        {
+            if (grupoObjetivoInvestimentoId == Guid.Empty)
+                throw new ArgumentException("Objetivo financeiro associado é inválido.", nameof(grupoObjetivoInvestimentoId));
+            GrupoObjetivoInvestimentoId = grupoObjetivoInvestimentoId;
             AtualizadoEm = DateTime.UtcNow;
         }
 

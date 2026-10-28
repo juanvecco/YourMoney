@@ -190,4 +190,35 @@ BEGIN
     FROM dbo.tbMeta;
 END;
 
+IF OBJECT_ID(N'dbo.tbMetaMensal', N'U') IS NOT NULL
+   AND OBJECT_ID(N'dbo.tbInvestimentoGrupoObjetivo', N'U') IS NOT NULL
+BEGIN
+    EXEC sp_executesql N'
+    SELECT ''RelationshipOwnerMismatch'' AS CheckName,
+           ''tbMetaMensal->tbInvestimentoGrupoObjetivo'' AS RelationshipName,
+           COUNT_BIG(*) AS CountValue
+    FROM dbo.tbMetaMensal m
+    INNER JOIN dbo.tbInvestimentoGrupoObjetivo g ON g.Id = m.GrupoObjetivoInvestimentoId
+    WHERE m.GrupoObjetivoInvestimentoId IS NOT NULL AND m.UsuarioId <> g.UsuarioId;';
+END;
+
+IF OBJECT_ID(N'dbo.tbAporteObjetivoInvestimento', N'U') IS NOT NULL
+BEGIN
+    EXEC sp_executesql N'
+    SELECT ''RelationshipOwnerMismatch'' AS CheckName,
+           ''tbAporteObjetivoInvestimento relationships'' AS RelationshipName,
+           COUNT_BIG(*) AS CountValue
+    FROM dbo.tbAporteObjetivoInvestimento a
+    INNER JOIN dbo.tbMetaMensal m ON m.Id = a.MetaMensalId
+    INNER JOIN dbo.tbInvestimentoGrupoObjetivo g ON g.Id = a.GrupoObjetivoInvestimentoId
+    LEFT JOIN dbo.tbInvestimento i ON i.Id = a.InvestimentoId
+    WHERE a.UsuarioId <> m.UsuarioId OR a.UsuarioId <> g.UsuarioId
+       OR (a.InvestimentoId IS NOT NULL AND (a.UsuarioId <> i.UsuarioId OR i.GrupoObjetivoInvestimentoId <> a.GrupoObjetivoInvestimentoId));';
+
+    SELECT 'FinancialTotals' AS CheckName, 'tbAporteObjetivoInvestimento' AS TableName,
+           COUNT_BIG(*) AS RowsValue, COALESCE(SUM(CAST(Valor AS decimal(38,2))), 0) AS TotalValue,
+           MIN(DataConfirmacao) AS MinDate, MAX(DataConfirmacao) AS MaxDate
+    FROM dbo.tbAporteObjetivoInvestimento;
+END;
+
 SELECT 'ValidationComplete' AS CheckName, @TargetUserId AS TargetUserId, SYSDATETIMEOFFSET() AS CompletedAt;

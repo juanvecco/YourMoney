@@ -13,6 +13,7 @@ namespace YourMoney.Infrastructure.Configurations
                 "CK_Investimento_TipoAtivo",
                 "[TipoAtivo] IS NULL OR [TipoAtivo] IN ('FundoInvestimento','Exterior','Criptomoeda','RendaFixa','Acoes','Outros')"));
             builder.HasKey(i => i.Id);
+            builder.HasAlternateKey(i => new { i.Id, i.UsuarioId });
 
             builder.Property(i => i.Nome)
                 .IsRequired()

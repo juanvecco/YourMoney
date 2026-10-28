@@ -22,6 +22,67 @@ namespace YourMoney.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.AporteObjetivoInvestimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataConfirmacao")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("GrupoObjetivoInvestimentoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("InvestimentoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("MesReferencia")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("MetaMensalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OperacaoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("GrupoObjetivoInvestimentoId", "UsuarioId");
+
+                    b.HasIndex("InvestimentoId", "UsuarioId");
+
+                    b.HasIndex("MetaMensalId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "GrupoObjetivoInvestimentoId");
+
+                    b.HasIndex("UsuarioId", "MesReferencia");
+
+                    b.HasIndex("UsuarioId", "OperacaoId")
+                        .IsUnique();
+
+                    b.ToTable("tbAporteObjetivoInvestimento", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AporteObjetivo_Valor", "[Valor] > 0");
+                        });
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
@@ -268,6 +329,28 @@ namespace YourMoney.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ArquivadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("DataAlvo")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<Guid?>("GrupoPaiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImagemUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -283,15 +366,22 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<decimal?>("ValorAlvo")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<byte[]>("Versao")
-                        .IsRequired()
                         .IsConcurrencyToken()
+                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("GrupoPaiId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "Ativo");
 
                     b.HasIndex("UsuarioId", "NomeNormalizado")
                         .IsUnique()
@@ -466,6 +556,9 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("GrupoObjetivoInvestimentoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("MesReferencia")
                         .HasColumnType("date");
 
@@ -496,6 +589,10 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
+                    b.HasIndex("GrupoObjetivoInvestimentoId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "GrupoObjetivoInvestimentoId");
+
                     b.HasIndex("UsuarioId", "MesReferencia")
                         .HasDatabaseName("IX_MetaMensal_Usuario_MesReferencia");
 
@@ -503,6 +600,133 @@ namespace YourMoney.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_MetaMensal_Definicao", "([TipoDefinicao] = N'Percentual' AND [PercentualReceita] IS NOT NULL AND [PercentualReceita] > 0 AND [ValorMeta] IS NULL) OR ([TipoDefinicao] = N'Valor' AND [ValorMeta] IS NOT NULL AND [ValorMeta] > 0 AND [PercentualReceita] IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyConnection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ConnectedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ConnectorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("ConsentExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<bool>("IsSandbox")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LastUpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PluggyItemId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PluggyItemId")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("tbPluggyConnection", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyCredential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ProtectedClientSecret")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
+
+                    b.ToTable("tbPluggyCredential", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyTransactionImport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecordType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset>("RegisteredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "TransactionId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Transaction");
+
+                    b.HasIndex("UsuarioId", "RecordType", "RecordId")
+                        .HasDatabaseName("IX_PluggyTransactionImport_Usuario_Record");
+
+                    b.ToTable("tbPluggyTransactionImport", (string)null);
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>
@@ -675,6 +899,35 @@ namespace YourMoney.Infrastructure.Migrations
                     b.ToTable("tbReceitaRecorrenteOcorrencia", (string)null);
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.AporteObjetivoInvestimento", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", "GrupoObjetivoInvestimento")
+                        .WithMany("Aportes")
+                        .HasForeignKey("GrupoObjetivoInvestimentoId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("YourMoney.Domain.Entities.Investimento", "Investimento")
+                        .WithMany()
+                        .HasForeignKey("InvestimentoId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("YourMoney.Domain.Entities.MetaMensal", "MetaMensal")
+                        .WithMany("AportesObjetivo")
+                        .HasForeignKey("MetaMensalId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GrupoObjetivoInvestimento");
+
+                    b.Navigation("Investimento");
+
+                    b.Navigation("MetaMensal");
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Categoria", b =>
                 {
                     b.HasOne("YourMoney.Domain.Entities.Categoria", "CategoriaPai")
@@ -756,6 +1009,17 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Navigation("DespesaRecorrente");
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", "GrupoPai")
+                        .WithMany("Subobjetivos")
+                        .HasForeignKey("GrupoPaiId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("GrupoPai");
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Investimento", b =>
                 {
                     b.HasOne("YourMoney.Domain.Entities.ReceitaRecorrente", "ReceitaRecorrente")
@@ -782,6 +1046,17 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.MetaMensal", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", "GrupoObjetivoInvestimento")
+                        .WithMany("MetasMensais")
+                        .HasForeignKey("GrupoObjetivoInvestimentoId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("GrupoObjetivoInvestimento");
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>
@@ -837,7 +1112,18 @@ namespace YourMoney.Infrastructure.Migrations
 
             modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>
                 {
+                    b.Navigation("Aportes");
+
                     b.Navigation("Investimentos");
+
+                    b.Navigation("MetasMensais");
+
+                    b.Navigation("Subobjetivos");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.MetaMensal", b =>
+                {
+                    b.Navigation("AportesObjetivo");
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.ReceitaRecorrente", b =>
