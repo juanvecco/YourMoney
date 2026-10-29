@@ -993,10 +993,11 @@ public sealed class PluggyService : IPluggyService
 
     private object CriarConnectTokenPayload(string clientUserId)
     {
+        // Cada banco Meu Pluggy vira um item independente, embora reutilize o login Meu Pluggy.
+        // avoidDuplicates bloquearia a criação do segundo banco como se fosse credencial repetida.
         var options = new Dictionary<string, object>
         {
-            ["clientUserId"] = clientUserId,
-            ["avoidDuplicates"] = true
+            ["clientUserId"] = clientUserId
         };
 
         var redirectUri = LerConfiguracao("PLUGGY_OAUTH_REDIRECT_URI", "Pluggy:OAuthRedirectUri");
