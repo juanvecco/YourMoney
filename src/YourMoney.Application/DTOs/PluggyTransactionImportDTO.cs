@@ -13,7 +13,7 @@ public sealed class PluggyTransactionImportRequestDTO
     [Required, StringLength(255, MinimumLength = 1)]
     public string Description { get; set; } = string.Empty;
 
-    [Range(typeof(decimal), "0.01", "9999999999999999")]
+    [Range(typeof(decimal), "0.01", "9999999999999999", ParseLimitsInInvariantCulture = true)]
     public decimal Amount { get; set; }
 
     public DateOnly Date { get; set; }
