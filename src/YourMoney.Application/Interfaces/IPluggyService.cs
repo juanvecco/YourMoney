@@ -52,6 +52,11 @@ public interface IPluggyService
         PluggyTransactionImportRequestDTO request,
         CancellationToken cancellationToken = default);
 
+    Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(
+        string usuarioId,
+        PluggyExpenseReconciliationRequestDTO request,
+        CancellationToken cancellationToken = default);
+
     Task RemoverConexaoAsync(
         string usuarioId,
         Guid connectionId,

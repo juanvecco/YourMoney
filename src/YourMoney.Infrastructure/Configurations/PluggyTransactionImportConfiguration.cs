@@ -25,6 +25,8 @@ public sealed class PluggyTransactionImportConfiguration : IEntityTypeConfigurat
             .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Transaction");
 
         builder.HasIndex(x => new { x.UsuarioId, x.RecordType, x.RecordId })
-            .HasDatabaseName("IX_PluggyTransactionImport_Usuario_Record");
+            .IsUnique()
+            .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Record");
     }
 }
+

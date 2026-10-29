@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using YourMoney.Api.Services;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
@@ -355,6 +356,75 @@ public sealed class PluggyController : ControllerBase
         catch (HttpRequestException)
         {
             return StatusCode(StatusCodes.Status502BadGateway, new { message = "Não foi possível comunicar com a Pluggy agora." });
+        }
+    }
+
+    [HttpPost("real-transactions/reconcile")]
+    public async Task<IActionResult> ReconciliarDespesa(
+        [FromBody] PluggyExpenseReconciliationRequestDTO request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _pluggyService.ReconciliarDespesaAsync(
+                _currentUserService.UserId,
+                request,
+                cancellationToken);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { code = "validation_error", message = ex.Message });
+        }
+        catch (PluggyTransactionAlreadyRegisteredException ex)
+        {
+            return Conflict(new
+            {
+                code = "already_registered",
+                message = ex.Message,
+                existingImport = ex.ExistingImport
+            });
+        }
+        catch (PluggyExpenseReconciliationConflictException ex)
+        {
+            return Conflict(new { code = ex.Code, message = ex.Message });
+        }
+        catch (PluggyTransactionNotImportableException ex)
+        {
+            return StatusCode(StatusCodes.Status422UnprocessableEntity,
+                new { code = "unsupported_transaction", message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { code = "not_found", message = ex.Message });
+        }
+        catch (PluggyAuthorizationException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { code = "forbidden", message = ex.Message });
+        }
+        catch (PluggyConfigurationException ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (PluggyConsentExpiredException ex)
+        {
+            return Conflict(new { code = "consent_expired", message = ex.Message });
+        }
+        catch (PluggyIntegrationException ex)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (HttpRequestException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = "Não foi possível comunicar com a Pluggy agora." });
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { code = "persistence_error", message = "Não foi possível salvar a reconciliação. Revise os dados e tente novamente." });
         }
     }
 

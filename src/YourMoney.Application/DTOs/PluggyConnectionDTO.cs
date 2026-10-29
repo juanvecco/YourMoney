@@ -52,6 +52,8 @@ public sealed class PluggyTransactionPreviewDTO
     public Guid? RegisteredRecordId { get; set; }
     public bool PossibleDuplicate { get; set; }
     public PluggyDuplicateCandidateDTO? DuplicateCandidate { get; set; }
+    public IReadOnlyList<PluggyDuplicateCandidateDTO> PossibleDuplicateCandidates { get; set; } =
+        Array.Empty<PluggyDuplicateCandidateDTO>();
     public bool Importable { get; set; }
     public string? ImportUnavailableReason { get; set; }
 }

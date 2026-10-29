@@ -724,7 +724,8 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Transaction");
 
                     b.HasIndex("UsuarioId", "RecordType", "RecordId")
-                        .HasDatabaseName("IX_PluggyTransactionImport_Usuario_Record");
+                        .IsUnique()
+                        .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Record");
 
                     b.ToTable("tbPluggyTransactionImport", (string)null);
                 });

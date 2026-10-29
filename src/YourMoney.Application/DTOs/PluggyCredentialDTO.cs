@@ -13,4 +13,5 @@ public sealed class PluggyCredentialStatusDTO
     public string? ClientIdHint { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public bool CanSave { get; set; }
+    public string? Message { get; set; }
 }

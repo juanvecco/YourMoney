@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Data;
 using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 using YourMoney.Infrastructure.Persistence;
 
 namespace YourMoney.Api.Services;
@@ -90,6 +92,17 @@ public sealed class PluggyTransactionNotImportableException : Exception
     }
 }
 
+public sealed class PluggyExpenseReconciliationConflictException : Exception
+{
+    public string Code { get; }
+
+    public PluggyExpenseReconciliationConflictException(string code, string message)
+        : base(message)
+    {
+        Code = code;
+    }
+}
+
 public sealed class PluggyService : IPluggyService
 {
     private const string ApiKeyCacheKey = "pluggy-api-key";
@@ -137,6 +150,24 @@ public sealed class PluggyService : IPluggyService
             .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
         if (stored is not null)
         {
+            try
+            {
+                _ = _credentialProtector.Unprotect(stored.ProtectedClientSecret);
+            }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                _logger.LogWarning("As credenciais Pluggy armazenadas não podem ser abertas pelo chaveiro de proteção atual.");
+                return new PluggyCredentialStatusDTO
+                {
+                    Configured = false,
+                    Source = "database",
+                    ClientIdHint = CriarDicaClientId(stored.ClientId),
+                    UpdatedAt = stored.UpdatedAt,
+                    CanSave = true,
+                    Message = MensagemCredenciaisProtegidasIndisponiveis
+                };
+            }
+
             return new PluggyCredentialStatusDTO
             {
                 Configured = true,
@@ -647,6 +678,286 @@ public sealed class PluggyService : IPluggyService
         }
     }
 
+    public async Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(
+        string usuarioId,
+        PluggyExpenseReconciliationRequestDTO request,
+        CancellationToken cancellationToken = default)
+    {
+        ValidarTitularPessoal(usuarioId);
+        if (request is null)
+            throw new ArgumentException("Os dados de reconciliação são obrigatórios.");
+        if (string.IsNullOrWhiteSpace(request.TransactionId))
+            throw new ArgumentException("A transação de origem é obrigatória.");
+        if (request.Action is not ("create" or "link" or "replace"))
+            throw new ArgumentException("Escolha uma ação válida para a despesa.");
+
+        var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken))
+            .SingleOrDefault(transaction => string.Equals(
+                transaction.TransactionId,
+                request.TransactionId,
+                StringComparison.Ordinal));
+        if (source is null)
+            throw new KeyNotFoundException("A transação não foi encontrada nas conexões Meu Pluggy deste usuário.");
+
+        var existingSource = await _dbContext.PluggyTransactionImports
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                item => item.UsuarioId == usuarioId && item.TransactionId == source.TransactionId,
+                cancellationToken);
+        if (existingSource is not null)
+            throw new PluggyTransactionAlreadyRegisteredException(existingSource);
+
+        if (!PodeReconciliarComoDespesa(source))
+            throw new PluggyTransactionNotImportableException(
+                "Esta transação não é um débito confirmado compatível com o cadastro de despesas.");
+        if (!source.Importable)
+            throw new PluggyTransactionNotImportableException(
+                source.ImportUnavailableReason ?? "Esta transação não possui um valor BRL confiável.");
+
+        if (request.Action == "create")
+        {
+            ValidarCamposRevisados(request, requireClassification: true);
+            if (source.PossibleDuplicateCandidates.Count > 0 && !request.ConfirmPossibleDuplicate)
+                throw new PluggyExpenseReconciliationConflictException(
+                    "duplicate_confirmation_required",
+                    "Há uma possível despesa correspondente. Revise a candidata ou confirme que deseja criar outra.");
+
+            var imported = await ImportarTransacaoAsync(usuarioId, new PluggyTransactionImportRequestDTO
+            {
+                TransactionId = source.TransactionId,
+                RecordType = "expense",
+                Description = request.Description!.Trim(),
+                Amount = request.Amount!.Value,
+                Date = request.Date!.Value,
+                IdContaFinanceira = request.IdContaFinanceira,
+                IdCategoria = request.IdCategoria
+            }, cancellationToken);
+
+            return new PluggyExpenseReconciliationResultDTO
+            {
+                TransactionId = imported.TransactionId,
+                Action = "create",
+                RecordType = "expense",
+                RecordId = imported.RecordId,
+                RegisteredAt = imported.RegisteredAt
+            };
+        }
+
+        if (!request.TargetExpenseId.HasValue || request.TargetExpenseId.Value == Guid.Empty)
+            throw new ArgumentException("Selecione a despesa manual que deseja manter ou substituir.");
+
+        var candidate = source.PossibleDuplicateCandidates
+            .SingleOrDefault(item => item.RecordId == request.TargetExpenseId.Value);
+        if (candidate is null)
+            throw new PluggyExpenseReconciliationConflictException(
+                "candidate_changed",
+                "A correspondência não está mais disponível. Atualize a lista e revise novamente.");
+        if (string.IsNullOrWhiteSpace(request.ExpectedDescription)
+            || !request.ExpectedDate.HasValue
+            || !request.ExpectedAmount.HasValue
+            || !CandidatoCorrespondeAoSnapshot(
+                candidate,
+                request.ExpectedDescription,
+                request.ExpectedDate.Value,
+                request.ExpectedAmount.Value))
+            throw new PluggyExpenseReconciliationConflictException(
+                "candidate_changed",
+                "A despesa mudou desde que foi exibida. Atualize a lista e revise novamente.");
+        if (!candidate.CanLink)
+            throw new PluggyExpenseReconciliationConflictException(
+                "target_already_linked",
+                "Esta despesa já representa outra transação Open Finance.");
+
+        if (request.Action == "replace")
+        {
+            ValidarCamposRevisados(request, requireClassification: false);
+            if (!candidate.CanReplace)
+                throw new PluggyTransactionNotImportableException(
+                    candidate.CannotReplaceReason ?? "Esta despesa não pode ser substituída com segurança.");
+        }
+
+        await using var transactionScope = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+        try
+        {
+            var concurrentSource = await _dbContext.PluggyTransactionImports
+                .AsNoTracking()
+                .SingleOrDefaultAsync(
+                    item => item.UsuarioId == usuarioId && item.TransactionId == source.TransactionId,
+                    cancellationToken);
+            if (concurrentSource is not null)
+                throw new PluggyTransactionAlreadyRegisteredException(concurrentSource);
+
+            var expense = await _dbContext.Despesas
+                .SingleOrDefaultAsync(
+                    item => item.Id == request.TargetExpenseId.Value && item.UsuarioId == usuarioId,
+                    cancellationToken);
+            if (expense is null)
+                throw new KeyNotFoundException("A despesa selecionada não foi encontrada para este usuário.");
+
+            var sourceAmount = ObterValorParaCadastro(
+                source.Amount,
+                source.CurrencyCode,
+                source.AmountInAccountCurrency,
+                source.AccountCurrencyCode)!.Value;
+            var sourceDate = DateOnly.FromDateTime(DataTransacaoBrasilia(source.Date));
+            if (!DespesaCorrespondeAoSnapshot(
+                    expense,
+                    request.ExpectedDescription!,
+                    request.ExpectedDate!.Value,
+                    request.ExpectedAmount!.Value)
+                || ObterMotivosCorrespondencia(
+                    expense.Descricao,
+                    DateOnly.FromDateTime(expense.Data),
+                    expense.Valor,
+                    source.Description,
+                    sourceDate,
+                    sourceAmount) is null)
+            {
+                throw new PluggyExpenseReconciliationConflictException(
+                    "candidate_changed",
+                    "A despesa mudou desde a comparação. Atualize a lista e revise novamente.");
+            }
+
+            var targetAlreadyLinked = await _dbContext.PluggyTransactionImports
+                .AsNoTracking()
+                .AnyAsync(
+                    item => item.UsuarioId == usuarioId
+                        && item.RecordType == "expense"
+                        && item.RecordId == expense.Id,
+                    cancellationToken);
+            if (targetAlreadyLinked)
+                throw new PluggyExpenseReconciliationConflictException(
+                    "target_already_linked",
+                    "Esta despesa já representa outra transação Open Finance.");
+
+            if (request.Action == "replace")
+            {
+                var hasRefund = await _dbContext.Receitas
+                    .AsNoTracking()
+                    .AnyAsync(revenue => revenue.UsuarioId == usuarioId
+                        && revenue.Natureza == NaturezaReceita.Reembolso
+                        && revenue.DespesaVinculadaId == expense.Id,
+                        cancellationToken);
+                if (expense.ParcelamentoId.HasValue || hasRefund)
+                    throw new PluggyTransactionNotImportableException(
+                        expense.ParcelamentoId.HasValue
+                            ? "Despesas parceladas não podem ser substituídas por uma única transação."
+                            : "Despesas com reembolso não podem ser substituídas por uma única transação.");
+
+                expense.AtualizarDescricao(request.Description!.Trim());
+                expense.AtualizarValor(decimal.Round(request.Amount!.Value, 2, MidpointRounding.AwayFromZero));
+                expense.AtualizarData(request.Date!.Value.ToDateTime(TimeOnly.MinValue));
+                await _despesaService.AtualizarAsync(expense);
+            }
+
+            var registeredAt = DateTimeOffset.UtcNow;
+            _dbContext.PluggyTransactionImports.Add(new PluggyTransactionImport(
+                usuarioId,
+                source.TransactionId,
+                source.ConnectionId,
+                "expense",
+                expense.Id,
+                registeredAt));
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            await transactionScope.CommitAsync(cancellationToken);
+
+            return new PluggyExpenseReconciliationResultDTO
+            {
+                TransactionId = source.TransactionId,
+                Action = request.Action,
+                RecordType = "expense",
+                RecordId = expense.Id,
+                RegisteredAt = registeredAt
+            };
+        }
+        catch (DbUpdateException)
+        {
+            await transactionScope.RollbackAsync(cancellationToken);
+            _dbContext.ChangeTracker.Clear();
+            var concurrentSource = await _dbContext.PluggyTransactionImports
+                .AsNoTracking()
+                .SingleOrDefaultAsync(
+                    item => item.UsuarioId == usuarioId && item.TransactionId == source.TransactionId,
+                    cancellationToken);
+            if (concurrentSource is not null)
+                throw new PluggyTransactionAlreadyRegisteredException(concurrentSource);
+
+            var concurrentTarget = await _dbContext.PluggyTransactionImports
+                .AsNoTracking()
+                .AnyAsync(item => item.UsuarioId == usuarioId
+                    && item.RecordType == "expense"
+                    && item.RecordId == request.TargetExpenseId.Value,
+                    cancellationToken);
+            if (concurrentTarget)
+                throw new PluggyExpenseReconciliationConflictException(
+                    "target_already_linked",
+                    "Esta despesa já representa outra transação Open Finance.");
+            throw;
+        }
+        catch
+        {
+            await transactionScope.RollbackAsync(cancellationToken);
+            _dbContext.ChangeTracker.Clear();
+            throw;
+        }
+    }
+
+    private static void ValidarCamposRevisados(
+        PluggyExpenseReconciliationRequestDTO request,
+        bool requireClassification)
+    {
+        if (string.IsNullOrWhiteSpace(request.Description))
+            throw new ArgumentException("A descrição da despesa é obrigatória.");
+        if (!request.Amount.HasValue || request.Amount.Value <= 0)
+            throw new ArgumentException("O valor da despesa deve ser maior que zero.");
+        if (!request.Date.HasValue || request.Date.Value == default)
+            throw new ArgumentException("A data da despesa é obrigatória.");
+        if (requireClassification)
+        {
+            if (!request.IdContaFinanceira.HasValue || request.IdContaFinanceira.Value == Guid.Empty)
+                throw new ArgumentException("Selecione a conta financeira da despesa.");
+            if (!request.IdCategoria.HasValue || request.IdCategoria.Value == Guid.Empty)
+                throw new ArgumentException("Selecione a categoria da despesa.");
+        }
+    }
+
+    private static bool CandidatoCorrespondeAoSnapshot(
+        PluggyDuplicateCandidateDTO candidate,
+        string description,
+        DateOnly date,
+        decimal amount) =>
+        string.Equals(candidate.Description, description, StringComparison.Ordinal)
+        && candidate.Date == date
+        && decimal.Round(candidate.Amount, 2, MidpointRounding.AwayFromZero)
+            == decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+    private static bool DespesaCorrespondeAoSnapshot(
+        Despesa expense,
+        string description,
+        DateOnly date,
+        decimal amount) =>
+        string.Equals(expense.Descricao, description, StringComparison.Ordinal)
+        && DateOnly.FromDateTime(expense.Data) == date
+        && decimal.Round(expense.Valor, 2, MidpointRounding.AwayFromZero)
+            == decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+    private static bool PodeReconciliarComoDespesa(PluggyTransactionPreviewDTO source)
+    {
+        if (!string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(source.Status, "PENDING", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var operation = string.Concat((source.OperationType ?? string.Empty)
+            .Where(char.IsLetterOrDigit))
+            .ToUpperInvariant();
+        return !operation.Contains("TRANSFER", StringComparison.Ordinal)
+            && !operation.Contains("REVERSAL", StringComparison.Ordinal)
+            && !operation.Contains("REFUND", StringComparison.Ordinal)
+            && !operation.Contains("ESTORNO", StringComparison.Ordinal);
+    }
+
     public async Task RemoverConexaoAsync(
         string usuarioId,
         Guid connectionId,
@@ -691,9 +1002,53 @@ public sealed class PluggyService : IPluggyService
                 RecordId = expense.Id,
                 Description = expense.Descricao,
                 Date = DateOnly.FromDateTime(expense.Data),
-                Amount = expense.Valor
+                Amount = expense.Valor,
+                AccountName = expense.ContaFinanceira.Descricao,
+                CategoryName = expense.Categoria.Descricao,
+                CanReplace = !expense.ParcelamentoId.HasValue,
+                CannotReplaceReason = expense.ParcelamentoId.HasValue
+                    ? "Despesas parceladas não podem ser substituídas por uma única transação."
+                    : null
             })
             .ToListAsync(cancellationToken);
+        var expenseIds = expenses.Select(expense => expense.RecordId).ToArray();
+        var linkedExpenseIds = expenseIds.Length == 0
+            ? new HashSet<Guid>()
+            : (await _dbContext.PluggyTransactionImports
+                    .AsNoTracking()
+                    .Where(item => item.UsuarioId == usuarioId
+                        && item.RecordType == "expense"
+                        && expenseIds.Contains(item.RecordId))
+                    .Select(item => item.RecordId)
+                    .Distinct()
+                    .ToListAsync(cancellationToken))
+                .ToHashSet();
+        var reimbursedExpenseIds = expenseIds.Length == 0
+            ? new HashSet<Guid>()
+            : (await _dbContext.Receitas
+                    .AsNoTracking()
+                    .Where(revenue => revenue.UsuarioId == usuarioId
+                        && revenue.Natureza == NaturezaReceita.Reembolso
+                        && revenue.DespesaVinculadaId.HasValue
+                        && expenseIds.Contains(revenue.DespesaVinculadaId.Value))
+                    .Select(revenue => revenue.DespesaVinculadaId!.Value)
+                    .Distinct()
+                    .ToListAsync(cancellationToken))
+                .ToHashSet();
+        foreach (var expense in expenses)
+        {
+            if (linkedExpenseIds.Contains(expense.RecordId))
+            {
+                expense.CanLink = false;
+                expense.CanReplace = false;
+                expense.CannotReplaceReason = "Esta despesa já está vinculada a outra transação Open Finance.";
+            }
+            else if (reimbursedExpenseIds.Contains(expense.RecordId))
+            {
+                expense.CanReplace = false;
+                expense.CannotReplaceReason = "Despesas com reembolso não podem ser substituídas por uma única transação.";
+            }
+        }
         var revenues = await _dbContext.Receitas
             .AsNoTracking()
             .Where(revenue => revenue.UsuarioId == usuarioId
@@ -735,21 +1090,82 @@ public sealed class PluggyService : IPluggyService
             if (expectedRecordType is null || !amount.HasValue)
                 continue;
 
-            var description = NormalizarDescricao(source.Description);
             var sourceDate = DateOnly.FromDateTime(DataTransacaoBrasilia(source.Date));
             var candidates = expectedRecordType == "expense" ? expenses : revenues;
-            var candidate = candidates.FirstOrDefault(item =>
-                item.Date == sourceDate
-                && decimal.Round(item.Amount, 2, MidpointRounding.AwayFromZero) == decimal.Round(amount.Value, 2, MidpointRounding.AwayFromZero)
-                && NormalizarDescricao(item.Description) == description);
+            var matchingCandidates = candidates
+                .Select(item => (Candidate: item, Reasons: expectedRecordType == "expense"
+                    ? ObterMotivosCorrespondencia(
+                        item.Description, item.Date, item.Amount, source.Description, sourceDate, amount.Value)
+                    : ObterMotivosCorrespondenciaExata(
+                        item.Description, item.Date, item.Amount, source.Description, sourceDate, amount.Value)))
+                .Where(match => match.Reasons is not null)
+                .ToArray();
 
-            if (candidate is not null)
+            if (matchingCandidates.Length > 0)
             {
-                candidate.Reason = "Mesmo tipo de lançamento, valor, data e descrição após normalização.";
+                foreach (var (candidate, reasons) in matchingCandidates)
+                {
+                    candidate.Reason = string.Join("; ", reasons!);
+                    candidate.MatchReasons = reasons!;
+                }
                 source.PossibleDuplicate = true;
-                source.DuplicateCandidate = candidate;
+                source.DuplicateCandidate = matchingCandidates[0].Candidate;
+                if (expectedRecordType == "expense")
+                    source.PossibleDuplicateCandidates = matchingCandidates
+                        .Select(match => match.Candidate)
+                        .ToArray();
             }
         }
+    }
+
+    private static IReadOnlyList<string>? ObterMotivosCorrespondencia(
+        string? registeredDescription,
+        DateOnly registeredDate,
+        decimal registeredAmount,
+        string? sourceDescription,
+        DateOnly sourceDate,
+        decimal sourceAmount)
+    {
+        var diasEntreLancamentos = Math.Abs(registeredDate.DayNumber - sourceDate.DayNumber);
+        if (diasEntreLancamentos > 1)
+            return null;
+
+        var mesmoValor = decimal.Round(registeredAmount, 2, MidpointRounding.AwayFromZero)
+            == decimal.Round(sourceAmount, 2, MidpointRounding.AwayFromZero);
+        var mesmaDescricao = NormalizarDescricao(registeredDescription)
+            == NormalizarDescricao(sourceDescription);
+        if (!mesmoValor && !(mesmaDescricao && diasEntreLancamentos == 0))
+            return null;
+
+        return new[]
+        {
+            diasEntreLancamentos == 0 ? "Mesma data" : "Data com diferença de um dia",
+            mesmoValor ? "Mesmo valor em centavos" : "Valor diferente",
+            mesmaDescricao ? "Descrição igual após normalização" : "Descrição diferente"
+        };
+    }
+
+    private static IReadOnlyList<string>? ObterMotivosCorrespondenciaExata(
+        string? registeredDescription,
+        DateOnly registeredDate,
+        decimal registeredAmount,
+        string? sourceDescription,
+        DateOnly sourceDate,
+        decimal sourceAmount)
+    {
+        if (registeredDate != sourceDate
+            || decimal.Round(registeredAmount, 2, MidpointRounding.AwayFromZero)
+                != decimal.Round(sourceAmount, 2, MidpointRounding.AwayFromZero)
+            || NormalizarDescricao(registeredDescription) != NormalizarDescricao(sourceDescription))
+            return null;
+
+        return new[]
+        {
+            "Mesmo tipo de lançamento",
+            "Mesmo valor em centavos",
+            "Mesma data",
+            "Descrição igual após normalização"
+        };
     }
 
     private static decimal? ObterValorParaCadastro(
@@ -929,8 +1345,7 @@ public sealed class PluggyService : IPluggyService
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
-                    throw new PluggyConfigurationException(
-                        "Não foi possível abrir as credenciais Pluggy protegidas. Verifique se o servidor mantém o mesmo chaveiro de proteção.");
+                    throw new PluggyConfigurationException(MensagemCredenciaisProtegidasIndisponiveis);
                 }
             }
             else
@@ -957,6 +1372,9 @@ public sealed class PluggyService : IPluggyService
             AuthenticationLock.Release();
         }
     }
+
+    private const string MensagemCredenciaisProtegidasIndisponiveis =
+        "As credenciais Pluggy salvas não podem ser abertas pelo servidor atual. Informe novamente o Client ID e o Client Secret nesta tela para atualizá-las.";
 
     private async Task<string> AutenticarAplicacaoAsync(
         string clientId,

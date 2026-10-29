@@ -33,4 +33,10 @@ public sealed class PluggyDuplicateCandidateDTO
     public DateOnly Date { get; set; }
     public decimal Amount { get; set; }
     public string Reason { get; set; } = string.Empty;
+    public string? AccountName { get; set; }
+    public string? CategoryName { get; set; }
+    public bool CanLink { get; set; } = true;
+    public bool CanReplace { get; set; } = true;
+    public string? CannotReplaceReason { get; set; }
+    public IReadOnlyList<string> MatchReasons { get; set; } = Array.Empty<string>();
 }
