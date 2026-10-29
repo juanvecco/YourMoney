@@ -132,6 +132,21 @@ public sealed class PluggyService : IPluggyService
     {
         ValidarTitularPessoal(usuarioId);
         var environmentCredentials = ObterCredenciaisDoServidor();
+        var stored = await _dbContext.PluggyCredentials
+            .AsNoTracking()
+            .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
+        if (stored is not null)
+        {
+            return new PluggyCredentialStatusDTO
+            {
+                Configured = true,
+                Source = "database",
+                ClientIdHint = CriarDicaClientId(stored.ClientId),
+                UpdatedAt = stored.UpdatedAt,
+                CanSave = true
+            };
+        }
+
         if (environmentCredentials.HasAnyValue)
         {
             return new PluggyCredentialStatusDTO
@@ -139,13 +154,10 @@ public sealed class PluggyService : IPluggyService
                 Configured = environmentCredentials.IsComplete,
                 Source = "server",
                 ClientIdHint = CriarDicaClientId(environmentCredentials.ClientId),
-                CanSave = false
+                CanSave = true
             };
         }
 
-        var stored = await _dbContext.PluggyCredentials
-            .AsNoTracking()
-            .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
         return new PluggyCredentialStatusDTO
         {
             Configured = stored is not null,
@@ -167,9 +179,6 @@ public sealed class PluggyService : IPluggyService
             throw new ArgumentException("Informe um Client ID válido.", nameof(request));
         if (string.IsNullOrWhiteSpace(request.ClientSecret) || request.ClientSecret.Length > 1000)
             throw new ArgumentException("Informe um Client Secret válido.", nameof(request));
-
-        if (ObterCredenciaisDoServidor().HasAnyValue)
-            throw new PluggyCredentialsManagedExternallyException();
 
         var clientId = request.ClientId.Trim();
         var apiKey = await ValidarCredenciaisInformadasAsync(clientId, request.ClientSecret, cancellationToken);
@@ -906,20 +915,13 @@ public sealed class PluggyService : IPluggyService
                 && !string.IsNullOrWhiteSpace(cachedApiKey))
                 return cachedApiKey;
 
-            var serverCredentials = ObterCredenciaisDoServidor();
-            string? clientId = serverCredentials.ClientId;
-            string? clientSecret = serverCredentials.ClientSecret;
-            if (serverCredentials.HasAnyValue && !serverCredentials.IsComplete)
-                throw new PluggyConfigurationException("A configuração de credenciais Pluggy no servidor está incompleta.");
-
-            if (!serverCredentials.HasAnyValue)
+            string? clientId;
+            string? clientSecret;
+            var storedCredential = await _dbContext.PluggyCredentials
+                .AsNoTracking()
+                .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
+            if (storedCredential is not null)
             {
-                var storedCredential = await _dbContext.PluggyCredentials
-                    .AsNoTracking()
-                    .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
-                if (storedCredential is null)
-                    throw new PluggyConfigurationException();
-
                 clientId = storedCredential.ClientId;
                 try
                 {
@@ -930,6 +932,17 @@ public sealed class PluggyService : IPluggyService
                     throw new PluggyConfigurationException(
                         "Não foi possível abrir as credenciais Pluggy protegidas. Verifique se o servidor mantém o mesmo chaveiro de proteção.");
                 }
+            }
+            else
+            {
+                var serverCredentials = ObterCredenciaisDoServidor();
+                if (serverCredentials.HasAnyValue && !serverCredentials.IsComplete)
+                    throw new PluggyConfigurationException("A configuração de credenciais Pluggy no servidor está incompleta.");
+                if (!serverCredentials.HasAnyValue)
+                    throw new PluggyConfigurationException();
+
+                clientId = serverCredentials.ClientId;
+                clientSecret = serverCredentials.ClientSecret;
             }
 
             if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
