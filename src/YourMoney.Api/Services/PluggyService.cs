@@ -673,23 +673,7 @@ public sealed class PluggyService : IPluggyService
         var isStale = connection.InvestmentAssetsSyncStatus == "stale"
             || now - asset.FetchedAt >= InvestmentAssetsRefreshInterval;
         var canReconcile = asset.CurrencyCode == "BRL" && asset.Balance > 0 && !isStale;
-        var candidates = investments
-            .Select(investment => new
-            {
-                Investment = investment,
-                ExactCode = !string.IsNullOrWhiteSpace(asset.Code)
-                    && string.Equals(investment.CodigoAtivo, asset.Code, StringComparison.OrdinalIgnoreCase),
-                ExactIsin = !string.IsNullOrWhiteSpace(asset.Isin)
-                    && string.Equals(investment.Isin, asset.Isin, StringComparison.OrdinalIgnoreCase),
-                NameMatch = (NormalizarChave(investment.Nome) == NormalizarChave(asset.Name)
-                    || NormalizarChave(investment.Descricao) == NormalizarChave(asset.Name))
-                    && (string.IsNullOrWhiteSpace(asset.Type)
-                        || NormalizarChave(investment.Tipo).Contains(NormalizarChave(asset.Type), StringComparison.Ordinal)
-                        || NormalizarChave(asset.Type).Contains(NormalizarChave(investment.Tipo), StringComparison.Ordinal))
-            })
-            .Where(match => match.ExactCode || match.ExactIsin || match.NameMatch)
-            .OrderByDescending(match => match.ExactCode || match.ExactIsin)
-            .Take(5)
+        var candidates = PluggyInvestmentAssetMatcher.FindCandidates(asset, investments)
             .Select(match => new PluggyInvestmentAssetCandidateDTO
             {
                 InvestmentId = match.Investment.Id,
@@ -697,9 +681,9 @@ public sealed class PluggyService : IPluggyService
                 Type = match.Investment.Tipo,
                 Code = match.Investment.CodigoAtivo,
                 Isin = match.Investment.Isin,
-                Reason = match.ExactCode ? "Código do ativo igual"
-                    : match.ExactIsin ? "ISIN igual"
-                    : "Nome e modalidade compatíveis; confirme manualmente",
+                Reason = match.Reason,
+                ValueDifference = match.ValueDifference,
+                ValueDifferencePercent = match.ValueDifferencePercent,
                 Descricao = match.Investment.Descricao,
                 Quantidade = match.Investment.Quantidade,
                 PrecoMedio = match.Investment.PrecoMedio,
@@ -751,12 +735,6 @@ public sealed class PluggyService : IPluggyService
             Candidates = candidates
         };
     }
-
-    private static string NormalizarChave(string? value) => new(
-        (value ?? string.Empty).Normalize(System.Text.NormalizationForm.FormD)
-            .Where(character => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(character)
-                != System.Globalization.UnicodeCategory.NonSpacingMark)
-            .Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
 
     public async Task<PluggyInvestmentAssetReconciliationResultDTO> ReconciliarAtivoInvestimentoAsync(
         string usuarioId,
@@ -812,6 +790,15 @@ public sealed class PluggyService : IPluggyService
         {
             if (request.Investment is null || request.Investment.OperacaoId == Guid.Empty)
                 throw new ArgumentException("Revise os dados disponíveis e informe os campos obrigatórios do investimento.");
+            if (!request.ConfirmPossibleDuplicate)
+            {
+                var manualInvestments = await _dbContext.Investimentos.AsNoTracking()
+                    .Where(investment => investment.UsuarioId == usuarioId && investment.Ativo)
+                    .ToListAsync(cancellationToken);
+                if (PluggyInvestmentAssetMatcher.FindCandidates(asset, manualInvestments).Count > 0)
+                    throw new PluggyInvestmentAssetConflictException("duplicate_confirmation_required",
+                        "Encontramos um possível investimento já cadastrado. Revise a correspondência ou confirme o cadastro de outro ativo.");
+            }
             investmentId = (await _investimentoService.CriarInvestimentoAsync(request.Investment)).Id;
         }
         else
@@ -822,20 +809,22 @@ public sealed class PluggyService : IPluggyService
             try { local = await _investimentoService.GetInvestimentoByIdAsync(request.TargetInvestmentId.Value); }
             catch (InvalidOperationException) { throw new KeyNotFoundException("Investimento não encontrado para este usuário."); }
 
+            if (string.IsNullOrWhiteSpace(request.ExpectedLocalName) || request.ExpectedLocalValue is null
+                || !string.Equals(local.Nome, request.ExpectedLocalName, StringComparison.Ordinal)
+                || local.ValorAtual != request.ExpectedLocalValue.Value)
+                throw new PluggyInvestmentAssetConflictException("local_asset_changed", "O investimento local mudou desde a prévia. Atualize e revise novamente.");
+
+            var alreadyRepresentsAnotherPosition = await _dbContext.PluggyInvestmentAssetLinks
+                .AnyAsync(link => link.UsuarioId == usuarioId && link.InvestimentoId == local.Id
+                    && (link.PluggyItemId != asset.PluggyItemId || link.ExternalInvestmentId != asset.ExternalInvestmentId),
+                    cancellationToken);
+
             if (request.Action == "replace")
             {
-                var alreadyRepresentsAnotherPosition = await _dbContext.PluggyInvestmentAssetLinks
-                    .AnyAsync(link => link.UsuarioId == usuarioId
-                        && link.InvestimentoId == local.Id
-                        && link.ExternalInvestmentId != asset.ExternalInvestmentId,
-                        cancellationToken);
                 if (alreadyRepresentsAnotherPosition)
                     throw new PluggyInvestmentAssetConflictException("aggregate_position", "Este investimento já está associado a outra posição. Vincule sem alterar para preservar o valor agregado.");
-                if (!local.Ativo || string.IsNullOrWhiteSpace(request.ExpectedLocalName)
-                    || request.ExpectedLocalValue is null
-                    || !string.Equals(local.Nome, request.ExpectedLocalName, StringComparison.Ordinal)
-                    || local.ValorAtual != request.ExpectedLocalValue.Value)
-                    throw new PluggyInvestmentAssetConflictException("local_asset_changed", "O investimento local mudou desde a prévia. Atualize e revise novamente.");
+                if (!local.Ativo)
+                    throw new PluggyInvestmentAssetConflictException("local_asset_changed", "Investimentos inativos não podem ser atualizados.");
                 if (request.Investment is null)
                     throw new ArgumentException("Revise os dados do investimento antes de confirmar a substituição.");
                 await _investimentoService.AtualizarInvestimentoAsync(local.Id, new AtualizarInvestimentoRequest
@@ -856,6 +845,10 @@ public sealed class PluggyService : IPluggyService
                     TipoAtivo = request.Investment.TipoAtivo
                 });
             }
+            // Completing metadata is part of the confirmed association, in the same transaction.
+            // An aggregate position must not inherit the identity of just one of its sources.
+            if (!alreadyRepresentsAnotherPosition && local.CompletarIdentificadoresAtivo(asset.Code, asset.Isin))
+                await _investimentoService.AtualizarAsync(local);
             investmentId = local.Id;
         }
 

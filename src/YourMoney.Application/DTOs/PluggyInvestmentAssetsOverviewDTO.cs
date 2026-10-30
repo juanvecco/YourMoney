@@ -62,6 +62,8 @@ public sealed class PluggyInvestmentAssetCandidateDTO
     public string? Code { get; set; }
     public string? Isin { get; set; }
     public string Reason { get; set; } = string.Empty;
+    public decimal? ValueDifference { get; set; }
+    public decimal? ValueDifferencePercent { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public decimal Quantidade { get; set; }
     public decimal PrecoMedio { get; set; }

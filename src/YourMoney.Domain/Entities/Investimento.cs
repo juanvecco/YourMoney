@@ -132,6 +132,22 @@ namespace YourMoney.Domain.Entities
             Isin = string.IsNullOrWhiteSpace(valor) ? null : valor.ToUpperInvariant();
         }
 
+        public bool CompletarIdentificadoresAtivo(string? codigo, string? isin)
+        {
+            var alterado = false;
+            if (string.IsNullOrWhiteSpace(CodigoAtivo) && !string.IsNullOrWhiteSpace(codigo))
+            {
+                AtualizarCodigoAtivo(codigo);
+                alterado = true;
+            }
+            if (string.IsNullOrWhiteSpace(Isin) && !string.IsNullOrWhiteSpace(isin))
+            {
+                AtualizarIsin(isin);
+                alterado = true;
+            }
+            return alterado;
+        }
+
         public void AtualizarPrecoUnitarioAtual(decimal? preco)
         {
             if (preco.HasValue && preco.Value <= 0)

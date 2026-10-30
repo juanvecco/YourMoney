@@ -26,7 +26,11 @@ public static class PluggyInvestmentAssetsControllerTests
                 PositionDate = provider.PositionDate,
                 CurrentUnitQuote = provider.CurrentUnitQuote,
                 OriginalAmount = provider.OriginalAmount,
-                IssuerCnpj = provider.IssuerCnpj
+                IssuerCnpj = provider.IssuerCnpj,
+                Candidates = [new PluggyInvestmentAssetCandidateDTO
+                {
+                    ValueDifference = 20m, ValueDifferencePercent = 5.25m
+                }]
             }]
         };
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(overview, options));
@@ -42,6 +46,10 @@ public static class PluggyInvestmentAssetsControllerTests
         foreach (var alias in new[] { "id", "date", "value", "amountOriginal", "issuerCNPJ" })
             TestAssert.True(!asset.TryGetProperty(alias, out _),
                 $"Provider alias {alias} must not replace the application response contract");
+        var candidate = asset.GetProperty("candidates")[0];
+        TestAssert.True(candidate.GetProperty("valueDifference").GetDecimal() == 20m
+            && candidate.GetProperty("valueDifferencePercent").GetDecimal() == 5.25m,
+            "The comparison must expose typed monetary and percentage differences");
         return Task.CompletedTask;
     }
 

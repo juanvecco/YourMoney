@@ -9,6 +9,7 @@ public sealed class PluggyInvestmentAssetReconciliationRequestDTO
     public Guid? TargetInvestmentId { get; set; }
     public string? ExpectedLocalName { get; set; }
     public decimal? ExpectedLocalValue { get; set; }
+    public bool ConfirmPossibleDuplicate { get; set; }
     public CriarInvestimentoRequest? Investment { get; set; }
 }
 
