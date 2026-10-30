@@ -60,6 +60,12 @@ public static class PluggyInvestmentAssetMatcher
             var source = Normalize(asset.Name);
             var name = Normalize(investment.Nome);
             var description = Normalize(investment.Descricao);
+            // A generic description must not hide a different maturity in the manual name.
+            var sourceNumbers = Numbers(Words(source));
+            var nameNumbers = Numbers(Words(name));
+            var localNumbers = nameNumbers.Length > 0 ? nameNumbers : Numbers(Words(description));
+            if (sourceNumbers.Length > 0 && localNumbers.Length > 0
+                && !sourceNumbers.Intersect(localNumbers, StringComparer.Ordinal).Any()) return null;
             strength = 2;
             if (source.Length > 0 && Key(source) == Key(name)) reason = "Nome igual";
             else if (source.Length > 0 && Key(source) == Key(description)) reason = "Descrição igual";
@@ -107,8 +113,8 @@ public static class PluggyInvestmentAssetMatcher
         if (common.Length < 2 || !common.Any(word => word.Length >= 3
             && !GenericWords.Contains(word) && !word.All(char.IsDigit))) return 0;
 
-        var sourceNumbers = sourceWords.Where(word => word.Length >= 4 && word.All(char.IsDigit)).ToArray();
-        var localNumbers = localWords.Where(word => word.Length >= 4 && word.All(char.IsDigit)).ToArray();
+        var sourceNumbers = Numbers(sourceWords);
+        var localNumbers = Numbers(localWords);
         if (sourceNumbers.Length > 0 && localNumbers.Length > 0
             && !sourceNumbers.Intersect(localNumbers, StringComparer.Ordinal).Any()) return 0;
 
@@ -117,6 +123,9 @@ public static class PluggyInvestmentAssetMatcher
 
     private static string[] Words(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries)
         .Where(word => !IgnoredWords.Contains(word)).Distinct(StringComparer.Ordinal).ToArray();
+
+    private static string[] Numbers(IEnumerable<string> words) =>
+        words.Where(word => word.Length >= 4 && word.All(char.IsDigit)).ToArray();
 
     private sealed record RankedMatch(PluggyInvestmentAssetMatch Result, int Strength, decimal Similarity);
 }

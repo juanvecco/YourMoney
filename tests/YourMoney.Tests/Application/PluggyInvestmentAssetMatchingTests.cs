@@ -47,6 +47,12 @@ public static class PluggyInvestmentAssetMatchingTests
         TestAssert.True(PluggyInvestmentAssetMatcher.FindCandidates(
             Asset("Tesouro Selic 2029"), [Manual("Reserva", "Tesouro Selic 2031", 1000m)]).Count == 0,
             "Different maturities must not be matched merely by similar product names");
+        TestAssert.True(PluggyInvestmentAssetMatcher.FindCandidates(
+            Asset("Tesouro Selic 2028"), [Manual("Tesouro Selic 2029 NU", "Tesouro Selic", 1000m)]).Count == 0,
+            "A generic description must not override the conflicting maturity in the manual investment name");
+        TestAssert.True(PluggyInvestmentAssetMatcher.FindCandidates(
+            Asset("Tesouro Selic 2029"), [Manual("Tesouro Selic 2029 NU", "Tesouro Selic", 1000m)]).Count == 1,
+            "A matching maturity in the manual name must remain a valid suggestion");
         return Task.CompletedTask;
     }
 
