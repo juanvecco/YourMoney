@@ -26,6 +26,7 @@ public sealed class PluggyTransactionImportConfiguration : IEntityTypeConfigurat
 
         builder.HasIndex(x => new { x.UsuarioId, x.RecordType, x.RecordId })
             .IsUnique()
+            .HasFilter("[RecordType] <> 'investment'")
             .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Record");
     }
 }

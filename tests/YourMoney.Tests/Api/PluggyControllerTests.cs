@@ -118,6 +118,51 @@ public static class PluggyControllerTests
             "Reconciliation should preserve the explicit action");
     }
 
+    public static async Task InvestmentReconciliationUsesAuthenticatedUserAndReturnsTypedResult()
+    {
+        var reconciliation = new PluggyInvestmentReconciliationResultDTO
+        {
+            TransactionId = "source-investment-1",
+            Action = "link",
+            RecordType = "investment",
+            RecordId = Guid.NewGuid(),
+            RegisteredAt = DateTimeOffset.UtcNow
+        };
+        var pluggy = new FakePluggyService { InvestmentReconciliationResult = reconciliation };
+        var controller = new PluggyController(pluggy, new FakeCurrentUserService("user-123"));
+
+        var result = await controller.ReconciliarInvestimento(
+            new PluggyInvestmentReconciliationRequestDTO { TransactionId = "source-investment-1", Action = "link" },
+            CancellationToken.None);
+
+        var ok = result as OkObjectResult;
+        TestAssert.True(ok?.Value is PluggyInvestmentReconciliationResultDTO,
+            "Investment reconciliation should return its typed response");
+        TestAssert.Equal("user-123", pluggy.ReconciliationUserId,
+            "Investment reconciliation should use the authenticated owner");
+        TestAssert.Equal("investment", ((PluggyInvestmentReconciliationResultDTO)ok!.Value!).RecordType,
+            "The result should identify the investment record type");
+    }
+
+    public static async Task InvestmentReconciliationMapsReviewConflict()
+    {
+        var pluggy = new FakePluggyService
+        {
+            ReconciliationFailure = new PluggyInvestmentReconciliationConflictException(
+                "candidate_changed", "Atualize a lista e revise novamente.")
+        };
+        var controller = new PluggyController(pluggy, new FakeCurrentUserService("user-123"));
+
+        var result = await controller.ReconciliarInvestimento(
+            new PluggyInvestmentReconciliationRequestDTO { TransactionId = "source-investment-1", Action = "replace" },
+            CancellationToken.None);
+
+        var conflict = result as ConflictObjectResult;
+        TestAssert.True(conflict != null, "A stale investment candidate should return HTTP 409");
+        TestAssert.Equal("user-123", pluggy.ReconciliationUserId,
+            "Conflict handling should still use the authenticated owner");
+    }
+
     private sealed class FakePluggyService : IPluggyService
     {
         public string ClientUserId { get; private set; } = string.Empty;
@@ -126,6 +171,7 @@ public static class PluggyControllerTests
         public Exception? ReconciliationFailure { get; set; }
         public PluggyOverviewDTO Overview { get; set; } = new();
         public PluggyExpenseReconciliationResultDTO ReconciliationResult { get; set; } = new();
+        public PluggyInvestmentReconciliationResultDTO InvestmentReconciliationResult { get; set; } = new();
 
         public Task<PluggyCredentialStatusDTO> ObterConfiguracaoCredenciaisAsync(
             string usuarioId,
@@ -154,6 +200,20 @@ public static class PluggyControllerTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<PluggyAccountDTO>>(Array.Empty<PluggyAccountDTO>());
 
+        public Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
+            string usuarioId, Guid? connectionId = null, bool retryFailed = false,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new PluggyInvestmentAssetsOverviewDTO());
+
+        public Task<PluggyInvestmentAssetReconciliationResultDTO> ReconciliarAtivoInvestimentoAsync(
+            string usuarioId, PluggyInvestmentAssetReconciliationRequestDTO request,
+            CancellationToken cancellationToken = default)
+        {
+            ReconciliationUserId = usuarioId;
+            if (ReconciliationFailure != null) throw ReconciliationFailure;
+            return Task.FromResult(new PluggyInvestmentAssetReconciliationResultDTO());
+        }
+
         public Task<IReadOnlyList<PluggyTransactionPreviewDTO>> ListarTransacoesPreviewAsync(
             string usuarioId,
             CancellationToken cancellationToken = default) =>
@@ -179,6 +239,16 @@ public static class PluggyControllerTests
             ReconciliationUserId = usuarioId;
             if (ReconciliationFailure != null) throw ReconciliationFailure;
             return Task.FromResult(ReconciliationResult);
+        }
+
+        public Task<PluggyInvestmentReconciliationResultDTO> ReconciliarInvestimentoAsync(
+            string usuarioId,
+            PluggyInvestmentReconciliationRequestDTO request,
+            CancellationToken cancellationToken = default)
+        {
+            ReconciliationUserId = usuarioId;
+            if (ReconciliationFailure != null) throw ReconciliationFailure;
+            return Task.FromResult(InvestmentReconciliationResult);
         }
 
         public Task RemoverConexaoAsync(

@@ -58,8 +58,8 @@ namespace YourMoney.Application.Services
                 request.Nome!,
                 request.Descricao!,
                 request.Tipo!,
-                NormalizarDecimal(request.Quantidade),
-                NormalizarDecimal(request.PrecoMedio),
+                NormalizarPrecisaoAtivo(request.Quantidade),
+                NormalizarPrecisaoAtivo(request.PrecoMedio),
                 NormalizarDecimal(request.ValorAtual),
                 request.DataInvestimento.Date,
                 request.MesReferencia,
@@ -68,6 +68,10 @@ namespace YourMoney.Application.Services
                 request.OperacaoId,
                 request.GrupoObjetivoId,
                 tipoAtivo);
+            investimento.AtualizarCodigoAtivo(request.CodigoAtivo);
+            investimento.AtualizarIsin(request.Isin);
+            investimento.AtualizarPrecoUnitarioAtual(request.PrecoUnitarioAtual.HasValue
+                ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null);
             investimento.AssociarGrupoObjetivo(grupo);
 
             var persistido = await _investimentoRepository.AdicionarIdempotenteAsync(investimento);
@@ -92,15 +96,41 @@ namespace YourMoney.Application.Services
             investimento.AtualizarNome(request.Nome!);
             investimento.AtualizarDescricao(request.Descricao!);
             investimento.AtualizarTipo(request.Tipo!);
-            investimento.AtualizarQuantidade(NormalizarDecimal(request.Quantidade));
-            investimento.AtualizarPrecoMedio(NormalizarDecimal(request.PrecoMedio));
+            investimento.AtualizarQuantidade(NormalizarPrecisaoAtivo(request.Quantidade));
+            investimento.AtualizarPrecoMedio(NormalizarPrecisaoAtivo(request.PrecoMedio));
             investimento.AtualizarValorAtual(NormalizarDecimal(request.ValorAtual));
+            investimento.AtualizarCodigoAtivo(request.CodigoAtivo);
+            investimento.AtualizarIsin(request.Isin);
+            investimento.AtualizarPrecoUnitarioAtual(request.PrecoUnitarioAtual.HasValue
+                ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null);
             investimento.AtualizarData(request.DataInvestimento);
             investimento.AtualizarMesReferencia(request.MesReferencia);
             investimento.DefinirReceitaRecorrente(request.ReceitaRecorrenteId);
             investimento.AssociarGrupoObjetivo(grupo);
             investimento.ClassificarTipoAtivo(tipoAtivo);
 
+            await _investimentoRepository.AtualizarAsync(investimento);
+            return Mapear(investimento);
+        }
+
+        public async Task<InvestimentoResponse> AtualizarDadosReconciliadosAsync(
+            Guid id,
+            string descricao,
+            DateTime data,
+            decimal valorAtual)
+        {
+            if (string.IsNullOrWhiteSpace(descricao))
+                throw new ArgumentException("A descrição do investimento é obrigatória.");
+            if (valorAtual <= 0 || valorAtual != decimal.Round(valorAtual, 2, MidpointRounding.AwayFromZero))
+                throw new ArgumentException("O valor atual deve ser positivo e ter no máximo duas casas decimais.");
+
+            var investimento = await ObterInvestimentoAsync(id);
+            if (!investimento.Ativo)
+                throw new InvalidOperationException("Investimentos inativos não podem ser substituídos por uma transação Open Finance.");
+
+            investimento.AtualizarDescricao(descricao);
+            investimento.AtualizarData(data);
+            investimento.AtualizarValorAtual(valorAtual);
             await _investimentoRepository.AtualizarAsync(investimento);
             return Mapear(investimento);
         }
@@ -289,6 +319,17 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Preço médio deve ser maior que zero.");
             if (request.ValorAtual <= 0)
                 throw new ArgumentException("Valor atual deve ser maior que zero.");
+            if (request.CodigoAtivo?.Trim().Length > 100)
+                throw new ArgumentException("Código do ativo deve ter no máximo 100 caracteres.");
+            if (request.Isin?.Trim().Length > 20)
+                throw new ArgumentException("ISIN deve ter no máximo 20 caracteres.");
+            if (request.PrecoUnitarioAtual.HasValue && request.PrecoUnitarioAtual.Value <= 0)
+                throw new ArgumentException("Cotação unitária atual deve ser maior que zero.");
+            if (request.Quantidade != NormalizarPrecisaoAtivo(request.Quantidade)
+                || request.PrecoMedio != NormalizarPrecisaoAtivo(request.PrecoMedio)
+                || (request.PrecoUnitarioAtual.HasValue
+                    && request.PrecoUnitarioAtual.Value != NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value)))
+                throw new ArgumentException("Quantidade e preços unitários aceitam até oito casas decimais.");
             if (request.DataInvestimento == default)
                 throw new ArgumentException("Data do investimento é obrigatória.");
             if (request.MesReferencia == default)
@@ -308,9 +349,13 @@ namespace YourMoney.Application.Services
             return investimento.Nome == request.Nome!.Trim()
                 && investimento.Descricao == request.Descricao!.Trim()
                 && investimento.Tipo == request.Tipo!.Trim()
-                && investimento.Quantidade == NormalizarDecimal(request.Quantidade)
-                && investimento.PrecoMedio == NormalizarDecimal(request.PrecoMedio)
+                && investimento.Quantidade == NormalizarPrecisaoAtivo(request.Quantidade)
+                && investimento.PrecoMedio == NormalizarPrecisaoAtivo(request.PrecoMedio)
                 && investimento.ValorAtual == NormalizarDecimal(request.ValorAtual)
+                && investimento.CodigoAtivo == (string.IsNullOrWhiteSpace(request.CodigoAtivo) ? null : request.CodigoAtivo.Trim())
+                && investimento.Isin == (string.IsNullOrWhiteSpace(request.Isin) ? null : request.Isin.Trim().ToUpperInvariant())
+                && investimento.PrecoUnitarioAtual == (request.PrecoUnitarioAtual.HasValue
+                    ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null)
                 && investimento.DataInvestimento == request.DataInvestimento.Date
                 && investimento.MesReferencia == mes
                 && investimento.ReceitaRecorrenteId == request.ReceitaRecorrenteId
@@ -320,6 +365,9 @@ namespace YourMoney.Application.Services
 
         private static decimal NormalizarDecimal(decimal valor) =>
             decimal.Round(valor, 2, MidpointRounding.AwayFromZero);
+
+        private static decimal NormalizarPrecisaoAtivo(decimal valor) =>
+            decimal.Round(valor, 8, MidpointRounding.AwayFromZero);
 
         private static CriarInvestimentoResponse MapearCriacao(Investimento investimento, bool criadoAgora)
         {
@@ -344,6 +392,9 @@ namespace YourMoney.Application.Services
             response.Tipo = investimento.Tipo;
             response.Quantidade = investimento.Quantidade;
             response.PrecoMedio = investimento.PrecoMedio;
+            response.CodigoAtivo = investimento.CodigoAtivo;
+            response.Isin = investimento.Isin;
+            response.PrecoUnitarioAtual = investimento.PrecoUnitarioAtual;
             response.ValorAtual = investimento.ValorAtual;
             response.DataInvestimento = investimento.DataInvestimento;
             response.MesReferencia = investimento.MesReferencia;

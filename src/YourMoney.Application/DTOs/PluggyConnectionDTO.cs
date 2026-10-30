@@ -55,5 +55,6 @@ public sealed class PluggyTransactionPreviewDTO
     public IReadOnlyList<PluggyDuplicateCandidateDTO> PossibleDuplicateCandidates { get; set; } =
         Array.Empty<PluggyDuplicateCandidateDTO>();
     public bool Importable { get; set; }
+    public decimal? SuggestedAmountBrl { get; set; }
     public string? ImportUnavailableReason { get; set; }
 }

@@ -24,7 +24,7 @@ public sealed class PluggyTransactionImport : BaseEntity
             throw new ArgumentException("O identificador da transação Pluggy é obrigatório.", nameof(transactionId));
         if (connectionId == Guid.Empty)
             throw new ArgumentException("A conexão Pluggy é obrigatória.", nameof(connectionId));
-        if (recordType is not ("expense" or "revenue"))
+        if (recordType is not ("expense" or "revenue" or "investment"))
             throw new ArgumentException("O tipo de lançamento é inválido.", nameof(recordType));
         if (recordId == Guid.Empty)
             throw new ArgumentException("O lançamento criado é obrigatório.", nameof(recordId));

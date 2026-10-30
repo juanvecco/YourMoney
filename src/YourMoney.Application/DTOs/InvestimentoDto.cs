@@ -8,6 +8,9 @@ namespace YourMoney.Application.DTOs
         public string? Tipo { get; set; }
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime? MesReferencia { get; set; }
@@ -25,6 +28,9 @@ namespace YourMoney.Application.DTOs
         public string? Tipo { get; set; }
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime MesReferencia { get; set; }
@@ -50,6 +56,9 @@ namespace YourMoney.Application.DTOs
         public string Tipo { get; set; } = string.Empty;
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime? MesReferencia { get; set; }

@@ -9,6 +9,11 @@ public sealed class PluggyConnection : BaseEntity
     public bool IsSandbox { get; private set; }
     public DateTimeOffset? LastUpdatedAt { get; private set; }
     public DateTimeOffset? ConsentExpiresAt { get; private set; }
+    public DateTimeOffset? InvestmentAssetsLastAttemptAt { get; private set; }
+    public DateTimeOffset? InvestmentAssetsLastSuccessAt { get; private set; }
+    public string InvestmentAssetsSyncStatus { get; private set; } = "never";
+    public string? InvestmentAssetsSyncMessage { get; private set; }
+    public bool? HasInvestmentProduct { get; private set; }
     public DateTimeOffset ConnectedAt { get; private set; }
 
     private PluggyConnection() { }
@@ -50,5 +55,38 @@ public sealed class PluggyConnection : BaseEntity
         IsSandbox = isSandbox;
         LastUpdatedAt = lastUpdatedAt;
         ConsentExpiresAt = consentExpiresAt;
+    }
+
+    public void RegistrarTentativaAtivos(DateTimeOffset attemptedAt)
+    {
+        InvestmentAssetsLastAttemptAt = attemptedAt;
+        InvestmentAssetsSyncStatus = "loading";
+        InvestmentAssetsSyncMessage = null;
+    }
+
+    public void RegistrarSucessoAtivos(DateTimeOffset succeededAt, bool hasInvestmentProduct)
+    {
+        InvestmentAssetsLastAttemptAt = succeededAt;
+        InvestmentAssetsLastSuccessAt = succeededAt;
+        HasInvestmentProduct = hasInvestmentProduct;
+        InvestmentAssetsSyncStatus = hasInvestmentProduct ? "current" : "no_product";
+        InvestmentAssetsSyncMessage = null;
+    }
+
+    public void RegistrarFalhaAtivos(DateTimeOffset attemptedAt, string message)
+    {
+        InvestmentAssetsLastAttemptAt = attemptedAt;
+        InvestmentAssetsSyncStatus = "stale";
+        var normalized = string.IsNullOrWhiteSpace(message)
+            ? "Não foi possível atualizar os ativos desta instituição."
+            : message.Trim();
+        InvestmentAssetsSyncMessage = normalized[..Math.Min(normalized.Length, 500)];
+    }
+
+    public void RegistrarErroConfiguracaoAtivos(string message)
+    {
+        InvestmentAssetsSyncStatus = "configuration_required";
+        InvestmentAssetsSyncMessage = string.IsNullOrWhiteSpace(message)
+            ? null : message.Trim()[..Math.Min(message.Trim().Length, 500)];
     }
 }

@@ -112,6 +112,7 @@ namespace YourMoney.Tests.Fixtures
         public Task<List<Investimento>> GetByTipoAsync(string tipo) => Task.FromResult(Investimentos.Where(i => i.Tipo == tipo).ToList());
         public Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim) => Task.FromResult(Investimentos.Where(i => i.DataInvestimento >= dataInicio && i.DataInvestimento <= dataFim).ToList());
         public Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId) => Task.FromResult(Investimentos.Where(i => i.UsuarioId == usuarioId && i.DataInvestimento >= dataInicio && i.DataInvestimento <= dataFim).ToList());
+        public Task<List<Investimento>> GetByReferenciaPeriodoAsync(DateTime dataInicio, DateTime dataFimExclusivo, string usuarioId) => Task.FromResult(Investimentos.Where(i => i.UsuarioId == usuarioId && (i.MesReferencia ?? i.DataInvestimento) >= dataInicio && (i.MesReferencia ?? i.DataInvestimento) < dataFimExclusivo).ToList());
         public Task AdicionarAsync(Investimento investimento) { Investimentos.Add(investimento); return Task.CompletedTask; }
         public Task AtualizarAsync(Investimento investimento) => Task.CompletedTask;
         public Task RemoverAsync(Guid id) { Investimentos.RemoveAll(i => i.Id == id); return Task.CompletedTask; }
@@ -186,6 +187,11 @@ namespace YourMoney.Tests.Fixtures
             LastUpdateRequest = request;
             if (UpdateException != null)
                 throw UpdateException;
+            return Task.FromResult(UpdateResponse);
+        }
+        public Task<InvestimentoResponse> AtualizarDadosReconciliadosAsync(Guid id, string descricao, DateTime data, decimal valorAtual)
+        {
+            if (UpdateException != null) throw UpdateException;
             return Task.FromResult(UpdateResponse);
         }
         public Task<Investimento> GetInvestimentoByIdAsync(Guid id) => throw new NotImplementedException();

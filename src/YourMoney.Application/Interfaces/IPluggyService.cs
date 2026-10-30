@@ -38,6 +38,17 @@ public interface IPluggyService
         string usuarioId,
         CancellationToken cancellationToken = default);
 
+    Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
+        string usuarioId,
+        Guid? connectionId = null,
+        bool retryFailed = false,
+        CancellationToken cancellationToken = default);
+
+    Task<PluggyInvestmentAssetReconciliationResultDTO> ReconciliarAtivoInvestimentoAsync(
+        string usuarioId,
+        PluggyInvestmentAssetReconciliationRequestDTO request,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<PluggyTransactionPreviewDTO>> ListarTransacoesPreviewAsync(
         string usuarioId,
         CancellationToken cancellationToken = default);
@@ -55,6 +66,11 @@ public interface IPluggyService
     Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(
         string usuarioId,
         PluggyExpenseReconciliationRequestDTO request,
+        CancellationToken cancellationToken = default);
+
+    Task<PluggyInvestmentReconciliationResultDTO> ReconciliarInvestimentoAsync(
+        string usuarioId,
+        PluggyInvestmentReconciliationRequestDTO request,
         CancellationToken cancellationToken = default);
 
     Task RemoverConexaoAsync(

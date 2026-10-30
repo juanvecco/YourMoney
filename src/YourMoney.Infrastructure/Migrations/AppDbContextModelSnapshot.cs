@@ -401,6 +401,10 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("CodigoAtivo")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("DataInvestimento")
                         .HasColumnType("datetime2");
 
@@ -413,6 +417,10 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.Property<Guid?>("GrupoObjetivoInvestimentoId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Isin")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("MesReferencia")
                         .HasColumnType("date")
@@ -427,10 +435,13 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("PrecoMedio")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,8)");
+
+                    b.Property<decimal?>("PrecoUnitarioAtual")
+                        .HasColumnType("decimal(18,8)");
 
                     b.Property<decimal>("Quantidade")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,8)");
 
                     b.Property<Guid?>("ReceitaRecorrenteId")
                         .HasColumnType("uniqueidentifier");
@@ -617,10 +628,29 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("ConsentExpiresAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<bool?>("HasInvestmentProduct")
+                        .HasColumnType("bit");
+
                     b.Property<string>("InstitutionName")
                         .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("nvarchar(160)");
+
+                    b.Property<DateTimeOffset?>("InvestmentAssetsLastAttemptAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("InvestmentAssetsLastSuccessAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("InvestmentAssetsSyncMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("InvestmentAssetsSyncStatus")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasDefaultValue("never")
+                        .HasColumnType("nvarchar(24)");
 
                     b.Property<bool>("IsSandbox")
                         .HasColumnType("bit");
@@ -685,6 +715,162 @@ namespace YourMoney.Infrastructure.Migrations
                     b.ToTable("tbPluggyCredential", (string)null);
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyInvestmentAssetLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<Guid>("ConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ExternalInvestmentId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("InvestimentoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PluggyItemId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<DateTimeOffset>("RegisteredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConnectionId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("InvestimentoId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "InvestimentoId")
+                        .HasDatabaseName("IX_PluggyInvestmentAssetLink_Investimento");
+
+                    b.HasIndex("UsuarioId", "PluggyItemId", "ExternalInvestmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_PluggyInvestmentAssetLink_Source");
+
+                    b.ToTable("tbPluggyInvestmentAssetLink", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyInvestmentAssetSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("ConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<decimal?>("CurrentUnitQuote")
+                        .HasColumnType("decimal(18,8)");
+
+                    b.Property<string>("ExternalInvestmentId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset>("FetchedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Isin")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Issuer")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("IssuerCnpj")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal?>("OriginalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PluggyItemId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<DateTimeOffset>("PositionDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("PurchaseDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<decimal?>("Quantity")
+                        .HasColumnType("decimal(18,8)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Subtype")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConnectionId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "ConnectionId", "IsCurrent")
+                        .HasDatabaseName("IX_PluggyInvestmentAssetSnapshot_Connection");
+
+                    b.HasIndex("UsuarioId", "PluggyItemId", "ExternalInvestmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_PluggyInvestmentAssetSnapshot_Source");
+
+                    b.ToTable("tbPluggyInvestmentAssetSnapshot", (string)null);
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.PluggyTransactionImport", b =>
                 {
                     b.Property<Guid>("Id")
@@ -725,7 +911,8 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId", "RecordType", "RecordId")
                         .IsUnique()
-                        .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Record");
+                        .HasDatabaseName("UX_PluggyTransactionImport_Usuario_Record")
+                        .HasFilter("[RecordType] <> 'investment'");
 
                     b.ToTable("tbPluggyTransactionImport", (string)null);
                 });
@@ -1058,6 +1245,31 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("GrupoObjetivoInvestimento");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyInvestmentAssetLink", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.PluggyConnection", null)
+                        .WithMany()
+                        .HasForeignKey("ConnectionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("YourMoney.Domain.Entities.Investimento", null)
+                        .WithMany()
+                        .HasForeignKey("InvestimentoId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyInvestmentAssetSnapshot", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.PluggyConnection", null)
+                        .WithMany()
+                        .HasForeignKey("ConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.Receita", b =>

@@ -131,13 +131,37 @@ namespace YourMoney.Tests.Api
             var defaultFilesIndex = source.IndexOf("UseDefaultFiles", StringComparison.Ordinal);
             var staticFilesIndex = source.IndexOf("UseStaticFiles", StringComparison.Ordinal);
             var routingIndex = source.IndexOf("UseRouting", StringComparison.Ordinal);
-            var fallbackIndex = source.IndexOf("MapFallbackToFile(\"index.html\")", StringComparison.Ordinal);
+            var fallbackIndex = source.IndexOf("MapFallback(", StringComparison.Ordinal);
 
             TestAssert.True(defaultFilesIndex >= 0, "API should enable default files for the Angular entry point");
             TestAssert.True(staticFilesIndex > defaultFilesIndex, "API should serve static files after default file resolution");
             TestAssert.True(routingIndex > staticFilesIndex, "API should serve static files before endpoint routing");
-            TestAssert.True(fallbackIndex > routingIndex, "API should map SPA routes back to index.html");
+            TestAssert.True(fallbackIndex > routingIndex, "API should map non-API navigation routes through a SPA fallback");
+            TestAssert.True(source.Contains("SendFileAsync(indexPath)", StringComparison.Ordinal),
+                "Angular navigation routes should still receive index.html");
             TestAssert.True(swaggerSource.Contains("RoutePrefix = \"swagger\"", StringComparison.Ordinal), "Swagger UI should not capture / or /index.html");
+
+            return Task.CompletedTask;
+        }
+
+        public static Task ApiFallbackDoesNotReturnSpaForMissingRoutes()
+        {
+            var apiConfigPath = Path.Combine(
+                FindSolutionRoot(),
+                "src",
+                "YourMoney.Api",
+                "Configuration",
+                "ApiConfig.cs");
+            var source = File.ReadAllText(apiConfigPath);
+
+            TestAssert.True(source.Contains("StartsWithSegments(\"/api\")", StringComparison.Ordinal),
+                "Unknown API paths must be detected before the SPA navigation fallback");
+            TestAssert.True(source.Contains("api_route_not_found", StringComparison.Ordinal),
+                "Unknown API paths must return a typed JSON error code");
+            TestAssert.True(source.Contains("WriteAsJsonAsync", StringComparison.Ordinal),
+                "Unknown API paths must return JSON rather than index.html");
+            TestAssert.True(source.Contains("SendFileAsync", StringComparison.Ordinal),
+                "Non-API navigation routes must continue to receive the Angular entry point");
 
             return Task.CompletedTask;
         }

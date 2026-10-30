@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using YourMoney.Api.Services;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
 
 namespace YourMoney.Api.Controllers;
 
@@ -227,6 +229,82 @@ public sealed class PluggyController : ControllerBase
         }
     }
 
+    [HttpGet("investments/preview")]
+    public async Task<IActionResult> ObterAtivosInvestimento(
+        [FromQuery] Guid? connectionId,
+        [FromQuery] bool retryFailed,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await _pluggyService.ObterAtivosInvestimentoAsync(
+                _currentUserService.UserId, connectionId, retryFailed, cancellationToken));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { code = "not_found", message = ex.Message });
+        }
+        catch (PluggyAuthorizationException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { code = "forbidden", message = ex.Message });
+        }
+        catch (PluggyConfigurationException ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (PluggyIntegrationException ex)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (HttpRequestException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = "Não foi possível consultar os ativos agora." });
+        }
+        catch (SqlException ex) when (ex.Number is 207 or 208)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+            {
+                code = "schema_migration_required",
+                message = "O banco ainda não possui a estrutura para posições de investimento Open Finance. Aplique a migration OpenFinanceInvestmentAssets e tente novamente."
+            });
+        }
+    }
+
+    [HttpPost("investments/reconcile")]
+    public async Task<IActionResult> ReconciliarAtivoInvestimento(
+        [FromBody] PluggyInvestmentAssetReconciliationRequestDTO request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await _pluggyService.ReconciliarAtivoInvestimentoAsync(
+                _currentUserService.UserId, request, cancellationToken));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { code = "validation_error", message = ex.Message });
+        }
+        catch (PluggyInvestmentAssetConflictException ex)
+        {
+            return Conflict(new { code = ex.Code, message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { code = "not_found", message = ex.Message });
+        }
+        catch (ConflitoOperacaoInvestimentoException ex)
+        {
+            return Conflict(new { code = "operation_conflict", message = ex.Message });
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new { code = "already_reconciled", message = "A posição já foi reconciliada. Atualize a prévia." });
+        }
+    }
+
     [HttpGet("real-transactions/preview")]
     public async Task<IActionResult> ListarTransacoesPreview(CancellationToken cancellationToken)
     {
@@ -262,7 +340,8 @@ public sealed class PluggyController : ControllerBase
         [FromQuery] string? accountId,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromQuery] string? targetType = null)
     {
         try
         {
@@ -273,7 +352,8 @@ public sealed class PluggyController : ControllerBase
                     ConnectionId = connectionId,
                     AccountId = accountId,
                     From = from,
-                    To = to
+                    To = to,
+                    TargetType = targetType
                 },
                 cancellationToken));
         }
@@ -388,6 +468,79 @@ public sealed class PluggyController : ControllerBase
         catch (PluggyExpenseReconciliationConflictException ex)
         {
             return Conflict(new { code = ex.Code, message = ex.Message });
+        }
+        catch (PluggyTransactionNotImportableException ex)
+        {
+            return StatusCode(StatusCodes.Status422UnprocessableEntity,
+                new { code = "unsupported_transaction", message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { code = "not_found", message = ex.Message });
+        }
+        catch (PluggyAuthorizationException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { code = "forbidden", message = ex.Message });
+        }
+        catch (PluggyConfigurationException ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (PluggyConsentExpiredException ex)
+        {
+            return Conflict(new { code = "consent_expired", message = ex.Message });
+        }
+        catch (PluggyIntegrationException ex)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = ex.Message });
+        }
+        catch (HttpRequestException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { code = "provider_unavailable", message = "Não foi possível comunicar com a Pluggy agora." });
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { code = "persistence_error", message = "Não foi possível salvar a reconciliação. Revise os dados e tente novamente." });
+        }
+    }
+
+    [HttpPost("real-transactions/reconcile-investment")]
+    public async Task<IActionResult> ReconciliarInvestimento(
+        [FromBody] PluggyInvestmentReconciliationRequestDTO request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _pluggyService.ReconciliarInvestimentoAsync(
+                _currentUserService.UserId,
+                request,
+                cancellationToken);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { code = "validation_error", message = ex.Message });
+        }
+        catch (PluggyTransactionAlreadyRegisteredException ex)
+        {
+            return Conflict(new
+            {
+                code = "already_registered",
+                message = ex.Message,
+                existingImport = ex.ExistingImport
+            });
+        }
+        catch (PluggyInvestmentReconciliationConflictException ex)
+        {
+            return Conflict(new { code = ex.Code, message = ex.Message });
+        }
+        catch (ConflitoOperacaoInvestimentoException ex)
+        {
+            return Conflict(new { code = "operation_conflict", message = ex.Message });
         }
         catch (PluggyTransactionNotImportableException ex)
         {

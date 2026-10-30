@@ -11,8 +11,17 @@ public static class GrupoObjetivoInvestimentoServiceTests
     {
         var repository = new InMemoryGrupoObjetivoInvestimentoRepository();
         var service = new GrupoObjetivoInvestimentoService(repository, new FakeCurrentUserService { UserId = "user-a" });
-        var created = await service.CriarAsync(new CriarGrupoObjetivoRequest { Nome = " Reserva " });
-        TestAssert.Equal("Reserva", created.Nome, "Create should normalize display name");
+        var created = await service.CriarAsync(new CriarGrupoObjetivoRequest
+        {
+            Nome = " Carro / Família ",
+            Descricao = " City LX Sedan ",
+            ImagemUrl = "/assets/objectives/city-lx-sedan.jpg",
+            ValorAlvo = 117700m
+        });
+        TestAssert.Equal("Carro / Família", created.Nome, "Create should normalize display name");
+        TestAssert.Equal("City LX Sedan", created.Descricao, "Create should preserve a trimmed visual description");
+        TestAssert.Equal("/assets/objectives/city-lx-sedan.jpg", created.ImagemUrl, "Create should preserve the internal image path");
+        TestAssert.Equal(117700m, created.ValorAlvo, "Create should preserve the requested vehicle target");
         var renamed = await service.RenomearAsync(created.Id, new RenomearGrupoObjetivoRequest { Nome = "Viver de renda", Versao = created.Versao });
         TestAssert.Equal("Viver de renda", renamed.Nome, "Owner should rename group");
         TestAssert.Equal(1, (await service.ListarAsync()).Count, "Owner should list private group");

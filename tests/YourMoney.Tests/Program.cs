@@ -152,8 +152,12 @@ var tests = new (string Name, Func<Task> Run)[]
     ("startup cmd delegates to powershell script", StaticApplicationHostingTests.StartupCmdDelegatesToPowerShellScript),
     ("cors allows local development origins without credential sharing", StaticApplicationHostingTests.CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing),
     ("api serves angular spa with route fallback", StaticApplicationHostingTests.ApiConfigurationServesAngularSpaWithRouteFallback),
+    ("api fallback returns JSON for missing API routes", StaticApplicationHostingTests.ApiFallbackDoesNotReturnSpaForMissingRoutes),
     ("published entry point is angular app with bearer interceptor", PublishedAngularAppTests.PublishedEntryPointIsAngularAppWithBearerInterceptor)
     ,
+    ("pluggy connect token uses authenticated user", PluggyControllerTests.ConnectTokenUsesAuthenticatedUser),
+    ("pluggy missing configuration returns unavailable", PluggyControllerTests.MissingConfigurationReturnsServiceUnavailable),
+    ("pluggy endpoint requires authorization", PluggyControllerTests.EndpointRequiresAuthorization),
     ("monthly goal entity normalizes and owns data", MetaMensalTests.CreatesNormalizedOwnedMeta),
     ("monthly goal entity rejects invalid data", MetaMensalTests.RejectsInvalidData),
     ("monthly goal entity supports value and mode transitions", MetaMensalTests.SupportsValueAndModeTransitions),
@@ -196,6 +200,52 @@ var tests = new (string Name, Func<Task> Run)[]
     ("investment organization controller binds filters", InvestimentoOrganizacaoConsultaControllerTests.BindsEveryConsolidatedFilter),
     ("investment organization controller maps query errors", InvestimentoOrganizacaoConsultaControllerTests.MapsInvalidUnavailableAndUnexpectedQueries),
     ("objective exclusion controller maps atomic command", GrupoObjetivoInvestimentoExclusaoControllerTests.ExclusionReturnsNoContentAndStableConflicts)
+    ,("integrated objective supports target and lifecycle", MetasObjetivosIntegracaoDomainTests.ObjectiveSupportsTargetAndLifecycle)
+    ,("monthly goal links canonical objective", MetasObjetivosIntegracaoDomainTests.MonthlyGoalCanLinkCanonicalObjective)
+    ,("objective contribution is precise and allocation stable", MetasObjetivosIntegracaoDomainTests.ContributionIsPreciseAndAllocationIsStable)
+    ,("goal objective link contract is owner derived", MetasObjetivosVinculoTests.ContractsPreserveOwnerDerivedCanonicalLink)
+    ,("goal objective commands stay protected", MetasObjetivosVinculoControllerTests.CommandsStayProtectedAndTyped)
+    ,("contribution validates precision and immutable allocation", AporteObjetivoInvestimentoTests.ValidatesPrecisionAndImmutableAllocation)
+    ,("contribution operation detects replay divergence", AporteObjetivoInvestimentoServiceTests.OperationIdentityDetectsReplayAndDivergence)
+    ,("contribution endpoints expose history confirmation allocation", AporteObjetivoInvestimentoControllerTests.ExposesHistoryConfirmationAndAllocationRoutes)
+    ,("objective summary separates portfolio and contributions", ObjetivoInvestimentoResumoTests.SummarySeparatesPortfolioFromConfirmedContributions)
+    ,("objective summary endpoint binds typed query", ObjetivoInvestimentoResumoControllerTests.SummaryEndpointUsesTypedQueryContract)
+    ,("objective lifecycle preserves target", GrupoObjetivoInvestimentoCicloVidaTests.ArchiveReactivatePreservesTarget)
+    ,("objective presentation supports safe image", GrupoObjetivoInvestimentoCicloVidaTests.PresentationSupportsDescriptionAndSafeInternalImage)
+    ,("objective lifecycle endpoints are post commands", GrupoObjetivoInvestimentoCicloVidaControllerTests.LifecycleEndpointsArePostCommands)
+    ,("activity projection is owner scoped and totals precede paging", MovimentacaoFinanceiraServiceTests.ProjectionIsOwnerScopedAndTotalsPrecedePagination)
+    ,("activity query bounds are validated", MovimentacaoFinanceiraServiceTests.QueryBoundsAreValidated)
+    ,("activity endpoint is protected and maps stable errors", MovimentacoesControllerTests.EndpointIsProtectedAndMapsStableErrors)
+    ,("account crud uses authenticated owner and conflict detection", ContaFinanceiraServiceTests.CrudUsesAuthenticatedOwnerAndConflictDetection)
+    ,("account controller is protected and typed", ContaFinanceiraControllerTests.CrudIsProtectedAndTyped)
+    ,("account links and ordering stay owner scoped", ContaFinanceiraRepositoryTests.LinksAndOrderingStayOwnerScoped)
+    ,("password recovery is neutral delivered and secret free", PasswordRecoveryControllerTests.RecoveryIsNeutralDeliveredAndSecretFree),
+    ("Pluggy source is unique and investment targets aggregate", PluggyTransactionImportConfigurationTests.SourceIsUniqueAndInvestmentTargetsCanAggregateSources),
+    ("Pluggy overview returns all typed expense candidates", PluggyControllerTests.OverviewReturnsAllTypedExpenseCandidates),
+    ("Pluggy expense reconciliation uses authenticated user", PluggyControllerTests.ExpenseReconciliationUsesAuthenticatedUserAndReturnsTypedResult),
+    ("Pluggy investment reconciliation uses authenticated user", PluggyControllerTests.InvestmentReconciliationUsesAuthenticatedUserAndReturnsTypedResult),
+    ("Pluggy investment reconciliation maps stale review conflicts", PluggyControllerTests.InvestmentReconciliationMapsReviewConflict),
+    ("Pluggy investment overview matches candidates by cents and date", PluggyInvestmentOverviewTests.SameAmountWithinOneDaySuggestsInvestmentCandidate),
+    ("Pluggy investment overview exposes same-day corrections", PluggyInvestmentOverviewTests.InvestmentCandidateCanBeMatchedByDescriptionWithAmountCorrection),
+    ("Pluggy investment overview scopes and returns every candidate", PluggyInvestmentOverviewTests.InvestmentOverviewScopesAndReturnsEveryCandidate),
+    ("Pluggy investment asset preview uses page-numbered position endpoint", PluggyInvestmentAssetsTests.PreviewUsesInvestmentEndpointAndPagePagination),
+    ("Pluggy investment asset contract preserves provider semantics", PluggyInvestmentAssetsTests.PositionContractPreservesProviderSemantics),
+    ("Pluggy investment asset retry uses a controlled failure window", PluggyInvestmentAssetsTests.FailedRefreshUsesControlledRetryWindow),
+    ("Pluggy investment asset retry preserves successful refresh window", PluggyInvestmentAssetsTests.SuccessfulAssetRefreshCannotBeForced),
+    ("Pluggy investment asset preview is protected and uses asset endpoint", PluggyInvestmentAssetsControllerTests.PreviewIsProtectedAndUsesAssetEndpoint),
+    ("Pluggy investment asset preview JSON uses application field names", PluggyInvestmentAssetsControllerTests.PreviewJsonUsesApplicationFieldNames),
+    ("Pluggy investment asset cache is persistent and owner scoped", PluggyInvestmentAssetsControllerTests.CacheAndOwnerRulesArePersisted),
+    ("Pluggy investment asset reconciliation validates snapshots and writes links atomically", PluggyInvestmentReconciliationTests.AssetReconciliationUsesSnapshotAndWritesLinkAtomically),
+    ("Pluggy investment asset financial precision preserves eight decimals", PluggyInvestmentReconciliationTests.InvestmentAssetQuantitiesAndQuotesKeepEightDecimals),
+    ("Pluggy investment asset source link is unique and owner bound", PluggyInvestmentAssetLinkConfigurationTests.SourceIdentityIsUniqueAndOwnerBound),
+    ("Pluggy investment eligibility accepts only safe finalized debits", PluggyInvestmentReconciliationTests.OnlyFinalizedBrlDebitsAreEligible),
+    ("Pluggy investment eligibility requires trusted BRL value", PluggyInvestmentReconciliationTests.ForeignCurrencyWithoutTrustedBrlAmountIsNotEligible),
+    ("Pluggy investment reconciliation persists position and source atomically", PluggyInvestmentReconciliationTests.ReconciliationWritesPositionAndSourceAtomically),
+    ("Pluggy investment replacement preserves asset details", PluggyInvestmentReconciliationTests.ReplacementChangesOnlyBankSharedFields),
+    ("Pluggy manual match explains normalized exact candidates", PluggyExpenseCandidateMatchingTests.SameDayNormalizedDescriptionAndCentsAreExplained),
+    ("Pluggy manual match suggests same amount within one day", PluggyExpenseCandidateMatchingTests.SameAmountWithinOneDaySuggestsDifferentDescription),
+    ("Pluggy manual match exposes same-day amount differences", PluggyExpenseCandidateMatchingTests.SameDayDescriptionCanSuggestAmountCorrection),
+    ("Pluggy manual match rejects unrelated expenses", PluggyExpenseCandidateMatchingTests.UnrelatedManualExpenseIsNotSuggested),
 };
 
 var failures = new List<string>();

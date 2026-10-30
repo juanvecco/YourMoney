@@ -24,6 +24,8 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<PluggyConnection> PluggyConnections { get; set; }
         public DbSet<PluggyCredential> PluggyCredentials { get; set; }
         public DbSet<PluggyTransactionImport> PluggyTransactionImports { get; set; }
+        public DbSet<PluggyInvestmentAssetSnapshot> PluggyInvestmentAssetSnapshots { get; set; }
+        public DbSet<PluggyInvestmentAssetLink> PluggyInvestmentAssetLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +47,8 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new PluggyConnectionConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyCredentialConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyTransactionImportConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyInvestmentAssetSnapshotConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyInvestmentAssetLinkConfiguration());
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

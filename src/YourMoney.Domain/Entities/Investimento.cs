@@ -9,6 +9,9 @@ namespace YourMoney.Domain.Entities
         public string Tipo { get; private set; }
         public decimal Quantidade { get; private set; }
         public decimal PrecoMedio { get; private set; }
+        public string? CodigoAtivo { get; private set; }
+        public string? Isin { get; private set; }
+        public decimal? PrecoUnitarioAtual { get; private set; }
         public decimal ValorAtual { get; private set; }
         public DateTime DataInvestimento { get; private set; }
         public DateTime? MesReferencia { get; private set; }
@@ -113,6 +116,27 @@ namespace YourMoney.Domain.Entities
             if (precoMedio <= 0)
                 throw new ArgumentException("Preço médio deve ser maior que zero.");
             PrecoMedio = precoMedio;
+        }
+
+        public void AtualizarCodigoAtivo(string? codigo)
+        {
+            var valor = codigo?.Trim();
+            if (valor?.Length > 100) throw new ArgumentException("Código do ativo deve ter no máximo 100 caracteres.");
+            CodigoAtivo = string.IsNullOrWhiteSpace(valor) ? null : valor;
+        }
+
+        public void AtualizarIsin(string? isin)
+        {
+            var valor = isin?.Trim();
+            if (valor?.Length > 20) throw new ArgumentException("ISIN deve ter no máximo 20 caracteres.");
+            Isin = string.IsNullOrWhiteSpace(valor) ? null : valor.ToUpperInvariant();
+        }
+
+        public void AtualizarPrecoUnitarioAtual(decimal? preco)
+        {
+            if (preco.HasValue && preco.Value <= 0)
+                throw new ArgumentException("Cotação unitária atual deve ser maior que zero.");
+            PrecoUnitarioAtual = preco;
         }
 
         public void AtualizarValorAtual(decimal novoValor)

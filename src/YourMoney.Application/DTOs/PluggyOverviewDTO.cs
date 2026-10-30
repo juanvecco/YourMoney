@@ -6,6 +6,7 @@ public sealed class PluggyOverviewFilterDTO
     public string? AccountId { get; set; }
     public DateOnly? From { get; set; }
     public DateOnly? To { get; set; }
+    public string? TargetType { get; set; }
 }
 
 public sealed class PluggyOverviewDTO
@@ -35,6 +36,11 @@ public sealed class PluggyDuplicateCandidateDTO
     public string Reason { get; set; } = string.Empty;
     public string? AccountName { get; set; }
     public string? CategoryName { get; set; }
+    public string? Name { get; set; }
+    public decimal? Quantity { get; set; }
+    public decimal? AveragePrice { get; set; }
+    public string? GroupName { get; set; }
+    public string? AssetType { get; set; }
     public bool CanLink { get; set; } = true;
     public bool CanReplace { get; set; } = true;
     public string? CannotReplaceReason { get; set; }

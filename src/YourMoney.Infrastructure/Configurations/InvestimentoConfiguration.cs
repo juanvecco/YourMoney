@@ -27,10 +27,14 @@ namespace YourMoney.Infrastructure.Configurations
                 .HasMaxLength(100);
 
             builder.Property(i => i.Quantidade)
-                .HasColumnType("decimal(18,2)");
+                .HasColumnType("decimal(18,8)");
 
             builder.Property(i => i.PrecoMedio)
-                .HasColumnType("decimal(18,2)");
+                .HasColumnType("decimal(18,8)");
+
+            builder.Property(i => i.CodigoAtivo).HasMaxLength(100);
+            builder.Property(i => i.Isin).HasMaxLength(20);
+            builder.Property(i => i.PrecoUnitarioAtual).HasColumnType("decimal(18,8)");
 
             builder.Property(i => i.ValorAtual)
                 .HasColumnType("decimal(18,2)");

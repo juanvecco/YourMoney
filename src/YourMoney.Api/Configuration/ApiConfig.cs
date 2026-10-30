@@ -58,7 +58,28 @@ namespace YourMoney.Api.Configuration
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index.html");
+                endpoints.MapFallback(async context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        await context.Response.WriteAsJsonAsync(new
+                        {
+                            code = "api_route_not_found",
+                            message = "A rota da API não foi encontrada. Atualize o servidor local e tente novamente."
+                        });
+                        return;
+                    }
+
+                    var indexPath = Path.Combine(env.ContentRootPath, "wwwroot", "index.html");
+                    if (!File.Exists(indexPath))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        return;
+                    }
+
+                    await context.Response.SendFileAsync(indexPath);
+                });
             });
 
             return app;

@@ -16,6 +16,12 @@ public sealed class PluggyConnectionConfiguration : IEntityTypeConfiguration<Plu
         builder.Property(connection => connection.IsSandbox).IsRequired();
         builder.Property(connection => connection.LastUpdatedAt);
         builder.Property(connection => connection.ConsentExpiresAt);
+        builder.Property(connection => connection.InvestmentAssetsLastAttemptAt);
+        builder.Property(connection => connection.InvestmentAssetsLastSuccessAt);
+        builder.Property(connection => connection.InvestmentAssetsSyncStatus)
+            .IsRequired().HasMaxLength(24).HasDefaultValue("never");
+        builder.Property(connection => connection.InvestmentAssetsSyncMessage).HasMaxLength(500);
+        builder.Property(connection => connection.HasInvestmentProduct);
         builder.Property(connection => connection.ConnectedAt).IsRequired();
         builder.HasIndex(connection => connection.PluggyItemId).IsUnique();
     }
