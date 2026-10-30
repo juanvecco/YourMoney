@@ -61,6 +61,9 @@ namespace YourMoney.Tests.Fixtures
         public Task<List<Receita>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId) =>
             Task.FromResult(Receitas.Where(r => r.UsuarioId == usuarioId && r.Data >= dataInicio && r.Data <= dataFim).ToList());
 
+        public Task<List<Receita>> GetByReferenciaPeriodoAsync(DateTime dataInicio, DateTime dataFimExclusivo, string usuarioId) =>
+            Task.FromResult(Receitas.Where(r => r.UsuarioId == usuarioId && (r.MesReferencia ?? r.Data) >= dataInicio && (r.MesReferencia ?? r.Data) < dataFimExclusivo).ToList());
+
         public Task<List<Receita>> GetByMesAnoAsync(int mes, int ano) =>
             Task.FromResult(FilterByReference(Receitas, mes, ano).ToList());
 

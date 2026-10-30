@@ -8,7 +8,10 @@ namespace YourMoney.Application.Interfaces
         Task AdicionarInvestimentoAsync(Investimento investimento);
         Task<CriarInvestimentoResponse> CriarInvestimentoAsync(CriarInvestimentoRequest request);
         Task<InvestimentoResponse> AtualizarInvestimentoAsync(Guid id, AtualizarInvestimentoRequest request);
+        Task<InvestimentoResponse> AtualizarDadosReconciliadosAsync(Guid id, string descricao, DateTime data, decimal valorAtual);
         Task<Investimento> GetInvestimentoByIdAsync(Guid id);
+        Task<InvestimentoResponse> ObterPorIdAsync(Guid id);
+        Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync(FiltroOrganizacaoInvestimentos? filtro = null);
         Task RemoverInvestimentoAsync(Guid id);
         Task AtualizarAsync(Investimento investimento);
         Task<List<InvestimentoResponse>> ListarAsync();

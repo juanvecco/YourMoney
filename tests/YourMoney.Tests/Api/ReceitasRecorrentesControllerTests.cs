@@ -147,6 +147,7 @@ namespace YourMoney.Tests.Api
             return Task.CompletedTask;
         }
         public Task<ProjecaoReservaEmergenciaResponse> ObterProjecaoReservaAsync() => Task.FromResult(Projection);
+        public Task<ListarSalariosElegiveisInvestimentoResponse> ListarElegiveisParaInvestimentoAsync() => Task.FromResult(new ListarSalariosElegiveisInvestimentoResponse());
 
         private static ReceitaRecorrenteResponse ResponsePadrao() => new()
         {

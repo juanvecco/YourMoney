@@ -120,6 +120,13 @@ namespace YourMoney.Api.Controllers
             catch (Exception) { return ErroInterno(); }
         }
 
+        [HttpGet("elegiveis-para-investimento")]
+        public async Task<IActionResult> ListarElegiveisParaInvestimento()
+        {
+            try { return Ok(await _service.ListarElegiveisParaInvestimentoAsync()); }
+            catch (Exception) { return ErroInterno(); }
+        }
+
         private ObjectResult ErroInterno()
         {
             return StatusCode(StatusCodes.Status500InternalServerError, new

@@ -177,6 +177,10 @@ namespace YourMoney.Tests.Application
             Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.EstaElegivelParaMes(mesReferencia)).ToList());
         public Task<List<ReceitaRecorrente>> ListarElegiveisParaReservaAsync(string usuarioId, DateTime mesReferencia) =>
             Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.EstaElegivelParaReserva(mesReferencia)).ToList());
+        public Task<List<ReceitaRecorrente>> ListarElegiveisParaInvestimentoAsync(string usuarioId, DateTime mesReferencia) =>
+            Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.EhSalario && r.Natureza == YourMoney.Domain.Enums.NaturezaReceita.RendaDisponivel && r.EstaElegivelParaMes(mesReferencia)).ToList());
+        public Task<List<ReceitaRecorrente>> ListarReservasSalariaisAtivasAsync(string usuarioId, DateTime mesReferencia) =>
+            Task.FromResult(Recorrencias.Where(r => r.UsuarioId == usuarioId && r.EhSalario && r.Natureza == YourMoney.Domain.Enums.NaturezaReceita.RendaDisponivel && r.EstaElegivelParaReserva(mesReferencia)).ToList());
 
         public Task AdicionarOcorrenciaAsync(ReceitaRecorrenteOcorrencia ocorrencia)
         {

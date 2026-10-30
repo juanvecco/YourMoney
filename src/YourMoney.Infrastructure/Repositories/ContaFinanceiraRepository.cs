@@ -53,6 +53,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return await _context.ContaFinanceira
                 .Where(c => c.UsuarioId == usuarioId)
+                .OrderBy(c => c.Descricao)
                 .ToListAsync();
         }
         public async Task<bool> ExisteAsync(Guid id)
@@ -62,6 +63,13 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<bool> ExisteAsync(Guid id, string usuarioId)
         {
             return await _context.ContaFinanceira.AnyAsync(c => c.Id == id && c.UsuarioId == usuarioId);
+        }
+        public async Task<bool> TemVinculosAsync(Guid id, string usuarioId)
+        {
+            return await _context.Receitas.AnyAsync(r => r.UsuarioId == usuarioId && r.IdContaFinanceira == id)
+                || await _context.Despesas.AnyAsync(d => d.UsuarioId == usuarioId && d.IdContaFinanceira == id)
+                || await _context.ReceitasRecorrentes.AnyAsync(r => r.UsuarioId == usuarioId && r.IdContaFinanceira == id)
+                || await _context.DespesasRecorrentes.AnyAsync(d => d.UsuarioId == usuarioId && d.IdContaFinanceira == id);
         }
         public async Task RemoverAsync(Guid id)
         {

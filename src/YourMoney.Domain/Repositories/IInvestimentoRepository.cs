@@ -13,6 +13,7 @@ namespace YourMoney.Domain.Repositories
         Task<List<Investimento>> GetByTipoAsync(string tipo);
         Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim);
         Task<List<Investimento>> GetByPeriodoAsync(DateTime dataInicio, DateTime dataFim, string usuarioId);
+        Task<List<Investimento>> GetByReferenciaPeriodoAsync(DateTime inicio, DateTime fimExclusivo, string usuarioId);
         Task AdicionarAsync(Investimento investimento);
         Task AtualizarAsync(Investimento investimento);
         Task RemoverAsync(Guid id);
@@ -25,5 +26,8 @@ namespace YourMoney.Domain.Repositories
         Task<List<Investimento>> ObterPorMesAnoAsync(int mes, int ano, string usuarioId);
         Task<List<Investimento>> ListarAsync();
         Task<List<Investimento>> ListarAsync(string usuarioId);
+        Task<List<Investimento>> ListarConsolidadoAsync(string usuarioId);
+        Task<Investimento?> ObterPorOperacaoIdAsync(Guid operacaoId, string usuarioId);
+        Task<Investimento> AdicionarIdempotenteAsync(Investimento investimento);
     }
 }

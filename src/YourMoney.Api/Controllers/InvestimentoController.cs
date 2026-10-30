@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
 
 namespace YourMoney.Api.Controllers
 {
@@ -23,15 +24,24 @@ namespace YourMoney.Api.Controllers
             try
             {
                 var response = await _investimentoService.CriarInvestimentoAsync(request);
-                var referencia = response.MesReferencia!.Value;
+                if (!response.CriadoAgora)
+                    return Ok(response);
                 return CreatedAtAction(
-                    nameof(ObterPorReferencia),
-                    new { mes = referencia.Month, ano = referencia.Year },
+                    nameof(ObterPorId),
+                    new { id = response.Id },
                     response);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(Erro("investimento_invalido", ex.Message));
+            }
+            catch (ConflitoOperacaoInvestimentoException ex)
+            {
+                return Conflict(new ErroApiResponse { Code = "operacao_conflitante", Message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ErroApiResponse { Code = "grupo_objetivo_indisponivel", Message = ex.Message });
             }
             catch (Exception)
             {
@@ -39,7 +49,7 @@ namespace YourMoney.Api.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> RemoverInvestimento(Guid id)
         {
             try
@@ -49,17 +59,55 @@ namespace YourMoney.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return NotFound(Erro("investimento_nao_encontrado", ex.Message));
             }
+            catch (Exception) { return FalhaInesperada(); }
         }
 
         [HttpGet]
         public async Task<IActionResult> ListarInvestimentos()
         {
-            return Ok(await _investimentoService.ListarAsync());
+            try { return Ok(await _investimentoService.ListarAsync()); }
+            catch (Exception) { return FalhaInesperada(); }
         }
 
-        [HttpPut("{id}")]
+        [HttpGet("consolidado")]
+        public async Task<IActionResult> ObterConsolidado(
+            [FromQuery] Guid? grupoObjetivoId = null,
+            [FromQuery] bool semGrupo = false,
+            [FromQuery] string tipoAtivo = null,
+            [FromQuery] bool naoClassificado = false)
+        {
+            try
+            {
+                return Ok(await _investimentoService.ObterConsolidadoAsync(new FiltroOrganizacaoInvestimentos
+                {
+                    GrupoObjetivoId = grupoObjetivoId,
+                    SemGrupo = semGrupo,
+                    TipoAtivo = tipoAtivo,
+                    NaoClassificado = naoClassificado
+                }));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(Erro("filtro_invalido", ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(Erro("grupo_objetivo_indisponivel", ex.Message));
+            }
+            catch (Exception) { return FalhaInesperada(); }
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> ObterPorId(Guid id)
+        {
+            try { return Ok(await _investimentoService.ObterPorIdAsync(id)); }
+            catch (InvalidOperationException ex) { return NotFound(Erro("investimento_nao_encontrado", ex.Message)); }
+            catch (Exception) { return FalhaInesperada(); }
+        }
+
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> AtualizarInvestimento(
             Guid id,
             [FromBody] AtualizarInvestimentoRequest request)
@@ -70,11 +118,15 @@ namespace YourMoney.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(Erro("investimento_invalido", ex.Message));
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return NotFound(Erro("investimento_nao_encontrado", ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ErroApiResponse { Code = "grupo_objetivo_indisponivel", Message = ex.Message });
             }
             catch (Exception)
             {
@@ -85,16 +137,25 @@ namespace YourMoney.Api.Controllers
         [HttpGet("por-referencia")]
         public async Task<IActionResult> ObterPorReferencia([FromQuery] int mes, [FromQuery] int ano)
         {
-            return Ok(await _investimentoService.ObterPorMesAnoAsync(mes, ano));
+            if (mes is < 1 or > 12 || ano is < 1900 or > 9999)
+                return BadRequest(Erro("referencia_invalida", "Informe um mês e ano de referência válidos."));
+            try { return Ok(await _investimentoService.ObterPorMesAnoAsync(mes, ano)); }
+            catch (Exception) { return FalhaInesperada(); }
         }
+
+        private static ErroApiResponse Erro(string code, string message) => new() { Code = code, Message = message };
 
         private ObjectResult FalhaInesperada()
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new
-            {
-                title = "Não foi possível salvar o investimento.",
-                status = StatusCodes.Status500InternalServerError
-            });
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ErroApiResponse
+                {
+                    Code = "erro_interno",
+                    Message = "Não foi possível processar os investimentos.",
+                    Title = "Não foi possível processar os investimentos.",
+                    Status = StatusCodes.Status500InternalServerError
+                });
         }
     }
 }

@@ -190,6 +190,25 @@ namespace YourMoney.Application.Services
             };
         }
 
+        public async Task<ListarSalariosElegiveisInvestimentoResponse> ListarElegiveisParaInvestimentoAsync()
+        {
+            var mesAtual = ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today);
+            var recorrencias = await _recorrenteRepository.ListarElegiveisParaInvestimentoAsync(
+                _currentUserService.UserId,
+                mesAtual);
+
+            return new ListarSalariosElegiveisInvestimentoResponse
+            {
+                Itens = recorrencias.Select(r => new SalarioElegivelInvestimentoResponse
+                {
+                    Id = r.Id,
+                    Descricao = r.Descricao,
+                    ContaDescricao = r.ContaFinanceira?.Descricao ?? string.Empty,
+                    ValorPrevisto = r.ValorPrevisto
+                }).ToList()
+            };
+        }
+
         private async Task<NaturezaReceita> ValidarRequestAsync(ReceitaRecorrenteRequest request)
         {
             if (request == null)

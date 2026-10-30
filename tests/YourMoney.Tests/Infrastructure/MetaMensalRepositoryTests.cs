@@ -20,6 +20,9 @@ namespace YourMoney.Tests.Infrastructure
 
             TestAssert.True(configurationSource.Contains("tbMetaMensal"), "Configuration should map the monthly goal table");
             TestAssert.True(configurationSource.Contains("decimal(9,4)"), "Percentage should keep decimal precision");
+            TestAssert.True(configurationSource.Contains("decimal(18,2)"), "Monetary value should keep cents");
+            TestAssert.True(configurationSource.Contains("HasConversion<string>()"), "Mode should be persisted as text");
+            TestAssert.True(configurationSource.Contains("CK_MetaMensal_Definicao"), "Database should enforce mutually exclusive principal fields");
             TestAssert.True(configurationSource.Contains("IX_MetaMensal_Usuario_MesReferencia"), "Configuration should index owner and month");
 
             var dbContextPath = RepositoryTestPaths.InYourMoney(
@@ -28,6 +31,23 @@ namespace YourMoney.Tests.Infrastructure
 
             TestAssert.True(dbContextSource.Contains("GetColumnType() == null"), "Default decimal mapping should not override explicit precision");
 
+            return Task.CompletedTask;
+        }
+
+        public static Task MigrationPreservesLegacyAndProtectsRollback()
+        {
+            var migrationsDirectory = RepositoryTestPaths.InYourMoney(
+                "src", "YourMoney.Infrastructure", "Migrations");
+            var migrationPath = Directory.GetFiles(
+                migrationsDirectory,
+                "*_AddMetaMensalModalidade.cs").Single();
+            var migrationSource = File.ReadAllText(migrationPath);
+
+            TestAssert.True(migrationSource.Contains("defaultValue: \"Percentual\""), "Legacy rows should default to percentage mode");
+            TestAssert.True(migrationSource.Contains("nullable: true"), "Percentage must become nullable");
+            TestAssert.True(migrationSource.Contains("ValorMeta"), "Migration should add the monetary principal field");
+            TestAssert.True(migrationSource.Contains("CK_MetaMensal_Definicao"), "Migration should install the consistency constraint");
+            TestAssert.True(migrationSource.Contains("Rollback bloqueado"), "Rollback should refuse destructive conversion of value goals");
             return Task.CompletedTask;
         }
     }

@@ -1,3 +1,5 @@
+using YourMoney.Domain.Enums;
+
 namespace YourMoney.Domain.Entities
 {
     public class Investimento : BaseEntity
@@ -7,11 +9,20 @@ namespace YourMoney.Domain.Entities
         public string Tipo { get; private set; }
         public decimal Quantidade { get; private set; }
         public decimal PrecoMedio { get; private set; }
+        public string? CodigoAtivo { get; private set; }
+        public string? Isin { get; private set; }
+        public decimal? PrecoUnitarioAtual { get; private set; }
         public decimal ValorAtual { get; private set; }
         public DateTime DataInvestimento { get; private set; }
         public DateTime? MesReferencia { get; private set; }
         public DateTime? DataResgate { get; private set; }
         public bool Ativo { get; private set; }
+        public Guid? ReceitaRecorrenteId { get; private set; }
+        public virtual ReceitaRecorrente? ReceitaRecorrente { get; private set; }
+        public Guid? OperacaoId { get; private set; }
+        public Guid? GrupoObjetivoInvestimentoId { get; private set; }
+        public virtual GrupoObjetivoInvestimento? GrupoObjetivoInvestimento { get; private set; }
+        public TipoAtivo? TipoAtivo { get; private set; }
 
         private Investimento() { }
 
@@ -23,7 +34,11 @@ namespace YourMoney.Domain.Entities
             decimal precoMedio,
             decimal valorAtual,
             DateTime dataInvestimento,
-            DateTime mesReferencia)
+            DateTime mesReferencia,
+            Guid? receitaRecorrenteId = null,
+            Guid? operacaoId = null,
+            Guid? grupoObjetivoInvestimentoId = null,
+            TipoAtivo? tipoAtivo = null)
         {
             Id = Guid.NewGuid();
             AtualizarNome(nome);
@@ -34,6 +49,10 @@ namespace YourMoney.Domain.Entities
             AtualizarValorAtual(valorAtual);
             AtualizarData(dataInvestimento);
             AtualizarMesReferencia(mesReferencia);
+            DefinirReceitaRecorrente(receitaRecorrenteId);
+            DefinirOperacao(operacaoId);
+            AssociarGrupoObjetivo(grupoObjetivoInvestimentoId);
+            ClassificarTipoAtivo(tipoAtivo);
             Ativo = true;
             DataResgate = null;
         }
@@ -47,8 +66,12 @@ namespace YourMoney.Domain.Entities
             decimal valorAtual,
             DateTime dataInvestimento,
             DateTime mesReferencia,
-            string usuarioId)
-            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia)
+            string usuarioId,
+            Guid? receitaRecorrenteId = null,
+            Guid? operacaoId = null,
+            Guid? grupoObjetivoInvestimentoId = null,
+            TipoAtivo? tipoAtivo = null)
+            : this(nome, descricao, tipo, quantidade, precoMedio, valorAtual, dataInvestimento, mesReferencia, receitaRecorrenteId, operacaoId, grupoObjetivoInvestimentoId, tipoAtivo)
         {
             DefinirUsuario(usuarioId);
         }
@@ -65,6 +88,8 @@ namespace YourMoney.Domain.Entities
         public void AtualizarDescricao(string descricao)
         {
             var descricaoNormalizada = descricao?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(descricaoNormalizada))
+                throw new ArgumentException("Descrição do investimento é obrigatória.");
             if (descricaoNormalizada.Length > 500)
                 throw new ArgumentException("Descrição deve ter no máximo 500 caracteres.");
             Descricao = descricaoNormalizada;
@@ -93,6 +118,43 @@ namespace YourMoney.Domain.Entities
             PrecoMedio = precoMedio;
         }
 
+        public void AtualizarCodigoAtivo(string? codigo)
+        {
+            var valor = codigo?.Trim();
+            if (valor?.Length > 100) throw new ArgumentException("Código do ativo deve ter no máximo 100 caracteres.");
+            CodigoAtivo = string.IsNullOrWhiteSpace(valor) ? null : valor;
+        }
+
+        public void AtualizarIsin(string? isin)
+        {
+            var valor = isin?.Trim();
+            if (valor?.Length > 20) throw new ArgumentException("ISIN deve ter no máximo 20 caracteres.");
+            Isin = string.IsNullOrWhiteSpace(valor) ? null : valor.ToUpperInvariant();
+        }
+
+        public bool CompletarIdentificadoresAtivo(string? codigo, string? isin)
+        {
+            var alterado = false;
+            if (string.IsNullOrWhiteSpace(CodigoAtivo) && !string.IsNullOrWhiteSpace(codigo))
+            {
+                AtualizarCodigoAtivo(codigo);
+                alterado = true;
+            }
+            if (string.IsNullOrWhiteSpace(Isin) && !string.IsNullOrWhiteSpace(isin))
+            {
+                AtualizarIsin(isin);
+                alterado = true;
+            }
+            return alterado;
+        }
+
+        public void AtualizarPrecoUnitarioAtual(decimal? preco)
+        {
+            if (preco.HasValue && preco.Value <= 0)
+                throw new ArgumentException("Cotação unitária atual deve ser maior que zero.");
+            PrecoUnitarioAtual = preco;
+        }
+
         public void AtualizarValorAtual(decimal novoValor)
         {
             if (novoValor <= 0)
@@ -113,6 +175,42 @@ namespace YourMoney.Domain.Entities
                 throw new ArgumentException("Mês de referência é obrigatório.");
 
             MesReferencia = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
+        }
+
+        public void DefinirReceitaRecorrente(Guid? receitaRecorrenteId)
+        {
+            if (receitaRecorrenteId == Guid.Empty)
+                throw new ArgumentException("Receita recorrente associada inválida.");
+
+            ReceitaRecorrenteId = receitaRecorrenteId;
+        }
+
+        public void AssociarGrupoObjetivo(Guid? grupoObjetivoInvestimentoId)
+        {
+            if (grupoObjetivoInvestimentoId == Guid.Empty)
+                throw new ArgumentException("Objetivo financeiro associado é inválido.");
+
+            GrupoObjetivoInvestimentoId = grupoObjetivoInvestimentoId;
+        }
+
+        public void DesassociarGrupoObjetivo() => GrupoObjetivoInvestimentoId = null;
+
+        public void AssociarGrupoObjetivo(GrupoObjetivoInvestimento? grupo)
+        {
+            GrupoObjetivoInvestimento = grupo;
+            GrupoObjetivoInvestimentoId = grupo?.Id;
+        }
+
+        public void ClassificarTipoAtivo(TipoAtivo? tipoAtivo) => TipoAtivo = tipoAtivo;
+
+        public void RemoverClassificacaoTipoAtivo() => TipoAtivo = null;
+
+        private void DefinirOperacao(Guid? operacaoId)
+        {
+            if (operacaoId == Guid.Empty)
+                throw new ArgumentException("Identificador da operação inválido.");
+
+            OperacaoId = operacaoId;
         }
 
         public void Resgatar()

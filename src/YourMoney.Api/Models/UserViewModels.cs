@@ -17,6 +17,9 @@ namespace YourMoney.Api.Models
 
         [Compare("Senha", ErrorMessage = "As senhas não conferem.")]
         public string SenhaConfirmacao { get; set; }
+
+        [StringLength(120, ErrorMessage = "A origem deve ter até {1} caracteres")]
+        public string OrigemConhecimento { get; set; }
     }
 
     public class UsuarioLogin

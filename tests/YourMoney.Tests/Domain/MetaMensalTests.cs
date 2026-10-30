@@ -1,4 +1,5 @@
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 using YourMoney.Tests.Fixtures;
 
 namespace YourMoney.Tests.Domain
@@ -28,6 +29,57 @@ namespace YourMoney.Tests.Domain
             await TestAssert.ThrowsAsync<ArgumentException>(
                 () => Task.FromResult(new MetaMensal("Meta", 1m, default)),
                 "Default month should be rejected");
+        }
+
+        public static Task SupportsValueAndModeTransitions()
+        {
+            var meta = new MetaMensal(
+                "Reserva",
+                TipoDefinicaoMeta.Valor,
+                null,
+                1000.25m,
+                new DateTime(2026, 6, 20),
+                "user-1");
+
+            TestAssert.Equal(TipoDefinicaoMeta.Valor, meta.TipoDefinicao, "Value mode should be preserved");
+            TestAssert.Equal(1000.25m, meta.ValorMeta, "Primary monetary value should be preserved");
+            TestAssert.Equal<decimal?>(null, meta.PercentualReceita, "Inactive percentage should stay null");
+
+            meta.Atualizar("Reserva percentual", TipoDefinicaoMeta.Percentual, 20.1234m, null);
+
+            TestAssert.Equal(TipoDefinicaoMeta.Percentual, meta.TipoDefinicao, "Mode should change to percentage");
+            TestAssert.Equal(20.1234m, meta.PercentualReceita, "Primary percentage should be preserved");
+            TestAssert.Equal<decimal?>(null, meta.ValorMeta, "Previous monetary value should be cleared");
+            TestAssert.Equal(new DateTime(2026, 6, 1), meta.MesReferencia, "Changing mode must preserve reference month");
+            return Task.CompletedTask;
+        }
+
+        public static async Task RejectsInconsistentDefinitionsAndPrecision()
+        {
+            await TestAssert.ThrowsAsync<ArgumentException>(
+                () => Task.FromResult(new MetaMensal(
+                    "Meta",
+                    TipoDefinicaoMeta.Valor,
+                    20m,
+                    1000m,
+                    new DateTime(2026, 6, 1))),
+                "Both principal fields should be rejected");
+            await TestAssert.ThrowsAsync<ArgumentException>(
+                () => Task.FromResult(new MetaMensal(
+                    "Meta",
+                    TipoDefinicaoMeta.Valor,
+                    null,
+                    10.001m,
+                    new DateTime(2026, 6, 1))),
+                "Monetary values beyond cents should be rejected");
+            await TestAssert.ThrowsAsync<ArgumentException>(
+                () => Task.FromResult(new MetaMensal(
+                    "Meta",
+                    TipoDefinicaoMeta.Percentual,
+                    10.12345m,
+                    null,
+                    new DateTime(2026, 6, 1))),
+                "Percentages beyond four decimals should be rejected");
         }
     }
 }

@@ -1,20 +1,33 @@
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 using YourMoney.Domain.Repositories;
 
 namespace YourMoney.Application.Services
 {
+    public sealed class ConflitoOperacaoInvestimentoException : InvalidOperationException
+    {
+        public ConflitoOperacaoInvestimentoException()
+            : base("O identificador da operação já foi utilizado com dados diferentes.") { }
+    }
+
     public class InvestimentoService : IInvestimentoService
     {
         private readonly IInvestimentoRepository _investimentoRepository;
+        private readonly IReceitaRecorrenteRepository _receitaRecorrenteRepository;
+        private readonly IGrupoObjetivoInvestimentoRepository _grupoRepository;
         private readonly ICurrentUserService _currentUserService;
 
         public InvestimentoService(
             IInvestimentoRepository investimentoRepository,
+            IReceitaRecorrenteRepository receitaRecorrenteRepository,
+            IGrupoObjetivoInvestimentoRepository grupoRepository,
             ICurrentUserService currentUserService)
         {
             _investimentoRepository = investimentoRepository;
+            _receitaRecorrenteRepository = receitaRecorrenteRepository;
+            _grupoRepository = grupoRepository;
             _currentUserService = currentUserService;
         }
 
@@ -30,69 +43,194 @@ namespace YourMoney.Application.Services
         public async Task<CriarInvestimentoResponse> CriarInvestimentoAsync(CriarInvestimentoRequest request)
         {
             ValidarEscrita(request);
+            if (request.OperacaoId == Guid.Empty)
+                throw new ArgumentException("Identificador da operação é obrigatório.");
 
+            var usuarioId = _currentUserService.UserId;
+            var existente = await _investimentoRepository.ObterPorOperacaoIdAsync(request.OperacaoId, usuarioId);
+            if (existente != null)
+                return ResolverRepeticao(existente, request);
+
+            await ValidarNovaAssociacaoAsync(request.ReceitaRecorrenteId);
+            var grupo = await ValidarGrupoAsync(request.GrupoObjetivoId);
+            var tipoAtivo = LerTipoAtivo(request.TipoAtivo);
             var investimento = new Investimento(
                 request.Nome!,
-                request.Descricao ?? string.Empty,
+                request.Descricao!,
                 request.Tipo!,
-                NormalizarDecimal(request.Quantidade),
-                NormalizarDecimal(request.PrecoMedio),
+                NormalizarPrecisaoAtivo(request.Quantidade),
+                NormalizarPrecisaoAtivo(request.PrecoMedio),
                 NormalizarDecimal(request.ValorAtual),
                 request.DataInvestimento.Date,
                 request.MesReferencia,
-                _currentUserService.UserId);
+                usuarioId,
+                request.ReceitaRecorrenteId,
+                request.OperacaoId,
+                request.GrupoObjetivoId,
+                tipoAtivo);
+            investimento.AtualizarCodigoAtivo(request.CodigoAtivo);
+            investimento.AtualizarIsin(request.Isin);
+            investimento.AtualizarPrecoUnitarioAtual(request.PrecoUnitarioAtual.HasValue
+                ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null);
+            investimento.AssociarGrupoObjetivo(grupo);
 
-            await _investimentoRepository.AdicionarAsync(investimento);
-            return MapearCriacao(investimento);
+            var persistido = await _investimentoRepository.AdicionarIdempotenteAsync(investimento);
+            if (persistido.Id != investimento.Id)
+                return ResolverRepeticao(persistido, request);
+
+            return MapearCriacao(persistido, true);
         }
 
-        public async Task<InvestimentoResponse> AtualizarInvestimentoAsync(
-            Guid id,
-            AtualizarInvestimentoRequest request)
+        public async Task<InvestimentoResponse> AtualizarInvestimentoAsync(Guid id, AtualizarInvestimentoRequest request)
         {
             ValidarEscrita(request);
+            var investimento = await ObterInvestimentoAsync(id);
 
-            var investimento = await _investimentoRepository.GetByIdAsync(id, _currentUserService.UserId);
-            if (investimento == null)
-                throw new InvalidOperationException("Investimento não encontrado.");
+            if (request.ReceitaRecorrenteId != investimento.ReceitaRecorrenteId)
+                await ValidarNovaAssociacaoAsync(request.ReceitaRecorrenteId);
+            GrupoObjetivoInvestimento? grupo = investimento.GrupoObjetivoInvestimento;
+            if (request.GrupoObjetivoId != investimento.GrupoObjetivoInvestimentoId)
+                grupo = await ValidarGrupoAsync(request.GrupoObjetivoId);
+            var tipoAtivo = LerTipoAtivo(request.TipoAtivo);
 
             investimento.AtualizarNome(request.Nome!);
-            investimento.AtualizarDescricao(request.Descricao ?? string.Empty);
+            investimento.AtualizarDescricao(request.Descricao!);
             investimento.AtualizarTipo(request.Tipo!);
-            investimento.AtualizarQuantidade(NormalizarDecimal(request.Quantidade));
-            investimento.AtualizarPrecoMedio(NormalizarDecimal(request.PrecoMedio));
+            investimento.AtualizarQuantidade(NormalizarPrecisaoAtivo(request.Quantidade));
+            investimento.AtualizarPrecoMedio(NormalizarPrecisaoAtivo(request.PrecoMedio));
             investimento.AtualizarValorAtual(NormalizarDecimal(request.ValorAtual));
+            investimento.AtualizarCodigoAtivo(request.CodigoAtivo);
+            investimento.AtualizarIsin(request.Isin);
+            investimento.AtualizarPrecoUnitarioAtual(request.PrecoUnitarioAtual.HasValue
+                ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null);
             investimento.AtualizarData(request.DataInvestimento);
             investimento.AtualizarMesReferencia(request.MesReferencia);
+            investimento.DefinirReceitaRecorrente(request.ReceitaRecorrenteId);
+            investimento.AssociarGrupoObjetivo(grupo);
+            investimento.ClassificarTipoAtivo(tipoAtivo);
 
             await _investimentoRepository.AtualizarAsync(investimento);
             return Mapear(investimento);
         }
 
-        public async Task<Investimento> GetInvestimentoByIdAsync(Guid id)
+        public async Task<InvestimentoResponse> AtualizarDadosReconciliadosAsync(
+            Guid id,
+            string descricao,
+            DateTime data,
+            decimal valorAtual)
         {
-            var investimento = await _investimentoRepository.GetByIdAsync(id, _currentUserService.UserId);
-            if (investimento == null)
-                throw new InvalidOperationException("Investimento não encontrado.");
-            return investimento;
+            if (string.IsNullOrWhiteSpace(descricao))
+                throw new ArgumentException("A descrição do investimento é obrigatória.");
+            if (valorAtual <= 0 || valorAtual != decimal.Round(valorAtual, 2, MidpointRounding.AwayFromZero))
+                throw new ArgumentException("O valor atual deve ser positivo e ter no máximo duas casas decimais.");
+
+            var investimento = await ObterInvestimentoAsync(id);
+            if (!investimento.Ativo)
+                throw new InvalidOperationException("Investimentos inativos não podem ser substituídos por uma transação Open Finance.");
+
+            investimento.AtualizarDescricao(descricao);
+            investimento.AtualizarData(data);
+            investimento.AtualizarValorAtual(valorAtual);
+            await _investimentoRepository.AtualizarAsync(investimento);
+            return Mapear(investimento);
+        }
+
+        public Task<Investimento> GetInvestimentoByIdAsync(Guid id) => ObterInvestimentoAsync(id);
+
+        public async Task<InvestimentoResponse> ObterPorIdAsync(Guid id)
+        {
+            return Mapear(await ObterInvestimentoAsync(id));
+        }
+
+        public async Task<CarteiraInvestimentosConsolidadaResponse> ObterConsolidadoAsync(FiltroOrganizacaoInvestimentos? filtro = null)
+        {
+            filtro ??= new FiltroOrganizacaoInvestimentos();
+            ValidarFiltro(filtro);
+            var usuarioId = _currentUserService.UserId;
+            var tipoAtivoFiltro = LerTipoAtivo(filtro.TipoAtivo);
+            if (filtro.GrupoObjetivoId.HasValue &&
+                await _grupoRepository.ObterAsync(filtro.GrupoObjetivoId.Value, usuarioId, false) == null)
+                throw new KeyNotFoundException("Objetivo financeiro não encontrado.");
+            var mesAtual = ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today);
+            var investimentos = await _investimentoRepository.ListarConsolidadoAsync(usuarioId);
+            var marcadas = await _receitaRecorrenteRepository.ListarReservasSalariaisAtivasAsync(usuarioId, mesAtual);
+            var acumulados = investimentos
+                .Where(i => i.ReceitaRecorrenteId.HasValue)
+                .GroupBy(i => i.ReceitaRecorrenteId!.Value)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.ValorAtual));
+
+            var rendas = investimentos
+                .Where(i => i.ReceitaRecorrente != null)
+                .Select(i => i.ReceitaRecorrente!)
+                .Concat(marcadas)
+                .GroupBy(r => r.Id)
+                .Select(g => g.First())
+                .OrderBy(r => r.Descricao)
+                .ThenBy(r => r.Id)
+                .ToList();
+
+            IEnumerable<Investimento> consulta = investimentos;
+            if (filtro.GrupoObjetivoId.HasValue)
+                consulta = consulta.Where(i => i.GrupoObjetivoInvestimentoId == filtro.GrupoObjetivoId.Value);
+            else if (filtro.SemGrupo)
+                consulta = consulta.Where(i => i.GrupoObjetivoInvestimentoId == null);
+
+            if (tipoAtivoFiltro.HasValue)
+                consulta = consulta.Where(i => i.TipoAtivo == tipoAtivoFiltro.Value);
+            else if (filtro.NaoClassificado)
+                consulta = consulta.Where(i => i.TipoAtivo == null);
+
+            var filtrados = consulta
+                .OrderByDescending(i => i.DataInvestimento)
+                .ThenByDescending(i => i.Id)
+                .ToList();
+
+            return new CarteiraInvestimentosConsolidadaResponse
+            {
+                TotalInvestido = investimentos.Sum(i => i.ValorAtual),
+                TotalFiltrado = filtrados.Sum(i => i.ValorAtual),
+                Itens = filtrados.Select(Mapear).ToList(),
+                Reservas = rendas.Select(r => MapearReserva(
+                    r,
+                    acumulados.GetValueOrDefault(r.Id),
+                    mesAtual)).ToList(),
+                SubtotaisPorGrupo = filtrados
+                    .GroupBy(i => new { i.GrupoObjetivoInvestimentoId, Nome = i.GrupoObjetivoInvestimento?.Nome ?? "Sem grupo" })
+                    .Select(g => new SubtotalGrupoInvestimentoResponse
+                    {
+                        GrupoObjetivoId = g.Key.GrupoObjetivoInvestimentoId,
+                        Nome = g.Key.Nome,
+                        QuantidadeInvestimentos = g.Count(),
+                        ValorAtual = g.Sum(i => i.ValorAtual)
+                    })
+                    .OrderBy(g => g.GrupoObjetivoId == null ? 1 : 0)
+                    .ThenBy(g => g.Nome)
+                    .ThenBy(g => g.GrupoObjetivoId)
+                    .ToList(),
+                SubtotaisPorTipoAtivo = filtrados
+                    .GroupBy(i => i.TipoAtivo)
+                    .Select(g => new SubtotalTipoAtivoInvestimentoResponse
+                    {
+                        TipoAtivo = g.Key?.ToString(),
+                        Nome = RotuloTipoAtivo(g.Key),
+                        QuantidadeInvestimentos = g.Count(),
+                        ValorAtual = g.Sum(i => i.ValorAtual)
+                    })
+                    .OrderBy(g => g.TipoAtivo == null ? 1 : 0)
+                    .ThenBy(g => g.Nome)
+                    .ToList()
+            };
         }
 
         public async Task RemoverInvestimentoAsync(Guid id)
         {
-            var investimento = await _investimentoRepository.GetByIdAsync(id, _currentUserService.UserId);
-            if (investimento == null)
-                throw new InvalidOperationException("Investimento não encontrado.");
+            _ = await ObterInvestimentoAsync(id);
             await _investimentoRepository.RemoverAsync(id, _currentUserService.UserId);
         }
 
         public async Task AtualizarAsync(Investimento investimento)
         {
-            var existingInvestimento = await _investimentoRepository.GetByIdAsync(
-                investimento.Id,
-                _currentUserService.UserId);
-            if (existingInvestimento == null)
-                throw new InvalidOperationException("Investimento não encontrado.");
-
+            _ = await ObterInvestimentoAsync(investimento.Id);
             investimento.DefinirUsuario(_currentUserService.UserId);
             await _investimentoRepository.AtualizarAsync(investimento);
         }
@@ -109,7 +247,57 @@ namespace YourMoney.Application.Services
             return investimentos.Select(Mapear).ToList();
         }
 
-        private static void ValidarEscrita(CriarInvestimentoRequest request)
+        private async Task<Investimento> ObterInvestimentoAsync(Guid id)
+        {
+            var investimento = await _investimentoRepository.GetByIdAsync(id, _currentUserService.UserId);
+            return investimento ?? throw new InvalidOperationException("Investimento não encontrado.");
+        }
+
+        private async Task ValidarNovaAssociacaoAsync(Guid? receitaRecorrenteId)
+        {
+            if (!receitaRecorrenteId.HasValue)
+                return;
+
+            var receita = await _receitaRecorrenteRepository.ObterPorIdAsync(
+                receitaRecorrenteId.Value,
+                _currentUserService.UserId);
+            if (receita == null || !Elegivel(receita, ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today)))
+                throw new ArgumentException("A receita recorrente selecionada não é um salário de renda disponível elegível.");
+        }
+
+        private async Task<GrupoObjetivoInvestimento?> ValidarGrupoAsync(Guid? grupoObjetivoId)
+        {
+            if (!grupoObjetivoId.HasValue)
+                return null;
+            return await _grupoRepository.ObterAsync(grupoObjetivoId.Value, _currentUserService.UserId, false)
+                ?? throw new KeyNotFoundException("Objetivo financeiro selecionado não está disponível.");
+        }
+
+        private static TipoAtivo? LerTipoAtivo(string? codigo)
+        {
+            if (string.IsNullOrWhiteSpace(codigo))
+                return null;
+            if (!Enum.TryParse<TipoAtivo>(codigo, false, out var tipo) || !Enum.IsDefined(tipo))
+                throw new ArgumentException("Tipo de ativo inválido.");
+            return tipo;
+        }
+
+        private static void ValidarFiltro(FiltroOrganizacaoInvestimentos filtro)
+        {
+            if (filtro.GrupoObjetivoId.HasValue && filtro.SemGrupo)
+                throw new ArgumentException("Informe um objetivo ou selecione apenas investimentos sem grupo, não ambos.");
+            if (!string.IsNullOrWhiteSpace(filtro.TipoAtivo) && filtro.NaoClassificado)
+                throw new ArgumentException("Informe um tipo de ativo ou selecione apenas investimentos não classificados, não ambos.");
+        }
+
+        private static bool Elegivel(ReceitaRecorrente receita, DateTime mes)
+        {
+            return receita.EhSalario
+                && receita.Natureza == NaturezaReceita.RendaDisponivel
+                && receita.EstaElegivelParaMes(mes);
+        }
+
+        private static void ValidarEscrita(InvestimentoWriteRequest request)
         {
             if (request == null)
                 throw new ArgumentException("Dados do investimento são obrigatórios.");
@@ -117,7 +305,9 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Nome do investimento é obrigatório.");
             if (request.Nome.Trim().Length > 100)
                 throw new ArgumentException("Nome do investimento deve ter no máximo 100 caracteres.");
-            if ((request.Descricao?.Trim().Length ?? 0) > 500)
+            if (string.IsNullOrWhiteSpace(request.Descricao))
+                throw new ArgumentException("Descrição do investimento é obrigatória.");
+            if (request.Descricao.Trim().Length > 500)
                 throw new ArgumentException("Descrição deve ter no máximo 500 caracteres.");
             if (string.IsNullOrWhiteSpace(request.Tipo))
                 throw new ArgumentException("Tipo do investimento é obrigatório.");
@@ -129,20 +319,59 @@ namespace YourMoney.Application.Services
                 throw new ArgumentException("Preço médio deve ser maior que zero.");
             if (request.ValorAtual <= 0)
                 throw new ArgumentException("Valor atual deve ser maior que zero.");
+            if (request.CodigoAtivo?.Trim().Length > 100)
+                throw new ArgumentException("Código do ativo deve ter no máximo 100 caracteres.");
+            if (request.Isin?.Trim().Length > 20)
+                throw new ArgumentException("ISIN deve ter no máximo 20 caracteres.");
+            if (request.PrecoUnitarioAtual.HasValue && request.PrecoUnitarioAtual.Value <= 0)
+                throw new ArgumentException("Cotação unitária atual deve ser maior que zero.");
+            if (request.Quantidade != NormalizarPrecisaoAtivo(request.Quantidade)
+                || request.PrecoMedio != NormalizarPrecisaoAtivo(request.PrecoMedio)
+                || (request.PrecoUnitarioAtual.HasValue
+                    && request.PrecoUnitarioAtual.Value != NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value)))
+                throw new ArgumentException("Quantidade e preços unitários aceitam até oito casas decimais.");
             if (request.DataInvestimento == default)
                 throw new ArgumentException("Data do investimento é obrigatória.");
             if (request.MesReferencia == default)
                 throw new ArgumentException("Mês de referência é obrigatório.");
         }
 
-        private static decimal NormalizarDecimal(decimal valor)
+        private static CriarInvestimentoResponse ResolverRepeticao(Investimento existente, CriarInvestimentoRequest request)
         {
-            return decimal.Round(valor, 2, MidpointRounding.AwayFromZero);
+            if (!MesmoConteudo(existente, request))
+                throw new ConflitoOperacaoInvestimentoException();
+            return MapearCriacao(existente, false);
         }
 
-        private static CriarInvestimentoResponse MapearCriacao(Investimento investimento)
+        private static bool MesmoConteudo(Investimento investimento, CriarInvestimentoRequest request)
         {
-            var response = new CriarInvestimentoResponse();
+            var mes = new DateTime(request.MesReferencia.Year, request.MesReferencia.Month, 1);
+            return investimento.Nome == request.Nome!.Trim()
+                && investimento.Descricao == request.Descricao!.Trim()
+                && investimento.Tipo == request.Tipo!.Trim()
+                && investimento.Quantidade == NormalizarPrecisaoAtivo(request.Quantidade)
+                && investimento.PrecoMedio == NormalizarPrecisaoAtivo(request.PrecoMedio)
+                && investimento.ValorAtual == NormalizarDecimal(request.ValorAtual)
+                && investimento.CodigoAtivo == (string.IsNullOrWhiteSpace(request.CodigoAtivo) ? null : request.CodigoAtivo.Trim())
+                && investimento.Isin == (string.IsNullOrWhiteSpace(request.Isin) ? null : request.Isin.Trim().ToUpperInvariant())
+                && investimento.PrecoUnitarioAtual == (request.PrecoUnitarioAtual.HasValue
+                    ? NormalizarPrecisaoAtivo(request.PrecoUnitarioAtual.Value) : null)
+                && investimento.DataInvestimento == request.DataInvestimento.Date
+                && investimento.MesReferencia == mes
+                && investimento.ReceitaRecorrenteId == request.ReceitaRecorrenteId
+                && investimento.GrupoObjetivoInvestimentoId == request.GrupoObjetivoId
+                && investimento.TipoAtivo == LerTipoAtivo(request.TipoAtivo);
+        }
+
+        private static decimal NormalizarDecimal(decimal valor) =>
+            decimal.Round(valor, 2, MidpointRounding.AwayFromZero);
+
+        private static decimal NormalizarPrecisaoAtivo(decimal valor) =>
+            decimal.Round(valor, 8, MidpointRounding.AwayFromZero);
+
+        private static CriarInvestimentoResponse MapearCriacao(Investimento investimento, bool criadoAgora)
+        {
+            var response = new CriarInvestimentoResponse { CriadoAgora = criadoAgora };
             PreencherResponse(response, investimento);
             return response;
         }
@@ -151,16 +380,11 @@ namespace YourMoney.Application.Services
         {
             var response = new InvestimentoResponse();
             PreencherResponse(response, investimento);
-            response.MesReferencia ??= new DateTime(
-                investimento.DataInvestimento.Year,
-                investimento.DataInvestimento.Month,
-                1);
+            response.MesReferencia ??= new DateTime(investimento.DataInvestimento.Year, investimento.DataInvestimento.Month, 1);
             return response;
         }
 
-        private static void PreencherResponse(
-            InvestimentoResponse response,
-            Investimento investimento)
+        private static void PreencherResponse(InvestimentoResponse response, Investimento investimento)
         {
             response.Id = investimento.Id;
             response.Nome = investimento.Nome;
@@ -168,11 +392,77 @@ namespace YourMoney.Application.Services
             response.Tipo = investimento.Tipo;
             response.Quantidade = investimento.Quantidade;
             response.PrecoMedio = investimento.PrecoMedio;
+            response.CodigoAtivo = investimento.CodigoAtivo;
+            response.Isin = investimento.Isin;
+            response.PrecoUnitarioAtual = investimento.PrecoUnitarioAtual;
             response.ValorAtual = investimento.ValorAtual;
             response.DataInvestimento = investimento.DataInvestimento;
             response.MesReferencia = investimento.MesReferencia;
             response.DataResgate = investimento.DataResgate;
             response.Ativo = investimento.Ativo;
+            response.ReceitaRecorrenteId = investimento.ReceitaRecorrenteId;
+            response.GrupoObjetivoId = investimento.GrupoObjetivoInvestimentoId;
+            response.TipoAtivo = investimento.TipoAtivo?.ToString();
+            if (investimento.GrupoObjetivoInvestimento != null)
+            {
+                response.GrupoObjetivo = new GrupoObjetivoResumoResponse
+                {
+                    Id = investimento.GrupoObjetivoInvestimento.Id,
+                    Nome = investimento.GrupoObjetivoInvestimento.Nome
+                };
+            }
+            if (investimento.ReceitaRecorrente != null)
+            {
+                var mes = ReceitaRecorrente.NormalizarMesReferencia(DateTime.Today);
+                response.ReservaAssociada = new ReservaAssociadaInvestimentoResponse
+                {
+                    Descricao = investimento.ReceitaRecorrente.Descricao,
+                    ContaDescricao = investimento.ReceitaRecorrente.ContaFinanceira?.Descricao ?? string.Empty,
+                    Ativa = investimento.ReceitaRecorrente.Ativa,
+                    ElegivelParaNovaAssociacao = Elegivel(investimento.ReceitaRecorrente, mes)
+                };
+            }
         }
+
+        private static ReservaSalarialResponse MapearReserva(ReceitaRecorrente receita, decimal acumulado, DateTime mes)
+        {
+            return new ReservaSalarialResponse
+            {
+                ReceitaRecorrenteId = receita.Id,
+                Descricao = receita.Descricao,
+                ContaDescricao = receita.ContaFinanceira?.Descricao ?? string.Empty,
+                Ativa = receita.Ativa,
+                ElegivelParaNovaAssociacao = Elegivel(receita, mes),
+                ValorMensal = receita.ValorPrevisto,
+                ValorAcumulado = acumulado,
+                MetaSeisMeses = CalcularMeta(6, receita.ValorPrevisto, acumulado),
+                MetaDozeMeses = CalcularMeta(12, receita.ValorPrevisto, acumulado)
+            };
+        }
+
+        private static ProgressoMetaReservaResponse CalcularMeta(int meses, decimal mensal, decimal acumulado)
+        {
+            var meta = mensal * meses;
+            return new ProgressoMetaReservaResponse
+            {
+                Meses = meses,
+                ValorMeta = meta,
+                ValorRestante = Math.Max(meta - acumulado, 0m),
+                PercentualAlcancado = meta == 0m
+                    ? 0m
+                    : decimal.Round(acumulado / meta * 100m, 2, MidpointRounding.AwayFromZero)
+            };
+        }
+
+        private static string RotuloTipoAtivo(TipoAtivo? tipo) => tipo switch
+        {
+            TipoAtivo.FundoInvestimento => "Fundo de investimento",
+            TipoAtivo.Exterior => "Investimento no exterior",
+            TipoAtivo.Criptomoeda => "Criptomoeda",
+            TipoAtivo.RendaFixa => "Renda fixa",
+            TipoAtivo.Acoes => "Ações",
+            TipoAtivo.Outros => "Outros",
+            _ => "Não classificado"
+        };
     }
 }

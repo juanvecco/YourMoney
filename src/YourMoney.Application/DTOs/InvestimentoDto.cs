@@ -8,26 +8,43 @@ namespace YourMoney.Application.DTOs
         public string? Tipo { get; set; }
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime? MesReferencia { get; set; }
         public DateTime? DataResgate { get; set; }
         public bool Ativo { get; set; }
+        public Guid? ReceitaRecorrenteId { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
-    public class CriarInvestimentoRequest
+    public class InvestimentoWriteRequest
     {
         public string? Nome { get; set; }
         public string? Descricao { get; set; }
         public string? Tipo { get; set; }
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime MesReferencia { get; set; }
+        public Guid? ReceitaRecorrenteId { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
-    public class AtualizarInvestimentoRequest : CriarInvestimentoRequest
+    public class CriarInvestimentoRequest : InvestimentoWriteRequest
+    {
+        public Guid OperacaoId { get; set; }
+    }
+
+    public class AtualizarInvestimentoRequest : InvestimentoWriteRequest
     {
     }
 
@@ -39,14 +56,93 @@ namespace YourMoney.Application.DTOs
         public string Tipo { get; set; } = string.Empty;
         public decimal Quantidade { get; set; }
         public decimal PrecoMedio { get; set; }
+        public string? CodigoAtivo { get; set; }
+        public string? Isin { get; set; }
+        public decimal? PrecoUnitarioAtual { get; set; }
         public decimal ValorAtual { get; set; }
         public DateTime DataInvestimento { get; set; }
         public DateTime? MesReferencia { get; set; }
         public DateTime? DataResgate { get; set; }
         public bool Ativo { get; set; }
+        public Guid? ReceitaRecorrenteId { get; set; }
+        public ReservaAssociadaInvestimentoResponse? ReservaAssociada { get; set; }
+        public Guid? GrupoObjetivoId { get; set; }
+        public GrupoObjetivoResumoResponse? GrupoObjetivo { get; set; }
+        public string? TipoAtivo { get; set; }
     }
 
     public class CriarInvestimentoResponse : InvestimentoResponse
     {
+        [System.Text.Json.Serialization.JsonIgnore]
+        public bool CriadoAgora { get; set; } = true;
+    }
+
+    public class ReservaAssociadaInvestimentoResponse
+    {
+        public string Descricao { get; set; } = string.Empty;
+        public string ContaDescricao { get; set; } = string.Empty;
+        public bool Ativa { get; set; }
+        public bool ElegivelParaNovaAssociacao { get; set; }
+    }
+
+    public class ProgressoMetaReservaResponse
+    {
+        public int Meses { get; set; }
+        public decimal ValorMeta { get; set; }
+        public decimal ValorRestante { get; set; }
+        public decimal PercentualAlcancado { get; set; }
+    }
+
+    public class ReservaSalarialResponse
+    {
+        public Guid ReceitaRecorrenteId { get; set; }
+        public string Descricao { get; set; } = string.Empty;
+        public string ContaDescricao { get; set; } = string.Empty;
+        public decimal ValorMensal { get; set; }
+        public decimal ValorAcumulado { get; set; }
+        public bool Ativa { get; set; }
+        public bool ElegivelParaNovaAssociacao { get; set; }
+        public ProgressoMetaReservaResponse MetaSeisMeses { get; set; } = new();
+        public ProgressoMetaReservaResponse MetaDozeMeses { get; set; } = new();
+    }
+
+    public class CarteiraInvestimentosConsolidadaResponse
+    {
+        public decimal TotalInvestido { get; set; }
+        public decimal TotalFiltrado { get; set; }
+        public List<InvestimentoResponse> Itens { get; set; } = new();
+        public List<ReservaSalarialResponse> Reservas { get; set; } = new();
+        public List<SubtotalGrupoInvestimentoResponse> SubtotaisPorGrupo { get; set; } = new();
+        public List<SubtotalTipoAtivoInvestimentoResponse> SubtotaisPorTipoAtivo { get; set; } = new();
+    }
+
+    public sealed class GrupoObjetivoResumoResponse
+    {
+        public Guid Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+    }
+
+    public sealed class FiltroOrganizacaoInvestimentos
+    {
+        public Guid? GrupoObjetivoId { get; set; }
+        public bool SemGrupo { get; set; }
+        public string? TipoAtivo { get; set; }
+        public bool NaoClassificado { get; set; }
+    }
+
+    public sealed class SubtotalGrupoInvestimentoResponse
+    {
+        public Guid? GrupoObjetivoId { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public int QuantidadeInvestimentos { get; set; }
+        public decimal ValorAtual { get; set; }
+    }
+
+    public sealed class SubtotalTipoAtivoInvestimentoResponse
+    {
+        public string? TipoAtivo { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public int QuantidadeInvestimentos { get; set; }
+        public decimal ValorAtual { get; set; }
     }
 }

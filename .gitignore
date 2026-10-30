@@ -8,11 +8,17 @@
 *.dll
 *.pdb
 *.vscode/
+.idea/
 bin/
 obj/
 packages/
 TestResults/
 coverage/
+.tmpbuild/
 *.trx
 *.tmp
+.env
+.env.*
+src/YourMoney.Api/App_Data/
+.DS_Store
 Thumbs.db

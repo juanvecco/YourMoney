@@ -1,0 +1,93 @@
+{
+  "configVersion": 1,
+  "timestamp": 1793393339587,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/chunk-2TKLHN27.js",
+        "/chunk-EPABC27I.js",
+        "/chunk-OSQMNGTH.js",
+        "/chunk-PNZIT7IF.js",
+        "/favicon.ico",
+        "/index.html",
+        "/main-RAZTWC2J.js",
+        "/manifest.webmanifest",
+        "/polyfills-5CFQRCPP.js",
+        "/scripts-TTWY4XDY.js",
+        "/styles-YOY4NZUI.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/assets/logo.png",
+        "/assets/objectives/city-lx-sedan.jpg",
+        "/assets/objectives/emergency-fund.jpg",
+        "/assets/objectives/financial-freedom.jpg",
+        "/assets/objectives/long-term.jpg",
+        "/icons/icon-192x192.png",
+        "/icons/icon-512x512.png",
+        "/icons/icon-maskable-512x512.png",
+        "/media/bootstrap-icons-CVBWLLHT.woff2",
+        "/media/bootstrap-icons-VQNJTM6Q.woff"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/assets/logo.png": "19ccdc5e234beccb3d807942b7fc8fbf87ad6680",
+    "/assets/objectives/city-lx-sedan.jpg": "8873e5da64275a48209bd80e8a8190deef61ba66",
+    "/assets/objectives/emergency-fund.jpg": "cc31202c2165d310a5a328244a7729b1d3f9da38",
+    "/assets/objectives/financial-freedom.jpg": "51ccd587c2b10998dd440e7240551018a35ad09f",
+    "/assets/objectives/long-term.jpg": "7ddc2abdef02deb12cda399a997afc3b86aefedf",
+    "/chunk-2TKLHN27.js": "a9b835364850e2b74cb034d7c9dcee6f6b5b52ac",
+    "/chunk-EPABC27I.js": "b6eef9ebbf335f657dc092149c31b04d114e18b4",
+    "/chunk-OSQMNGTH.js": "b6362b30b39300340b9152926881844aca37e4e1",
+    "/chunk-PNZIT7IF.js": "6c9e579fcc78b3be0d98f38b2a6b6e95fafe9f54",
+    "/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "/icons/icon-192x192.png": "841525adeaa9902bd60a277e2f1c47fa2be61f57",
+    "/icons/icon-512x512.png": "ea0b51f495d54a95bdecd7c2eb0da8f7a95e773d",
+    "/icons/icon-maskable-512x512.png": "42d612c26e9993c941dbd5db688ca2ce6c5e0c09",
+    "/index.html": "9f0150222bf5bc891d9016cb21b1d42d91a0bd39",
+    "/main-RAZTWC2J.js": "d279d739d7fb459a3874fc7e00e1482e4eb5b09f",
+    "/manifest.webmanifest": "c926b1bf45b37fa4b924bb1c51deb207fe83d57d",
+    "/media/bootstrap-icons-CVBWLLHT.woff2": "b441fcff939e24fa0906a37b7788788b9fddbb68",
+    "/media/bootstrap-icons-VQNJTM6Q.woff": "762010c79b4a05e1131fc8fb3b1aeff324d8033f",
+    "/polyfills-5CFQRCPP.js": "f2241e9a25858f895ce299d15f6f22e849e2fd72",
+    "/scripts-TTWY4XDY.js": "59aa489af6324127a3d773836250da08639d4b26",
+    "/styles-YOY4NZUI.css": "f93f4496d1c4b3feb15e2d5209401dea31d642f6"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}

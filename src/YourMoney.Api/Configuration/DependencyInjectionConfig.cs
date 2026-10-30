@@ -13,6 +13,7 @@ namespace YourMoney.Api.Configuration
         {
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IUsuarioDemonstracaoService, UsuarioDemonstracaoService>();
             services.AddScoped<IDespesaService, DespesaService>();
             services.AddScoped<IDespesaRepository, DespesaRepository>();
             services.AddScoped<IDespesaRecorrenteService, DespesaRecorrenteService>();
@@ -25,12 +26,26 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IReceitaRecorrenteRepository, ReceitaRecorrenteRepository>();
             services.AddScoped<IInvestimentoService, InvestimentoService>();
             services.AddScoped<IInvestimentoRepository, InvestimentoRepository>();
+            services.AddScoped<IGrupoObjetivoInvestimentoService, GrupoObjetivoInvestimentoService>();
+            services.AddScoped<IGrupoObjetivoInvestimentoRepository, GrupoObjetivoInvestimentoRepository>();
             services.AddScoped<IMetaRepository, MetaRepository>();
             services.AddScoped<IMetaMensalService, MetaMensalService>();
             services.AddScoped<IMetaMensalRepository, MetaMensalRepository>();
+            services.AddScoped<IAporteObjetivoInvestimentoService, AporteObjetivoInvestimentoService>();
+            services.AddScoped<IAporteObjetivoInvestimentoRepository, AporteObjetivoInvestimentoRepository>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
             services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
+            services.AddScoped<IMovimentacaoFinanceiraService, MovimentacaoFinanceiraService>();
+            services.AddScoped<IOpenFinanceService, OpenFinanceService>();
+            services.AddMemoryCache();
+            services.AddHttpClient("Pluggy", client =>
+            {
+                client.BaseAddress = new Uri("https://api.pluggy.ai/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+            services.AddScoped<IPluggyService, PluggyService>();
+            services.AddScoped<IPasswordResetDeliveryService, SmtpPasswordResetDeliveryService>();
             return services;
         }
     }

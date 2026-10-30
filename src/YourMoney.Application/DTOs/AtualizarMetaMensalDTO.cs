@@ -4,6 +4,9 @@ namespace YourMoney.Application.DTOs
     {
         public Guid Id { get; set; }
         public string? Nome { get; set; }
-        public decimal PercentualReceita { get; set; }
+        public string? TipoDefinicao { get; set; }
+        public decimal? PercentualReceita { get; set; }
+        public decimal? ValorMeta { get; set; }
+        public Guid? GrupoObjetivoInvestimentoId { get; set; }
     }
 }

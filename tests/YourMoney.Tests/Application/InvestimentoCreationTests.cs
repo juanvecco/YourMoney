@@ -15,8 +15,8 @@ namespace YourMoney.Tests.Application
             TestAssert.Equal(1, repository.Investimentos.Count, "Create should persist one investment");
             var created = repository.Investimentos.Single();
             TestAssert.Equal("test-user", created.UsuarioId, "Create should use current user");
-            TestAssert.Equal(2.51m, created.Quantidade, "Quantity should round to two decimals");
-            TestAssert.Equal(153.42m, created.PrecoMedio, "Average price should round to cents");
+            TestAssert.Equal(2.505m, created.Quantidade, "Quantity should preserve the source precision");
+            TestAssert.Equal(153.424m, created.PrecoMedio, "Average price should preserve the source precision");
             TestAssert.Equal(383.56m, created.ValorAtual, "Current value should round to cents");
             TestAssert.Equal(new DateTime(2026, 6, 9), created.DataInvestimento, "Date should preserve civil day");
             TestAssert.Equal(new DateTime(2026, 5, 1), created.MesReferencia!.Value, "Reference should normalize to first day");

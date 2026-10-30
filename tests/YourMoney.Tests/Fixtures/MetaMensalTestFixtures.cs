@@ -16,7 +16,24 @@ namespace YourMoney.Tests.Fixtures
             return new CriarMetaMensalDTO
             {
                 Nome = nome,
+                TipoDefinicao = "Percentual",
                 PercentualReceita = percentualReceita,
+                ValorMeta = null,
+                MesReferencia = mesReferencia ?? new DateTime(2026, 6, 15)
+            };
+        }
+
+        public static CriarMetaMensalDTO CriarRequestPorValor(
+            string? nome = "Reserva",
+            decimal valorMeta = 1000m,
+            DateTime? mesReferencia = null)
+        {
+            return new CriarMetaMensalDTO
+            {
+                Nome = nome,
+                TipoDefinicao = "Valor",
+                PercentualReceita = null,
+                ValorMeta = valorMeta,
                 MesReferencia = mesReferencia ?? new DateTime(2026, 6, 15)
             };
         }
