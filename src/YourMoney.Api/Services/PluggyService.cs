@@ -184,6 +184,8 @@ public sealed class PluggyService : IPluggyService
     private readonly ILogger<PluggyService> _logger;
     private readonly AppDbContext _dbContext;
     private readonly IDataProtector _credentialProtector;
+    private readonly IDataProtectionProvider _dataProtectionProvider;
+    private readonly YourMoney.Domain.Repositories.ICarteiraRepository _carteiraRepository;
     private readonly IDespesaService _despesaService;
     private readonly IReceitaService _receitaService;
     private readonly IInvestimentoService _investimentoService;
@@ -196,6 +198,7 @@ public sealed class PluggyService : IPluggyService
         ILogger<PluggyService> logger,
         AppDbContext dbContext,
         IDataProtectionProvider dataProtectionProvider,
+        YourMoney.Domain.Repositories.ICarteiraRepository carteiraRepository,
         IDespesaService despesaService,
         IReceitaService receitaService,
         IInvestimentoService investimentoService)
@@ -206,6 +209,8 @@ public sealed class PluggyService : IPluggyService
         _logger = logger;
         _dbContext = dbContext;
         _credentialProtector = dataProtectionProvider.CreateProtector("YourMoney.Pluggy.ClientSecret.v1");
+        _dataProtectionProvider = dataProtectionProvider;
+        _carteiraRepository = carteiraRepository;
         _despesaService = despesaService;
         _receitaService = receitaService;
         _investimentoService = investimentoService;
@@ -213,18 +218,19 @@ public sealed class PluggyService : IPluggyService
 
     public async Task<PluggyCredentialStatusDTO> ObterConfiguracaoCredenciaisAsync(
         string usuarioId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         var environmentCredentials = ObterCredenciaisDoServidor();
         var stored = await _dbContext.PluggyCredentials
             .AsNoTracking()
-            .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
+            .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId && credential.CarteiraId == walletId, cancellationToken);
         if (stored is not null)
         {
             try
             {
-                _ = _credentialProtector.Unprotect(stored.ProtectedClientSecret);
+                _ = DesprotegerSegredo(stored, walletId);
             }
             catch (System.Security.Cryptography.CryptographicException exception)
             {
@@ -250,7 +256,15 @@ public sealed class PluggyService : IPluggyService
             };
         }
 
-        if (environmentCredentials.HasAnyValue)
+        var isPrincipalWallet = await _dbContext.Carteiras
+            .AsNoTracking()
+            .AnyAsync(wallet => wallet.Id == walletId && wallet.UsuarioId == usuarioId && wallet.Principal, cancellationToken);
+        if (environmentCredentials.HasAnyValue
+            && isPrincipalWallet
+            && string.Equals(
+                LerConfiguracao("PLUGGY_PERSONAL_OWNER_USER_ID", "Pluggy:PersonalOwnerUserId")?.Trim(),
+                usuarioId,
+                StringComparison.Ordinal))
         {
             return new PluggyCredentialStatusDTO
             {
@@ -274,9 +288,10 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyCredentialStatusDTO> SalvarConfiguracaoCredenciaisAsync(
         string usuarioId,
         PluggyCredentialRequestDTO request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         ArgumentNullException.ThrowIfNull(request);
         if (string.IsNullOrWhiteSpace(request.ClientId) || request.ClientId.Length > 200)
             throw new ArgumentException("Informe um Client ID válido.", nameof(request));
@@ -285,12 +300,13 @@ public sealed class PluggyService : IPluggyService
 
         var clientId = request.ClientId.Trim();
         var apiKey = await ValidarCredenciaisInformadasAsync(clientId, request.ClientSecret, cancellationToken);
-        var protectedSecret = _credentialProtector.Protect(request.ClientSecret);
+        var protectedSecret = ProtegerSegredo(request.ClientSecret, walletId);
         var credential = await _dbContext.PluggyCredentials
-            .SingleOrDefaultAsync(entry => entry.UsuarioId == usuarioId, cancellationToken);
+            .SingleOrDefaultAsync(entry => entry.UsuarioId == usuarioId && entry.CarteiraId == walletId, cancellationToken);
         if (credential is null)
         {
             credential = new PluggyCredential(usuarioId, clientId, protectedSecret);
+            credential.AssociarCarteira(walletId);
             _dbContext.PluggyCredentials.Add(credential);
         }
         else
@@ -299,7 +315,7 @@ public sealed class PluggyService : IPluggyService
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-        _cache.Set(ApiKeyCacheKey, apiKey, ApiKeyCacheDuration);
+        _cache.Set(CriarChaveCacheApi(walletId, clientId), apiKey, ApiKeyCacheDuration);
         return new PluggyCredentialStatusDTO
         {
             Configured = true,
@@ -313,12 +329,13 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyConnectTokenResponseDTO> CriarConnectTokenAsync(
         string clientUserId,
         Guid? connectionId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
         if (string.IsNullOrWhiteSpace(clientUserId))
             throw new ArgumentException("Usuário autenticado não identificado.", nameof(clientUserId));
 
-        ValidarTitularPessoal(clientUserId);
+        var walletId = await ObterCarteiraIdAsync(clientUserId, carteiraId, cancellationToken);
 
         PluggyConnection? connectionToReplace = null;
         if (connectionId.HasValue)
@@ -326,20 +343,20 @@ public sealed class PluggyService : IPluggyService
             connectionToReplace = await _dbContext.PluggyConnections
                 .AsNoTracking()
                 .SingleOrDefaultAsync(
-                    entry => entry.Id == connectionId.Value && entry.UsuarioId == clientUserId,
+                    entry => entry.Id == connectionId.Value && entry.UsuarioId == clientUserId && entry.CarteiraId == walletId,
                     cancellationToken);
             if (connectionToReplace is null)
                 throw new KeyNotFoundException("Conexão bancária não encontrada.");
         }
         else if (await _dbContext.PluggyConnections.CountAsync(
-                     entry => entry.UsuarioId == clientUserId,
+                     entry => entry.UsuarioId == clientUserId && entry.CarteiraId == walletId,
                      cancellationToken) >= MeuPluggyConnectionLimit)
         {
             throw new PluggyConnectionLimitException();
         }
 
-        var apiKey = await ObterApiKeyAsync(clientUserId, cancellationToken);
-        var requestBody = CriarConnectTokenPayload(clientUserId);
+        var apiKey = await ObterApiKeyAsync(clientUserId, walletId, cancellationToken);
+        var requestBody = CriarConnectTokenPayload(walletId.ToString("D"));
         using var response = await EnviarAsync(HttpMethod.Post, "connect_token", apiKey, requestBody, cancellationToken);
         GarantirSucesso(response, "Não foi possível iniciar a conexão bancária agora. Tente novamente.");
 
@@ -358,23 +375,28 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyConnectionDTO> RegistrarConexaoAsync(
         string usuarioId,
         string itemId,
-        CancellationToken cancellationToken = default)
-        => await RegistrarConexaoAsync(usuarioId, itemId, null, cancellationToken);
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
+        => await RegistrarConexaoAsync(usuarioId, itemId, null, cancellationToken, carteiraId);
 
     public async Task<PluggyConnectionDTO> RegistrarConexaoAsync(
         string usuarioId,
         string itemId,
         Guid? connectionId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
 
         if (!Guid.TryParse(itemId, out var parsedItemId))
             throw new ArgumentException("A Pluggy retornou um identificador de conexão inválido.", nameof(itemId));
 
-        var apiKey = await ObterApiKeyAsync(usuarioId, cancellationToken);
+        var apiKey = await ObterApiKeyAsync(usuarioId, walletId, cancellationToken);
         var item = await ObterItemAsync(apiKey, parsedItemId, cancellationToken);
-        if (!string.Equals(item.ClientUserId, usuarioId, StringComparison.Ordinal))
+        var isLegacyPrincipalItem = await _dbContext.Carteiras.AnyAsync(wallet =>
+            wallet.Id == walletId && wallet.UsuarioId == usuarioId && wallet.Principal, cancellationToken)
+            && string.Equals(item.ClientUserId, usuarioId, StringComparison.Ordinal);
+        if (!string.Equals(item.ClientUserId, walletId.ToString("D"), StringComparison.OrdinalIgnoreCase) && !isLegacyPrincipalItem)
             throw new KeyNotFoundException("Conexão bancária não encontrada para este usuário.");
         if (item.Connector?.Id != MeuPluggyConnectorId || item.IsSandbox)
             throw new ArgumentException("Somente conexões reais do conector pessoal Meu Pluggy são aceitas.", nameof(itemId));
@@ -383,17 +405,21 @@ public sealed class PluggyService : IPluggyService
         if (string.IsNullOrWhiteSpace(institutionName))
             institutionName = "Meu Pluggy";
 
+        // Serialize the count and insert so concurrent authorizations cannot exceed five items.
+        await using var connectionScope = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var connectionForItem = await _dbContext.PluggyConnections
             .SingleOrDefaultAsync(entry => entry.PluggyItemId == item.Id, cancellationToken);
-        if (connectionForItem is not null && !string.Equals(connectionForItem.UsuarioId, usuarioId, StringComparison.Ordinal))
-            throw new KeyNotFoundException("Conexão bancária não encontrada para este usuário.");
+        if (connectionForItem is not null
+            && (!string.Equals(connectionForItem.UsuarioId, usuarioId, StringComparison.Ordinal)
+                || connectionForItem.CarteiraId != walletId))
+            throw new KeyNotFoundException("Esta conexão já está associada a outra carteira ou outro usuário.");
 
         PluggyConnection connection;
         if (connectionId.HasValue)
         {
             connection = await _dbContext.PluggyConnections
                 .SingleOrDefaultAsync(
-                    entry => entry.Id == connectionId.Value && entry.UsuarioId == usuarioId,
+                    entry => entry.Id == connectionId.Value && entry.UsuarioId == usuarioId && entry.CarteiraId == walletId,
                     cancellationToken)
                 ?? throw new KeyNotFoundException("Conexão bancária não encontrada para este usuário.");
 
@@ -424,7 +450,7 @@ public sealed class PluggyService : IPluggyService
         else
         {
             var count = await _dbContext.PluggyConnections
-                .CountAsync(entry => entry.UsuarioId == usuarioId, cancellationToken);
+                .CountAsync(entry => entry.UsuarioId == usuarioId && entry.CarteiraId == walletId, cancellationToken);
             if (count >= MeuPluggyConnectionLimit)
                 throw new PluggyConnectionLimitException();
 
@@ -437,35 +463,39 @@ public sealed class PluggyService : IPluggyService
                 item.IsSandbox,
                 item.LastUpdatedAt,
                 item.ConsentExpiresAt);
+            connection.AssociarCarteira(walletId);
             _dbContext.PluggyConnections.Add(connection);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await connectionScope.CommitAsync(cancellationToken);
         return MapearConexao(connection);
     }
 
     public async Task<IReadOnlyList<PluggyConnectionDTO>> ListarConexoesAsync(
         string usuarioId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
-        var connections = await AtualizarMetadadosConexoesAsync(usuarioId, cancellationToken);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
+        var connections = await AtualizarMetadadosConexoesAsync(usuarioId, walletId, cancellationToken);
 
         return connections.Select(MapearConexao).ToArray();
     }
 
     public async Task<IReadOnlyList<PluggyAccountDTO>> ListarContasAsync(
         string usuarioId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
-        var connections = await AtualizarMetadadosConexoesAsync(usuarioId, cancellationToken);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
+        var connections = await AtualizarMetadadosConexoesAsync(usuarioId, walletId, cancellationToken);
         if (connections.Count == 0)
             return Array.Empty<PluggyAccountDTO>();
 
         GarantirAutorizacoesAtivas(connections);
 
-        var apiKey = await ObterApiKeyAsync(usuarioId, cancellationToken);
+        var apiKey = await ObterApiKeyAsync(usuarioId, walletId, cancellationToken);
         var accounts = new List<PluggyAccountDTO>();
         foreach (var connection in connections)
         {
@@ -499,11 +529,12 @@ public sealed class PluggyService : IPluggyService
         string usuarioId,
         Guid? connectionId = null,
         bool retryFailed = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         var now = DateTimeOffset.UtcNow;
-        var query = _dbContext.PluggyConnections.Where(connection => connection.UsuarioId == usuarioId);
+        var query = _dbContext.PluggyConnections.Where(connection => connection.UsuarioId == usuarioId && connection.CarteiraId == walletId);
         if (connectionId.HasValue)
             query = query.Where(connection => connection.Id == connectionId.Value);
         var connections = await query.OrderBy(connection => connection.InstitutionName).ToListAsync(cancellationToken);
@@ -541,7 +572,7 @@ public sealed class PluggyService : IPluggyService
                 if (!refresh.ShouldSynchronize)
                     continue;
 
-                await SincronizarAtivosInvestimentoAsync(usuarioId, connection, now, cancellationToken);
+                await SincronizarAtivosInvestimentoAsync(usuarioId, walletId, connection, now, cancellationToken);
             }
             finally
             {
@@ -599,18 +630,19 @@ public sealed class PluggyService : IPluggyService
 
     private async Task SincronizarAtivosInvestimentoAsync(
         string usuarioId,
+        Guid carteiraId,
         PluggyConnection connection,
         DateTimeOffset attemptedAt,
         CancellationToken cancellationToken)
     {
         try
         {
-            var apiKey = await ObterApiKeyAsync(usuarioId, cancellationToken);
+            var apiKey = await ObterApiKeyAsync(usuarioId, carteiraId, cancellationToken);
             connection.RegistrarTentativaAtivos(attemptedAt);
             await _dbContext.SaveChangesAsync(cancellationToken);
             var itemId = Guid.Parse(connection.PluggyItemId);
             var item = await ObterItemAsync(apiKey, itemId, cancellationToken);
-            ValidarItemPessoal(usuarioId, item);
+            ValidarItemPessoal(usuarioId, carteiraId, item);
             var hasInvestmentProduct = item.Products.Any(product =>
                 string.Equals(product, "INVESTMENTS", StringComparison.OrdinalIgnoreCase));
             var positions = hasInvestmentProduct
@@ -739,9 +771,10 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyInvestmentAssetReconciliationResultDTO> ReconciliarAtivoInvestimentoAsync(
         string usuarioId,
         PluggyInvestmentAssetReconciliationRequestDTO request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         if (request is null || request.ConnectionId == Guid.Empty
             || string.IsNullOrWhiteSpace(request.ExternalInvestmentId)
             || string.IsNullOrWhiteSpace(request.SnapshotToken))
@@ -751,7 +784,7 @@ public sealed class PluggyService : IPluggyService
 
         await using var scope = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var connection = await _dbContext.PluggyConnections.SingleOrDefaultAsync(
-            entry => entry.Id == request.ConnectionId && entry.UsuarioId == usuarioId, cancellationToken)
+            entry => entry.Id == request.ConnectionId && entry.UsuarioId == usuarioId && entry.CarteiraId == walletId, cancellationToken)
             ?? throw new KeyNotFoundException("Conexão bancária não encontrada para este usuário.");
         var asset = await _dbContext.PluggyInvestmentAssetSnapshots.SingleOrDefaultAsync(
             entry => entry.UsuarioId == usuarioId && entry.ConnectionId == connection.Id
@@ -906,15 +939,17 @@ public sealed class PluggyService : IPluggyService
 
     public async Task<IReadOnlyList<PluggyTransactionPreviewDTO>> ListarTransacoesPreviewAsync(
         string usuarioId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
-        var accounts = await ListarContasAsync(usuarioId, cancellationToken);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
+        var accounts = await ListarContasAsync(usuarioId, cancellationToken, walletId);
         if (accounts.Count == 0)
             return Array.Empty<PluggyTransactionPreviewDTO>();
 
         return await ListarTransacoesParaContasAsync(
             usuarioId,
+            walletId,
             accounts,
             DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(-30)),
             DateOnly.FromDateTime(DateTime.UtcNow.Date),
@@ -925,9 +960,10 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyOverviewDTO> ObterVisaoGeralAsync(
         string usuarioId,
         PluggyOverviewFilterDTO filtro,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         filtro ??= new PluggyOverviewFilterDTO();
         if (!string.IsNullOrWhiteSpace(filtro.TargetType)
             && !string.Equals(filtro.TargetType, "investment", StringComparison.OrdinalIgnoreCase))
@@ -942,7 +978,7 @@ public sealed class PluggyService : IPluggyService
         if (filtro.From.HasValue && filtro.To.HasValue && filtro.From.Value > filtro.To.Value)
             throw new ArgumentException("A data inicial deve ser anterior ou igual à data final.");
 
-        var todasContas = await ListarContasAsync(usuarioId, cancellationToken);
+        var todasContas = await ListarContasAsync(usuarioId, cancellationToken, walletId);
         var contas = todasContas
             .Where(account => !filtro.ConnectionId.HasValue || account.ConnectionId == filtro.ConnectionId.Value)
             .Where(account => string.IsNullOrWhiteSpace(filtro.AccountId)
@@ -951,7 +987,7 @@ public sealed class PluggyService : IPluggyService
 
         var transacoes = contas.Length == 0 || inicio > fim
             ? Array.Empty<PluggyTransactionPreviewDTO>()
-            : await ListarTransacoesParaContasAsync(usuarioId, contas, inicio, fim, cancellationToken, filtro.TargetType);
+            : await ListarTransacoesParaContasAsync(usuarioId, walletId, contas, inicio, fim, cancellationToken, filtro.TargetType);
 
         var saldos = contas
             .Where(account => account.Balance.HasValue)
@@ -985,13 +1021,14 @@ public sealed class PluggyService : IPluggyService
 
     private async Task<IReadOnlyList<PluggyTransactionPreviewDTO>> ListarTransacoesParaContasAsync(
         string usuarioId,
+        Guid carteiraId,
         IReadOnlyCollection<PluggyAccountDTO> accounts,
         DateOnly dataInicial,
         DateOnly dataFinal,
         CancellationToken cancellationToken,
         string? targetType)
     {
-        var apiKey = await ObterApiKeyAsync(usuarioId, cancellationToken);
+        var apiKey = await ObterApiKeyAsync(usuarioId, carteiraId, cancellationToken);
         var dateFrom = dataInicial.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var dateTo = dataFinal.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var transactions = new List<PluggyTransactionPreviewDTO>();
@@ -1045,16 +1082,17 @@ public sealed class PluggyService : IPluggyService
             .OrderByDescending(transaction => transaction.Date)
             .Take(100)
             .ToArray();
-        await AnexarSituacaoCadastroAsync(usuarioId, latestTransactions, cancellationToken, targetType);
+        await AnexarSituacaoCadastroAsync(usuarioId, carteiraId, latestTransactions, cancellationToken, targetType);
         return latestTransactions;
     }
 
     public async Task<PluggyTransactionImportResultDTO> ImportarTransacaoAsync(
         string usuarioId,
         PluggyTransactionImportRequestDTO request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         if (request is null)
             throw new ArgumentException("Os dados de cadastro são obrigatórios.");
         if (string.IsNullOrWhiteSpace(request.TransactionId))
@@ -1067,8 +1105,15 @@ public sealed class PluggyService : IPluggyService
             throw new ArgumentException("O valor deve ser maior que zero.");
         if (request.Date == default)
             throw new ArgumentException("A data é obrigatória.");
+        if (!request.IdContaFinanceira.HasValue || request.IdContaFinanceira.Value == Guid.Empty
+            || !await _dbContext.ContaFinanceira.AnyAsync(account =>
+                account.Id == request.IdContaFinanceira.Value
+                && account.UsuarioId == usuarioId
+                && account.CarteiraId == walletId,
+                cancellationToken))
+            throw new ArgumentException("Selecione uma conta financeira pertencente à carteira selecionada.");
 
-        var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken))
+        var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken, walletId))
             .SingleOrDefault(transaction => string.Equals(
                 transaction.TransactionId,
                 request.TransactionId,
@@ -1173,9 +1218,10 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(
         string usuarioId,
         PluggyExpenseReconciliationRequestDTO request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         if (request is null)
             throw new ArgumentException("Os dados de reconciliação são obrigatórios.");
         if (string.IsNullOrWhiteSpace(request.TransactionId))
@@ -1183,7 +1229,7 @@ public sealed class PluggyService : IPluggyService
         if (request.Action is not ("create" or "link" or "replace"))
             throw new ArgumentException("Escolha uma ação válida para a despesa.");
 
-        var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken))
+        var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken, walletId))
             .SingleOrDefault(transaction => string.Equals(
                 transaction.TransactionId,
                 request.TransactionId,
@@ -1223,7 +1269,7 @@ public sealed class PluggyService : IPluggyService
                 Date = request.Date!.Value,
                 IdContaFinanceira = request.IdContaFinanceira,
                 IdCategoria = request.IdCategoria
-            }, cancellationToken);
+            }, cancellationToken, walletId);
 
             return new PluggyExpenseReconciliationResultDTO
             {
@@ -1283,7 +1329,9 @@ public sealed class PluggyService : IPluggyService
 
             var expense = await _dbContext.Despesas
                 .SingleOrDefaultAsync(
-                    item => item.Id == request.TargetExpenseId.Value && item.UsuarioId == usuarioId,
+                    item => item.Id == request.TargetExpenseId.Value
+                        && item.UsuarioId == usuarioId
+                        && item.ContaFinanceira.CarteiraId == walletId,
                     cancellationToken);
             if (expense is null)
                 throw new KeyNotFoundException("A despesa selecionada não foi encontrada para este usuário.");
@@ -1418,20 +1466,22 @@ public sealed class PluggyService : IPluggyService
     public async Task<PluggyInvestmentReconciliationResultDTO> ReconciliarInvestimentoAsync(
         string usuarioId,
         PluggyInvestmentReconciliationRequestDTO request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         if (request is null || string.IsNullOrWhiteSpace(request.TransactionId))
             throw new ArgumentException("A transação de origem é obrigatória.");
         if (request.Action is not ("create" or "link" or "replace"))
             throw new ArgumentException("Escolha uma ação válida para o investimento.");
 
-        var contas = await ListarContasAsync(usuarioId, cancellationToken);
+        var contas = await ListarContasAsync(usuarioId, cancellationToken, walletId);
         var hoje = DateOnly.FromDateTime(DateTime.UtcNow.Date);
         var sources = contas.Count == 0
             ? Array.Empty<PluggyTransactionPreviewDTO>()
             : await ListarTransacoesParaContasAsync(
                 usuarioId,
+                walletId,
                 contas,
                 hoje.AddDays(-30),
                 hoje,
@@ -1690,12 +1740,13 @@ public sealed class PluggyService : IPluggyService
     public async Task RemoverConexaoAsync(
         string usuarioId,
         Guid connectionId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
     {
-        ValidarTitularPessoal(usuarioId);
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
         var connection = await _dbContext.PluggyConnections
             .SingleOrDefaultAsync(
-                entry => entry.Id == connectionId && entry.UsuarioId == usuarioId,
+                entry => entry.Id == connectionId && entry.UsuarioId == usuarioId && entry.CarteiraId == walletId,
                 cancellationToken);
         if (connection is null)
             throw new KeyNotFoundException("Conexão bancária não encontrada.");
@@ -1706,6 +1757,7 @@ public sealed class PluggyService : IPluggyService
 
     private async Task AnexarSituacaoCadastroAsync(
         string usuarioId,
+        Guid carteiraId,
         IReadOnlyCollection<PluggyTransactionPreviewDTO> transactions,
         CancellationToken cancellationToken,
         string? targetType)
@@ -1714,9 +1766,10 @@ public sealed class PluggyService : IPluggyService
             return;
 
         var sourceIds = transactions.Select(transaction => transaction.TransactionId).ToArray();
+        var connectionIds = transactions.Select(transaction => transaction.ConnectionId).Distinct().ToArray();
         var registered = await _dbContext.PluggyTransactionImports
             .AsNoTracking()
-            .Where(item => item.UsuarioId == usuarioId && sourceIds.Contains(item.TransactionId))
+            .Where(item => item.UsuarioId == usuarioId && sourceIds.Contains(item.TransactionId) && connectionIds.Contains(item.ConnectionId))
             .ToDictionaryAsync(item => item.TransactionId, cancellationToken);
 
         var earliest = transactions.Min(transaction => DataTransacaoBrasilia(transaction.Date));
@@ -1724,6 +1777,7 @@ public sealed class PluggyService : IPluggyService
         var expenses = await _dbContext.Despesas
             .AsNoTracking()
             .Where(expense => expense.UsuarioId == usuarioId
+                && expense.ContaFinanceira.CarteiraId == carteiraId
                 && expense.Data >= earliest.AddDays(-1)
                 && expense.Data <= latest.AddDays(1))
             .Select(expense => new PluggyDuplicateCandidateDTO
@@ -1782,6 +1836,7 @@ public sealed class PluggyService : IPluggyService
         var revenues = await _dbContext.Receitas
             .AsNoTracking()
             .Where(revenue => revenue.UsuarioId == usuarioId
+                && revenue.ContaFinanceira.CarteiraId == carteiraId
                 && revenue.Data >= earliest.AddDays(-1)
                 && revenue.Data <= latest.AddDays(1))
             .Select(revenue => new PluggyDuplicateCandidateDTO
@@ -1996,25 +2051,27 @@ public sealed class PluggyService : IPluggyService
 
     private async Task<List<PluggyConnection>> ListarConexoesDoUsuarioAsync(
         string usuarioId,
+        Guid carteiraId,
         CancellationToken cancellationToken) => await _dbContext.PluggyConnections
-            .Where(connection => connection.UsuarioId == usuarioId)
+            .Where(connection => connection.UsuarioId == usuarioId && connection.CarteiraId == carteiraId)
             .OrderBy(connection => connection.ConnectedAt)
             .ToListAsync(cancellationToken);
 
     private async Task<List<PluggyConnection>> AtualizarMetadadosConexoesAsync(
         string usuarioId,
+        Guid carteiraId,
         CancellationToken cancellationToken)
     {
-        var connections = await ListarConexoesDoUsuarioAsync(usuarioId, cancellationToken);
+        var connections = await ListarConexoesDoUsuarioAsync(usuarioId, carteiraId, cancellationToken);
         if (connections.Count == 0)
             return connections;
 
-        var apiKey = await ObterApiKeyAsync(usuarioId, cancellationToken);
+        var apiKey = await ObterApiKeyAsync(usuarioId, carteiraId, cancellationToken);
         foreach (var connection in connections)
         {
             var itemId = Guid.Parse(connection.PluggyItemId);
             var item = await ObterItemAsync(apiKey, itemId, cancellationToken);
-            ValidarItemPessoal(usuarioId, item);
+            ValidarItemPessoal(usuarioId, carteiraId, item);
             var status = string.Equals(item.Error?.Code, "USER_AUTHORIZATION_EXPIRED", StringComparison.Ordinal)
                 ? item.Error.Code
                 : item.Status;
@@ -2093,54 +2150,56 @@ public sealed class PluggyService : IPluggyService
         throw new PluggyIntegrationException(publicError);
     }
 
-    private async Task<string> ObterApiKeyAsync(string usuarioId, CancellationToken cancellationToken)
+    private async Task<string> ObterApiKeyAsync(string usuarioId, Guid carteiraId, CancellationToken cancellationToken)
     {
-        if (_cache.TryGetValue<string>(ApiKeyCacheKey, out var cachedApiKey)
+        string? clientId;
+        string? clientSecret;
+        var storedCredential = await _dbContext.PluggyCredentials
+            .AsNoTracking()
+            .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId && credential.CarteiraId == carteiraId, cancellationToken);
+        if (storedCredential is not null)
+        {
+            clientId = storedCredential.ClientId;
+            try
+            {
+                clientSecret = DesprotegerSegredo(storedCredential, carteiraId);
+            }
+            catch (System.Security.Cryptography.CryptographicException exception)
+            {
+                _logger.LogWarning(exception, "Não foi possível abrir o segredo Pluggy salvo com o provedor de proteção atual.");
+                throw new PluggyConfigurationException(MensagemCredenciaisProtegidasIndisponiveis);
+            }
+        }
+        else
+        {
+            var serverCredentials = ObterCredenciaisDoServidor();
+            if (serverCredentials.HasAnyValue && !serverCredentials.IsComplete)
+                throw new PluggyConfigurationException("A configuração de credenciais Pluggy no servidor está incompleta.");
+            if (!serverCredentials.HasAnyValue)
+                throw new PluggyConfigurationException();
+
+            // Environment credentials remain a compatibility path for the configured original holder only.
+            await ValidarTitularPessoalAsync(usuarioId, carteiraId, cancellationToken);
+            clientId = serverCredentials.ClientId;
+            clientSecret = serverCredentials.ClientSecret;
+        }
+
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+            throw new PluggyConfigurationException();
+        var cacheKey = CriarChaveCacheApi(carteiraId, clientId);
+        if (_cache.TryGetValue<string>(cacheKey, out var cachedApiKey)
             && !string.IsNullOrWhiteSpace(cachedApiKey))
             return cachedApiKey;
 
         await AuthenticationLock.WaitAsync(cancellationToken);
         try
         {
-            if (_cache.TryGetValue<string>(ApiKeyCacheKey, out cachedApiKey)
+            if (_cache.TryGetValue<string>(cacheKey, out cachedApiKey)
                 && !string.IsNullOrWhiteSpace(cachedApiKey))
                 return cachedApiKey;
 
-            string? clientId;
-            string? clientSecret;
-            var storedCredential = await _dbContext.PluggyCredentials
-                .AsNoTracking()
-                .SingleOrDefaultAsync(credential => credential.UsuarioId == usuarioId, cancellationToken);
-            if (storedCredential is not null)
-            {
-                clientId = storedCredential.ClientId;
-                try
-                {
-                    clientSecret = _credentialProtector.Unprotect(storedCredential.ProtectedClientSecret);
-                }
-                catch (System.Security.Cryptography.CryptographicException exception)
-                {
-                    _logger.LogWarning(exception, "Não foi possível abrir o segredo Pluggy salvo com o provedor de proteção atual.");
-                    throw new PluggyConfigurationException(MensagemCredenciaisProtegidasIndisponiveis);
-                }
-            }
-            else
-            {
-                var serverCredentials = ObterCredenciaisDoServidor();
-                if (serverCredentials.HasAnyValue && !serverCredentials.IsComplete)
-                    throw new PluggyConfigurationException("A configuração de credenciais Pluggy no servidor está incompleta.");
-                if (!serverCredentials.HasAnyValue)
-                    throw new PluggyConfigurationException();
-
-                clientId = serverCredentials.ClientId;
-                clientSecret = serverCredentials.ClientSecret;
-            }
-
-            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
-                throw new PluggyConfigurationException();
-
             var apiKey = await AutenticarAplicacaoAsync(clientId, clientSecret, cancellationToken);
-            _cache.Set(ApiKeyCacheKey, apiKey, ApiKeyCacheDuration);
+            _cache.Set(cacheKey, apiKey, ApiKeyCacheDuration);
             return apiKey;
         }
         finally
@@ -2205,14 +2264,68 @@ public sealed class PluggyService : IPluggyService
         return new Dictionary<string, object> { ["options"] = options };
     }
 
-    private void ValidarTitularPessoal(string usuarioId)
+    private async Task ValidarTitularPessoalAsync(string usuarioId, Guid carteiraId, CancellationToken cancellationToken)
     {
+        var isPrincipalWallet = await _dbContext.Carteiras
+            .AsNoTracking()
+            .AnyAsync(wallet => wallet.Id == carteiraId && wallet.UsuarioId == usuarioId && wallet.Principal, cancellationToken);
+        if (!isPrincipalWallet)
+            throw new PluggyConfigurationException("Configure credenciais Pluggy próprias nesta carteira.");
+
         var titularId = LerConfiguracao("PLUGGY_PERSONAL_OWNER_USER_ID", "Pluggy:PersonalOwnerUserId");
         if (string.IsNullOrWhiteSpace(titularId))
             throw new PluggyConfigurationException();
         if (!string.Equals(titularId.Trim(), usuarioId, StringComparison.Ordinal))
             throw new PluggyAuthorizationException();
     }
+
+    private async Task<Guid> ObterCarteiraIdAsync(
+        string usuarioId,
+        Guid? carteiraId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(usuarioId))
+            throw new ArgumentException("Usuário autenticado não identificado.", nameof(usuarioId));
+        if (!carteiraId.HasValue)
+            return (await _carteiraRepository.ObterOuCriarPrincipalAsync(usuarioId)).Id;
+        if (carteiraId.Value == Guid.Empty
+            || await _carteiraRepository.ObterAsync(carteiraId.Value, usuarioId) is not { } wallet)
+            throw new KeyNotFoundException("Carteira não encontrada para este usuário.");
+        return wallet.Id;
+    }
+
+    private string ProtegerSegredo(string clientSecret, Guid carteiraId) =>
+        _dataProtectionProvider
+            .CreateProtector("YourMoney.Pluggy.ClientSecret.v2", carteiraId.ToString("N"))
+            .Protect(clientSecret);
+
+    private string DesprotegerSegredo(PluggyCredential credential, Guid carteiraId)
+    {
+        try
+        {
+            return _dataProtectionProvider
+                .CreateProtector("YourMoney.Pluggy.ClientSecret.v2", carteiraId.ToString("N"))
+                .Unprotect(credential.ProtectedClientSecret);
+        }
+        catch (System.Security.Cryptography.CryptographicException)
+        {
+            var principal = _dbContext.Carteiras.Local.FirstOrDefault(wallet => wallet.Id == carteiraId)?.Principal;
+            if (principal != true)
+            {
+                // The caller's query is normally AsNoTracking; check persisted ownership before permitting legacy v1.
+                principal = _dbContext.Carteiras.AsNoTracking()
+                    .Where(wallet => wallet.Id == carteiraId)
+                    .Select(wallet => (bool?)wallet.Principal)
+                    .SingleOrDefault();
+            }
+            if (principal != true)
+                throw;
+            return _credentialProtector.Unprotect(credential.ProtectedClientSecret);
+        }
+    }
+
+    private static string CriarChaveCacheApi(Guid carteiraId, string clientId) =>
+        $"{ApiKeyCacheKey}:{carteiraId:N}:{clientId.Trim()}";
 
     private PluggyCredentialSource ObterCredenciaisDoServidor() => new(
         LerConfiguracao("PLUGGY_CLIENT_ID", "Pluggy:ClientId"),
@@ -2228,9 +2341,13 @@ public sealed class PluggyService : IPluggyService
         return $"{normalized[..4]}…{normalized[^4..]}";
     }
 
-    private static void ValidarItemPessoal(string usuarioId, PluggyItem item)
+    private void ValidarItemPessoal(string usuarioId, Guid carteiraId, PluggyItem item)
     {
-        if (!string.Equals(item.ClientUserId, usuarioId, StringComparison.Ordinal))
+        var isWalletOwner = string.Equals(item.ClientUserId, carteiraId.ToString("D"), StringComparison.OrdinalIgnoreCase);
+        var isLegacyPrincipalItem = !isWalletOwner
+            && string.Equals(item.ClientUserId, usuarioId, StringComparison.Ordinal)
+            && _dbContext.Carteiras.Any(wallet => wallet.Id == carteiraId && wallet.UsuarioId == usuarioId && wallet.Principal);
+        if (!isWalletOwner && !isLegacyPrincipalItem)
             throw new PluggyIntegrationException("A Pluggy não conseguiu validar uma conexão pessoal armazenada.");
         if (item.Connector?.Id != MeuPluggyConnectorId || item.IsSandbox)
             throw new PluggyIntegrationException("A conexão cadastrada não é um item pessoal válido do Meu Pluggy.");

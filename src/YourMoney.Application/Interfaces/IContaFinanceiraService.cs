@@ -13,6 +13,8 @@ namespace YourMoney.Application.Interfaces
         Task RemoverContaFinanceiraAsync(Guid id);
         Task<ContaFinanceiraResponse> AtualizarAsync(Guid id, ContaFinanceiraRequest request);
         Task<List<ContaFinanceiraResponse>> ListarAsync();
+        Task<List<ContaFinanceiraResponse>> ListarAsync(Guid? carteiraId);
         Task<ContaFinanceiraResponse> GetByIdAsync(Guid id);
+        Task<ContaFinanceiraResponse> MoverAsync(Guid id, MoverContaFinanceiraRequest request);
     }
 }

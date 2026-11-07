@@ -26,13 +26,14 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("pluggy-configuration")]
-    public async Task<IActionResult> ObterConfiguracaoCredenciais(CancellationToken cancellationToken)
+    public async Task<IActionResult> ObterConfiguracaoCredenciais([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
         {
             return Ok(await _pluggyService.ObterConfiguracaoCredenciaisAsync(
                 _currentUserService.UserId,
-                cancellationToken));
+                cancellationToken,
+                carteiraId));
         }
         catch (PluggyAuthorizationException ex)
         {
@@ -47,6 +48,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPut("pluggy-configuration")]
     public async Task<IActionResult> SalvarConfiguracaoCredenciais(
         [FromBody] PluggyCredentialRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -54,7 +56,8 @@ public sealed class PluggyController : ControllerBase
             return Ok(await _pluggyService.SalvarConfiguracaoCredenciaisAsync(
                 _currentUserService.UserId,
                 request,
-                cancellationToken));
+                cancellationToken,
+                carteiraId));
         }
         catch (ArgumentException ex)
         {
@@ -92,6 +95,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("connect-token")]
     public async Task<IActionResult> CriarConnectToken(
         [FromBody] PluggyConnectTokenRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -99,7 +103,8 @@ public sealed class PluggyController : ControllerBase
             var response = await _pluggyService.CriarConnectTokenAsync(
                 _currentUserService.UserId,
                 request?.ConnectionId,
-                cancellationToken);
+                cancellationToken,
+                carteiraId);
             return Ok(response);
         }
         catch (PluggyConfigurationException ex)
@@ -134,6 +139,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("connections")]
     public async Task<IActionResult> RegistrarConexao(
         [FromBody] PluggyConnectionRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -142,7 +148,8 @@ public sealed class PluggyController : ControllerBase
                 _currentUserService.UserId,
                 request?.ItemId ?? string.Empty,
                 request?.ConnectionId,
-                cancellationToken);
+                cancellationToken,
+                carteiraId);
             return Ok(connection);
         }
         catch (ArgumentException ex)
@@ -176,11 +183,11 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("connections")]
-    public async Task<IActionResult> ListarConexoes(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListarConexoes([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
         {
-            return Ok(await _pluggyService.ListarConexoesAsync(_currentUserService.UserId, cancellationToken));
+            return Ok(await _pluggyService.ListarConexoesAsync(_currentUserService.UserId, cancellationToken, carteiraId));
         }
         catch (PluggyConfigurationException ex)
         {
@@ -201,11 +208,11 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("accounts")]
-    public async Task<IActionResult> ListarContas(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListarContas([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
         {
-            return Ok(await _pluggyService.ListarContasAsync(_currentUserService.UserId, cancellationToken));
+            return Ok(await _pluggyService.ListarContasAsync(_currentUserService.UserId, cancellationToken, carteiraId));
         }
         catch (PluggyConfigurationException ex)
         {
@@ -233,12 +240,13 @@ public sealed class PluggyController : ControllerBase
     public async Task<IActionResult> ObterAtivosInvestimento(
         [FromQuery] Guid? connectionId,
         [FromQuery] bool retryFailed,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
         {
             return Ok(await _pluggyService.ObterAtivosInvestimentoAsync(
-                _currentUserService.UserId, connectionId, retryFailed, cancellationToken));
+                _currentUserService.UserId, connectionId, retryFailed, cancellationToken, carteiraId));
         }
         catch (KeyNotFoundException ex)
         {
@@ -276,12 +284,13 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("investments/reconcile")]
     public async Task<IActionResult> ReconciliarAtivoInvestimento(
         [FromBody] PluggyInvestmentAssetReconciliationRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
         {
             return Ok(await _pluggyService.ReconciliarAtivoInvestimentoAsync(
-                _currentUserService.UserId, request, cancellationToken));
+                _currentUserService.UserId, request, cancellationToken, carteiraId));
         }
         catch (ArgumentException ex)
         {
@@ -306,11 +315,11 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("real-transactions/preview")]
-    public async Task<IActionResult> ListarTransacoesPreview(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListarTransacoesPreview([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
         {
-            return Ok(await _pluggyService.ListarTransacoesPreviewAsync(_currentUserService.UserId, cancellationToken));
+            return Ok(await _pluggyService.ListarTransacoesPreviewAsync(_currentUserService.UserId, cancellationToken, carteiraId));
         }
         catch (PluggyConfigurationException ex)
         {
@@ -340,6 +349,7 @@ public sealed class PluggyController : ControllerBase
         [FromQuery] string? accountId,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken,
         [FromQuery] string? targetType = null)
     {
@@ -355,7 +365,8 @@ public sealed class PluggyController : ControllerBase
                     To = to,
                     TargetType = targetType
                 },
-                cancellationToken));
+                cancellationToken,
+                carteiraId));
         }
         catch (ArgumentException ex)
         {
@@ -386,6 +397,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("real-transactions/import")]
     public async Task<IActionResult> ImportarTransacao(
         [FromBody] PluggyTransactionImportRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -393,7 +405,8 @@ public sealed class PluggyController : ControllerBase
             var result = await _pluggyService.ImportarTransacaoAsync(
                 _currentUserService.UserId,
                 request,
-                cancellationToken);
+                cancellationToken,
+                carteiraId);
             return StatusCode(StatusCodes.Status201Created, result);
         }
         catch (ArgumentException ex)
@@ -442,6 +455,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("real-transactions/reconcile")]
     public async Task<IActionResult> ReconciliarDespesa(
         [FromBody] PluggyExpenseReconciliationRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -449,7 +463,8 @@ public sealed class PluggyController : ControllerBase
             var result = await _pluggyService.ReconciliarDespesaAsync(
                 _currentUserService.UserId,
                 request,
-                cancellationToken);
+                cancellationToken,
+                carteiraId);
             return Ok(result);
         }
         catch (ArgumentException ex)
@@ -511,6 +526,7 @@ public sealed class PluggyController : ControllerBase
     [HttpPost("real-transactions/reconcile-investment")]
     public async Task<IActionResult> ReconciliarInvestimento(
         [FromBody] PluggyInvestmentReconciliationRequestDTO request,
+        [FromQuery] Guid? carteiraId,
         CancellationToken cancellationToken)
     {
         try
@@ -518,7 +534,8 @@ public sealed class PluggyController : ControllerBase
             var result = await _pluggyService.ReconciliarInvestimentoAsync(
                 _currentUserService.UserId,
                 request,
-                cancellationToken);
+                cancellationToken,
+                carteiraId);
             return Ok(result);
         }
         catch (ArgumentException ex)
@@ -582,11 +599,11 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpDelete("connections/{id:guid}")]
-    public async Task<IActionResult> RemoverConexao(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoverConexao(Guid id, [FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
         {
-            await _pluggyService.RemoverConexaoAsync(_currentUserService.UserId, id, cancellationToken);
+            await _pluggyService.RemoverConexaoAsync(_currentUserService.UserId, id, cancellationToken, carteiraId);
             return NoContent();
         }
         catch (KeyNotFoundException)

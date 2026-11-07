@@ -32,8 +32,16 @@ public sealed class UsuarioDemonstracaoService : IUsuarioDemonstracaoService
             return;
         }
 
-        var contaPrincipal = new ContaFinanceira("Nubank (exemplo)", usuarioId);
-        var carteira = new ContaFinanceira("Carteira (exemplo)", usuarioId);
+        var wallet = await _dbContext.Carteiras.SingleOrDefaultAsync(
+            item => item.UsuarioId == usuarioId && item.Principal,
+            cancellationToken);
+        if (wallet is null)
+        {
+            wallet = new Carteira(usuarioId, "Minha carteira", principal: true);
+            _dbContext.Carteiras.Add(wallet);
+        }
+        var contaPrincipal = new ContaFinanceira("Nubank (exemplo)", usuarioId, wallet.Id);
+        var carteira = new ContaFinanceira("Carteira (exemplo)", usuarioId, wallet.Id);
         _dbContext.ContaFinanceira.AddRange(contaPrincipal, carteira);
 
         // A interface existente usa o valor 1 para a árvore de categorias de despesas.

@@ -40,7 +40,10 @@ namespace YourMoney.Api.Configuration
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            // Render terminates TLS and redirects HTTP at its edge.
+            if (!app.ApplicationServices.GetRequiredService<IConfiguration>()
+                    .GetValue<bool>("TLS_TERMINATED_BY_PROXY"))
+                app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();
             var objectiveImagesPath = Path.Combine(env.ContentRootPath, "App_Data", "ObjectiveImages");

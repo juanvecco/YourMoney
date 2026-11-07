@@ -102,7 +102,10 @@ namespace YourMoney.Tests.Api
 
             var source = File.ReadAllText(apiConfigPath);
 
-            TestAssert.True(source.Contains("AllowAnyOrigin", StringComparison.Ordinal), "API should accept local development frontend origins");
+            TestAssert.True(source.Contains("WithOrigins", StringComparison.Ordinal)
+                && source.Contains("http://localhost:4200", StringComparison.Ordinal)
+                && source.Contains("http://127.0.0.1:4200", StringComparison.Ordinal),
+                "API should accept only configured local development frontend origins");
             TestAssert.True(source.Contains("AllowAnyHeader", StringComparison.Ordinal), "API should accept Authorization headers from local development origins");
             TestAssert.True(source.Contains("AllowAnyMethod", StringComparison.Ordinal), "API should accept protected REST methods from local development origins");
             TestAssert.True(!source.Contains("AllowCredentials", StringComparison.Ordinal), "API should not enable credential sharing for bearer-token local origins");

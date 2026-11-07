@@ -19,6 +19,7 @@ public static class PluggyControllerTests
 
         var result = await controller.CriarConnectToken(
             new PluggyConnectTokenRequestDTO(),
+            null,
             CancellationToken.None);
 
         var ok = result as OkObjectResult;
@@ -37,11 +38,35 @@ public static class PluggyControllerTests
 
         var result = await controller.CriarConnectToken(
             new PluggyConnectTokenRequestDTO(),
+            null,
             CancellationToken.None);
 
         var unavailable = result as ObjectResult;
         TestAssert.True(unavailable != null, "Missing Pluggy settings should return an object result");
         TestAssert.Equal(503, unavailable!.StatusCode, "Missing Pluggy settings should return 503");
+    }
+
+    public static async Task CredentialAndConnectionEndpointsForwardWalletAndMapLimitConflict()
+    {
+        var walletId = Guid.NewGuid();
+        var pluggy = new FakePluggyService();
+        var controller = new PluggyController(pluggy, new FakeCurrentUserService("user-123"));
+
+        var status = await controller.ObterConfiguracaoCredenciais(walletId, CancellationToken.None);
+        TestAssert.True(status is OkObjectResult, "Credential status should be returned for the selected wallet");
+        TestAssert.Equal(walletId, pluggy.RequestedWalletId, "Credential status must use the selected wallet");
+
+        var saved = await controller.SalvarConfiguracaoCredenciais(
+            new PluggyCredentialRequestDTO { ClientId = "client", ClientSecret = "secret" },
+            walletId,
+            CancellationToken.None);
+        TestAssert.True(saved is OkObjectResult, "Wallet credentials should return the safe status contract");
+        TestAssert.Equal(walletId, pluggy.RequestedWalletId, "Credential save must use the selected wallet");
+
+        pluggy.Failure = new PluggyConnectionLimitException();
+        var connect = await controller.CriarConnectToken(new PluggyConnectTokenRequestDTO(), walletId, CancellationToken.None);
+        TestAssert.True(connect is ConflictObjectResult, "The per-wallet connection limit should map to HTTP 409");
+        TestAssert.Equal(walletId, pluggy.RequestedWalletId, "Connect token must use the selected wallet");
     }
 
     public static Task EndpointRequiresAuthorization()
@@ -81,6 +106,7 @@ public static class PluggyControllerTests
             null,
             null,
             null,
+            null,
             CancellationToken.None);
 
         var ok = result as OkObjectResult;
@@ -107,6 +133,7 @@ public static class PluggyControllerTests
 
         var result = await controller.ReconciliarDespesa(
             new PluggyExpenseReconciliationRequestDTO { TransactionId = "source-1", Action = "link" },
+            null,
             CancellationToken.None);
 
         var ok = result as OkObjectResult;
@@ -133,6 +160,7 @@ public static class PluggyControllerTests
 
         var result = await controller.ReconciliarInvestimento(
             new PluggyInvestmentReconciliationRequestDTO { TransactionId = "source-investment-1", Action = "link" },
+            null,
             CancellationToken.None);
 
         var ok = result as OkObjectResult;
@@ -155,6 +183,7 @@ public static class PluggyControllerTests
 
         var result = await controller.ReconciliarInvestimento(
             new PluggyInvestmentReconciliationRequestDTO { TransactionId = "source-investment-1", Action = "replace" },
+            null,
             CancellationToken.None);
 
         var conflict = result as ConflictObjectResult;
@@ -167,6 +196,7 @@ public static class PluggyControllerTests
     {
         public string ClientUserId { get; private set; } = string.Empty;
         public string ReconciliationUserId { get; private set; } = string.Empty;
+        public Guid? RequestedWalletId { get; private set; }
         public Exception? Failure { get; set; }
         public Exception? ReconciliationFailure { get; set; }
         public PluggyOverviewDTO Overview { get; set; } = new();
@@ -175,39 +205,50 @@ public static class PluggyControllerTests
 
         public Task<PluggyCredentialStatusDTO> ObterConfiguracaoCredenciaisAsync(
             string usuarioId,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(new PluggyCredentialStatusDTO());
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null)
+        {
+            RequestedWalletId = carteiraId;
+            return Task.FromResult(new PluggyCredentialStatusDTO());
+        }
 
         public Task<PluggyCredentialStatusDTO> SalvarConfiguracaoCredenciaisAsync(
             string usuarioId,
             PluggyCredentialRequestDTO request,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(new PluggyCredentialStatusDTO { Configured = true, Source = "database", CanSave = true });
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null)
+        {
+            RequestedWalletId = carteiraId;
+            return Task.FromResult(new PluggyCredentialStatusDTO { Configured = true, Source = "database", CanSave = true });
+        }
 
         public Task<PluggyConnectionDTO> RegistrarConexaoAsync(
             string usuarioId,
             string itemId,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             throw new NotSupportedException();
 
         public Task<IReadOnlyList<PluggyConnectionDTO>> ListarConexoesAsync(
             string usuarioId,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             Task.FromResult<IReadOnlyList<PluggyConnectionDTO>>(Array.Empty<PluggyConnectionDTO>());
 
         public Task<IReadOnlyList<PluggyAccountDTO>> ListarContasAsync(
             string usuarioId,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             Task.FromResult<IReadOnlyList<PluggyAccountDTO>>(Array.Empty<PluggyAccountDTO>());
 
         public Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
             string usuarioId, Guid? connectionId = null, bool retryFailed = false,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default, Guid? carteiraId = null) =>
             Task.FromResult(new PluggyInvestmentAssetsOverviewDTO());
 
         public Task<PluggyInvestmentAssetReconciliationResultDTO> ReconciliarAtivoInvestimentoAsync(
             string usuarioId, PluggyInvestmentAssetReconciliationRequestDTO request,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, Guid? carteiraId = null)
         {
             ReconciliationUserId = usuarioId;
             if (ReconciliationFailure != null) throw ReconciliationFailure;
@@ -216,25 +257,29 @@ public static class PluggyControllerTests
 
         public Task<IReadOnlyList<PluggyTransactionPreviewDTO>> ListarTransacoesPreviewAsync(
             string usuarioId,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             Task.FromResult<IReadOnlyList<PluggyTransactionPreviewDTO>>(Array.Empty<PluggyTransactionPreviewDTO>());
 
         public Task<PluggyOverviewDTO> ObterVisaoGeralAsync(
             string usuarioId,
             PluggyOverviewFilterDTO filtro,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             Task.FromResult(Overview);
 
         public Task<PluggyTransactionImportResultDTO> ImportarTransacaoAsync(
             string usuarioId,
             PluggyTransactionImportRequestDTO request,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) =>
             Task.FromResult(new PluggyTransactionImportResultDTO());
 
         public Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(
             string usuarioId,
             PluggyExpenseReconciliationRequestDTO request,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null)
         {
             ReconciliationUserId = usuarioId;
             if (ReconciliationFailure != null) throw ReconciliationFailure;
@@ -244,7 +289,8 @@ public static class PluggyControllerTests
         public Task<PluggyInvestmentReconciliationResultDTO> ReconciliarInvestimentoAsync(
             string usuarioId,
             PluggyInvestmentReconciliationRequestDTO request,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null)
         {
             ReconciliationUserId = usuarioId;
             if (ReconciliationFailure != null) throw ReconciliationFailure;
@@ -254,14 +300,17 @@ public static class PluggyControllerTests
         public Task RemoverConexaoAsync(
             string usuarioId,
             Guid connectionId,
-            CancellationToken cancellationToken = default) => Task.CompletedTask;
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null) => Task.CompletedTask;
 
         public Task<PluggyConnectTokenResponseDTO> CriarConnectTokenAsync(
             string clientUserId,
             Guid? itemId,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            Guid? carteiraId = null)
         {
             ClientUserId = clientUserId;
+            RequestedWalletId = carteiraId;
             if (Failure != null) throw Failure;
             return Task.FromResult(new PluggyConnectTokenResponseDTO
             {

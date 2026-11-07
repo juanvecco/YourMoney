@@ -9,13 +9,8 @@ namespace YourMoney.Api.Configuration
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            var connectionString =
-                Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-                ?? configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string não encontrada");
-
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                DatabaseProviderConfig.Configure(options, configuration, "DefaultConnection"));
 
             return services;
         }

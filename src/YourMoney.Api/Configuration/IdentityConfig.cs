@@ -13,7 +13,7 @@ namespace YourMoney.Api.Configuration
         public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("IdentityConnection")));
+                DatabaseProviderConfig.Configure(options, configuration, "IdentityConnection"));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddErrorDescriber<IdentityMensagensPortugues>()

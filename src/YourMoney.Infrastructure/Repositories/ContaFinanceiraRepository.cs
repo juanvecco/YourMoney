@@ -56,6 +56,13 @@ namespace YourMoney.Infrastructure.Repositories
                 .OrderBy(c => c.Descricao)
                 .ToListAsync();
         }
+        public async Task<List<ContaFinanceira>> ListarAsync(string usuarioId, Guid carteiraId)
+        {
+            return await _context.ContaFinanceira
+                .Where(account => account.UsuarioId == usuarioId && account.CarteiraId == carteiraId)
+                .OrderBy(account => account.Descricao)
+                .ToListAsync();
+        }
         public async Task<bool> ExisteAsync(Guid id)
         {
             return await _context.ContaFinanceira.AnyAsync(c => c.Id == id);

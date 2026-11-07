@@ -36,10 +36,18 @@ public sealed class ContaFinanceiraController : ControllerBase
         {
             return Problema(StatusCodes.Status400BadRequest, "Conta inválida.", ex.Message);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Problema(StatusCodes.Status404NotFound, "Carteira não encontrada.", ex.Message);
+        }
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar() => Ok(await _service.ListarAsync());
+    public async Task<IActionResult> Listar([FromQuery] Guid? carteiraId)
+    {
+        try { return Ok(await _service.ListarAsync(carteiraId)); }
+        catch (InvalidOperationException ex) { return Problema(StatusCodes.Status404NotFound, "Carteira não encontrada.", ex.Message); }
+    }
 
     [HttpGet("instituicoes")]
     public IActionResult ListarInstituicoes() => Ok(InstituicoesSugeridas);
@@ -71,6 +79,20 @@ public sealed class ContaFinanceiraController : ControllerBase
         catch (InvalidOperationException)
         {
             return Problema(StatusCodes.Status404NotFound, "Conta não encontrada.");
+        }
+    }
+
+    [HttpPut("{id:guid}/carteira")]
+    public async Task<IActionResult> Mover(Guid id, [FromBody] MoverContaFinanceiraRequest request)
+    {
+        try { return Ok(await _service.MoverAsync(id, request)); }
+        catch (ContaFinanceiraMoverConfirmacaoException ex)
+        {
+            return Problema(StatusCodes.Status409Conflict, "Confirmação necessária.", ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Problema(StatusCodes.Status404NotFound, "Conta ou carteira não encontrada.", ex.Message);
         }
     }
 

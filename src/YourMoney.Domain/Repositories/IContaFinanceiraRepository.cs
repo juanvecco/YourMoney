@@ -12,6 +12,7 @@ namespace YourMoney.Domain.Repositories
         Task RemoverAsync(Guid id, string usuarioId);
         Task<List<ContaFinanceira>> ListarAsync();
         Task<List<ContaFinanceira>> ListarAsync(string usuarioId);
+        Task<List<ContaFinanceira>> ListarAsync(string usuarioId, Guid carteiraId);
         Task<bool> ExisteAsync(Guid id);
         Task<bool> ExisteAsync(Guid id, string usuarioId);
         Task<bool> TemVinculosAsync(Guid id, string usuarioId);

@@ -17,6 +17,7 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<Meta> Metas { get; set; }
         public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<ContaFinanceira> ContaFinanceira { get; set; }
+        public DbSet<Carteira> Carteiras { get; set; }
         public DbSet<DespesaRecorrente> DespesasRecorrentes { get; set; }
         public DbSet<DespesaRecorrenteOcorrencia> DespesasRecorrentesOcorrencias { get; set; }
         public DbSet<ReceitaRecorrente> ReceitasRecorrentes { get; set; }
@@ -40,6 +41,7 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new MetaConfiguration());
             modelBuilder.ApplyConfiguration(new MetaMensalConfiguration());
             modelBuilder.ApplyConfiguration(new ContaFinanceiraConfiguration());
+            modelBuilder.ApplyConfiguration(new CarteiraConfiguration());
             modelBuilder.ApplyConfiguration(new DespesaRecorrenteConfiguration());
             modelBuilder.ApplyConfiguration(new DespesaRecorrenteOcorrenciaConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaRecorrenteConfiguration());
@@ -73,6 +75,52 @@ namespace YourMoney.Infrastructure.Persistence
                 modelBuilder.Entity(entityType.ClrType)
                     .HasIndex(nameof(BaseEntity.UsuarioId));
             }
+
+            if (Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+            {
+                // Keep SQL Server migrations intact; adapt only the PostgreSQL model.
+                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+                {
+                    foreach (var constraint in entityType.GetCheckConstraints().ToList())
+                    {
+                        modelBuilder.Entity(entityType.ClrType).ToTable(
+                            entityType.GetTableName(),
+                            table => table.HasCheckConstraint(
+                                constraint.Name,
+                                PostgreSqlExpression(constraint.Sql)));
+                    }
+
+                    foreach (var index in entityType.GetIndexes())
+                    {
+                        if (index.GetFilter() is { } filter)
+                            index.SetFilter(PostgreSqlExpression(filter));
+                    }
+
+                    foreach (var property in entityType.GetProperties())
+                    {
+                        if ((property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                            && property.GetColumnType() == null)
+                        {
+                            property.SetColumnType("timestamp without time zone");
+                        }
+                    }
+                }
+
+                modelBuilder.Entity<GrupoObjetivoInvestimento>()
+                    .Property(group => group.Versao)
+                    .HasColumnType("bytea")
+                    .HasDefaultValueSql("decode(replace(gen_random_uuid()::text, '-', ''), 'hex')");
+            }
+        }
+
+        private static string PostgreSqlExpression(string sql)
+        {
+            var translated = System.Text.RegularExpressions.Regex.Replace(
+                sql,
+                @"\[([^\]]+)\]",
+                match => $"\"{match.Groups[1].Value.Replace("\"", "\"\"")}\"");
+            return translated.Replace("N'", "'")
+                .Replace("\"Principal\" = 1", "\"Principal\" = TRUE");
         }
     }
 }

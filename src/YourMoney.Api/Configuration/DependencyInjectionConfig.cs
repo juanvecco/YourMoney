@@ -36,6 +36,7 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IContaFinanceiraService, ContaFinanceiraService>();
             services.AddScoped<IContaFinanceiraRepository, ContaFinanceiraRepository>();
+            services.AddScoped<ICarteiraRepository, CarteiraRepository>();
             services.AddScoped<IMovimentacaoFinanceiraService, MovimentacaoFinanceiraService>();
             services.AddScoped<IOpenFinanceService, OpenFinanceService>();
             services.AddMemoryCache();
@@ -45,6 +46,7 @@ namespace YourMoney.Api.Configuration
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
             services.AddScoped<IPluggyService, PluggyService>();
+            services.AddScoped<ICarteiraService, CarteiraService>();
             services.AddScoped<IPasswordResetDeliveryService, SmtpPasswordResetDeliveryService>();
             return services;
         }

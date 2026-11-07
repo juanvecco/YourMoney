@@ -2,6 +2,7 @@ namespace YourMoney.Domain.Entities;
 
 public sealed class PluggyCredential : BaseEntity
 {
+    public Guid CarteiraId { get; private set; }
     public string ClientId { get; private set; } = string.Empty;
     public string ProtectedClientSecret { get; private set; } = string.Empty;
     public DateTimeOffset UpdatedAt { get; private set; }
@@ -25,5 +26,12 @@ public sealed class PluggyCredential : BaseEntity
         ClientId = clientId.Trim();
         ProtectedClientSecret = protectedClientSecret;
         UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void AssociarCarteira(Guid carteiraId)
+    {
+        if (carteiraId == Guid.Empty)
+            throw new ArgumentException("A carteira é obrigatória.", nameof(carteiraId));
+        CarteiraId = carteiraId;
     }
 }

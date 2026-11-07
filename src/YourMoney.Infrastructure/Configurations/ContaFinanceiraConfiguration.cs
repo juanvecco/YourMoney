@@ -22,6 +22,13 @@ namespace YourMoney.Infrastructure.Configurations
                 .HasMaxLength(255);
 
             builder.Property(d => d.DataCriacao).IsRequired();
+            builder.Property(d => d.CarteiraId).IsRequired();
+            builder.HasOne<Carteira>()
+                .WithMany()
+                .HasForeignKey(d => new { d.CarteiraId, d.UsuarioId })
+                .HasPrincipalKey(wallet => new { wallet.Id, wallet.UsuarioId })
+                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(d => new { d.UsuarioId, d.CarteiraId });
         }
     }
 }

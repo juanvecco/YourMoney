@@ -83,6 +83,48 @@ namespace YourMoney.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.Carteira", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("AtualizadaEm")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CriadaEm")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("NomeNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<bool>("Principal")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique()
+                        .HasFilter("[Principal] = 1");
+
+                    b.HasIndex("UsuarioId", "NomeNormalizado")
+                        .IsUnique();
+
+                    b.ToTable("tbCarteira", (string)null);
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
@@ -120,6 +162,9 @@ namespace YourMoney.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CarteiraId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime2");
 
@@ -136,6 +181,10 @@ namespace YourMoney.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("CarteiraId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "CarteiraId");
 
                     b.ToTable("tbContaFinanceira", (string)null);
                 });
@@ -619,6 +668,9 @@ namespace YourMoney.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CarteiraId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("ConnectedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -648,9 +700,10 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.Property<string>("InvestmentAssetsSyncStatus")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(24)
-                        .HasDefaultValue("never")
-                        .HasColumnType("nvarchar(24)");
+                        .HasColumnType("nvarchar(24)")
+                        .HasDefaultValue("never");
 
                     b.Property<bool>("IsSandbox")
                         .HasColumnType("bit");
@@ -680,6 +733,10 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
+                    b.HasIndex("CarteiraId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "CarteiraId");
+
                     b.ToTable("tbPluggyConnection", (string)null);
                 });
 
@@ -687,6 +744,9 @@ namespace YourMoney.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CarteiraId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ClientId")
@@ -709,8 +769,12 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId")
+                    b.HasIndex("CarteiraId")
                         .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("CarteiraId", "UsuarioId");
 
                     b.ToTable("tbPluggyCredential", (string)null);
                 });
@@ -1125,6 +1189,16 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Navigation("CategoriaPai");
                 });
 
+            modelBuilder.Entity("YourMoney.Domain.Entities.ContaFinanceira", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("YourMoney.Domain.Entities.Despesa", b =>
                 {
                     b.HasOne("YourMoney.Domain.Entities.Categoria", "Categoria")
@@ -1245,6 +1319,26 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("GrupoObjetivoInvestimento");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyConnection", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyCredential", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.PluggyInvestmentAssetLink", b =>

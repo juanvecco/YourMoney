@@ -23,6 +23,13 @@ public sealed class PluggyConnectionConfiguration : IEntityTypeConfiguration<Plu
         builder.Property(connection => connection.InvestmentAssetsSyncMessage).HasMaxLength(500);
         builder.Property(connection => connection.HasInvestmentProduct);
         builder.Property(connection => connection.ConnectedAt).IsRequired();
+        builder.Property(connection => connection.CarteiraId).IsRequired();
+        builder.HasOne<Carteira>()
+            .WithMany()
+            .HasForeignKey(connection => new { connection.CarteiraId, connection.UsuarioId })
+            .HasPrincipalKey(wallet => new { wallet.Id, wallet.UsuarioId })
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(connection => new { connection.UsuarioId, connection.CarteiraId });
         builder.HasIndex(connection => connection.PluggyItemId).IsUnique();
     }
 }

@@ -13,3 +13,9 @@ coverage/
 *.tmp
 Dockerfile*
 .dockerignore
+.env
+.env.*
+**/*.pfx
+**/*.pem
+**/*.key
+**/*.bak

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace YourMoney.Infrastructure.Persistence
@@ -9,9 +9,16 @@ namespace YourMoney.Infrastructure.Persistence
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-                ?? "Server=localhost,1433;Database=dbYourMoney;User Id=sa;Password=Top@2024!;Encrypt=False;TrustServerCertificate=True;";
+                ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING é obrigatória para operações de design-time.");
 
-            optionsBuilder.UseSqlServer(connectionString);
+            var provider = Environment.GetEnvironmentVariable("DATABASE_PROVIDER") ?? "SqlServer";
+            if (provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase)
+                || provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
+                optionsBuilder.UseNpgsql(connectionString);
+            else if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+                optionsBuilder.UseSqlServer(connectionString);
+            else
+                throw new InvalidOperationException("DATABASE_PROVIDER inválido.");
 
             return new AppDbContext(optionsBuilder.Options);
         }

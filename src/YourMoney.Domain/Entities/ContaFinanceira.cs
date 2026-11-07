@@ -2,6 +2,7 @@
 {
     public class ContaFinanceira : BaseEntity
     {
+        public Guid CarteiraId { get; private set; }
         public string Descricao { get; private set; }          // Ex: Nubank, Dinheiro
         //public string Tipo { get; private set; }          // Ex: Cartão de Crédito, Carteira, Pix
         //public bool Ativa { get; private set; }
@@ -25,11 +26,24 @@
             DefinirUsuario(usuarioId);
         }
 
+        public ContaFinanceira(string descricao, string usuarioId, Guid carteiraId)
+            : this(descricao, usuarioId)
+        {
+            AssociarCarteira(carteiraId);
+        }
+
         public void AtualizarDescricao(string descricao)
         {
             if (string.IsNullOrWhiteSpace(descricao))
                 throw new ArgumentException("Descrição é obrigatória", nameof(descricao));
             Descricao = descricao.Trim();
+        }
+
+        public void AssociarCarteira(Guid carteiraId)
+        {
+            if (carteiraId == Guid.Empty)
+                throw new ArgumentException("A carteira é obrigatória.", nameof(carteiraId));
+            CarteiraId = carteiraId;
         }
 
         //public void AtualizarTipo(string tipo)

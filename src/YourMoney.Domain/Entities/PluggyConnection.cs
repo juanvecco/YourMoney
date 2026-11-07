@@ -2,6 +2,7 @@ namespace YourMoney.Domain.Entities;
 
 public sealed class PluggyConnection : BaseEntity
 {
+    public Guid CarteiraId { get; private set; }
     public string PluggyItemId { get; private set; } = string.Empty;
     public string InstitutionName { get; private set; } = string.Empty;
     public int ConnectorId { get; private set; }
@@ -55,6 +56,13 @@ public sealed class PluggyConnection : BaseEntity
         IsSandbox = isSandbox;
         LastUpdatedAt = lastUpdatedAt;
         ConsentExpiresAt = consentExpiresAt;
+    }
+
+    public void AssociarCarteira(Guid carteiraId)
+    {
+        if (carteiraId == Guid.Empty)
+            throw new ArgumentException("A carteira é obrigatória.", nameof(carteiraId));
+        CarteiraId = carteiraId;
     }
 
     public void RegistrarTentativaAtivos(DateTimeOffset attemptedAt)

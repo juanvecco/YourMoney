@@ -264,6 +264,7 @@ namespace YourMoney.Tests.Fixtures
         public Task RemoverAsync(Guid id, string usuarioId) => throw new NotImplementedException();
         public Task<List<ContaFinanceira>> ListarAsync() => throw new NotImplementedException();
         public Task<List<ContaFinanceira>> ListarAsync(string usuarioId) => throw new NotImplementedException();
+        public Task<List<ContaFinanceira>> ListarAsync(string usuarioId, Guid carteiraId) => Task.FromResult(new List<ContaFinanceira>());
         public Task<bool> ExisteAsync(Guid id) => Task.FromResult(Existe(id));
         public Task<bool> ExisteAsync(Guid id, string usuarioId) => Task.FromResult(Existe(id) && !string.IsNullOrWhiteSpace(usuarioId));
         public Task<bool> TemVinculosAsync(Guid id, string usuarioId) => Task.FromResult(false);
