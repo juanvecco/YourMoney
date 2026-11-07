@@ -26,6 +26,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("pluggy-configuration")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ObterConfiguracaoCredenciais([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
@@ -46,6 +47,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPut("pluggy-configuration")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> SalvarConfiguracaoCredenciais(
         [FromBody] PluggyCredentialRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -93,6 +95,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("connect-token")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> CriarConnectToken(
         [FromBody] PluggyConnectTokenRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -137,6 +140,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("connections")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> RegistrarConexao(
         [FromBody] PluggyConnectionRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -183,6 +187,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("connections")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ListarConexoes([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
@@ -208,6 +213,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("accounts")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ListarContas([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
@@ -237,6 +243,8 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("investments/preview")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.AtivosOpenFinance)]
     public async Task<IActionResult> ObterAtivosInvestimento(
         [FromQuery] Guid? connectionId,
         [FromQuery] bool retryFailed,
@@ -282,6 +290,8 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("investments/reconcile")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.AtivosOpenFinance)]
     public async Task<IActionResult> ReconciliarAtivoInvestimento(
         [FromBody] PluggyInvestmentAssetReconciliationRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -315,6 +325,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("real-transactions/preview")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ListarTransacoesPreview([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)
     {
         try
@@ -344,6 +355,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpGet("real-transactions/overview")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ObterVisaoGeralTransacoes(
         [FromQuery] Guid? connectionId,
         [FromQuery] string? accountId,
@@ -395,6 +407,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("real-transactions/import")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ImportarTransacao(
         [FromBody] PluggyTransactionImportRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -453,6 +466,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("real-transactions/reconcile")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ReconciliarDespesa(
         [FromBody] PluggyExpenseReconciliationRequestDTO request,
         [FromQuery] Guid? carteiraId,
@@ -524,6 +538,7 @@ public sealed class PluggyController : ControllerBase
     }
 
     [HttpPost("real-transactions/reconcile-investment")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ReconciliarInvestimento(
         [FromBody] PluggyInvestmentReconciliationRequestDTO request,
         [FromQuery] Guid? carteiraId,

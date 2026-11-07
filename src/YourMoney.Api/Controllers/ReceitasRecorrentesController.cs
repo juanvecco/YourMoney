@@ -2,19 +2,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
     [Authorize]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.ReceitasRecorrentes)]
     [Route("api/[controller]")]
     public class ReceitasRecorrentesController : ControllerBase
     {
         private readonly IReceitaRecorrenteService _service;
+        private readonly IRegraNegocioService _regras;
 
-        public ReceitasRecorrentesController(IReceitaRecorrenteService service)
+        public ReceitasRecorrentesController(IReceitaRecorrenteService service, IRegraNegocioService regras = null)
         {
             _service = service;
+            _regras = regras;
         }
 
         [HttpPost]
@@ -22,6 +27,8 @@ namespace YourMoney.Api.Controllers
         {
             try
             {
+                var bloqueio = await VerificarMarcacoesAsync(request, null);
+                if (bloqueio is not null) return bloqueio;
                 var response = await _service.CriarAsync(request);
                 return CreatedAtAction(nameof(ObterPorId), new { id = response.Id }, response);
             }
@@ -47,7 +54,13 @@ namespace YourMoney.Api.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Atualizar(Guid id, [FromBody] ReceitaRecorrenteRequest request)
         {
-            try { return Ok(await _service.AtualizarAsync(id, request)); }
+            try
+            {
+                var atual = await _service.ObterPorIdAsync(id);
+                var bloqueio = await VerificarMarcacoesAsync(request, atual);
+                if (bloqueio is not null) return bloqueio;
+                return Ok(await _service.AtualizarAsync(id, request));
+            }
             catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
             catch (Exception) { return ErroInterno(); }
@@ -114,6 +127,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpGet("reserva-emergencia")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.ReservaEmergencia)]
         public async Task<IActionResult> ObterReservaEmergencia()
         {
             try { return Ok(await _service.ObterProjecaoReservaAsync()); }
@@ -121,6 +135,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpGet("elegiveis-para-investimento")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.RendaSalarial)]
         public async Task<IActionResult> ListarElegiveisParaInvestimento()
         {
             try { return Ok(await _service.ListarElegiveisParaInvestimentoAsync()); }
@@ -133,6 +148,18 @@ namespace YourMoney.Api.Controllers
             {
                 message = "Não foi possível processar receitas recorrentes."
             });
+        }
+
+        private async Task<IActionResult> VerificarMarcacoesAsync(ReceitaRecorrenteRequest request, ReceitaRecorrenteResponse atual)
+        {
+            if (_regras is null || request is null) return null;
+            if (request.EhSalario && atual?.EhSalario != true
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.RendaSalarial))
+                return StatusCode(403, new { message = "Investimentos por renda salarial estão desativados." });
+            if (request.ConsideraReservaEmergencia && atual?.ConsideraReservaEmergencia != true
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.ReservaEmergencia))
+                return StatusCode(403, new { message = "Reserva de emergência está desativada." });
+            return null;
         }
     }
 }

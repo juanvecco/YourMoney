@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
     [Authorize]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.MetasMensais)]
     [Route("api/[controller]")]
     public class MetasController : ControllerBase
     {
@@ -21,6 +23,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpGet("{id:guid}/aportes")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.ObjetivosInvestimento)]
         public async Task<IActionResult> ListarAportes(Guid id)
         {
             try { return Ok(await ObterAporteService().ListarAsync(id)); }
@@ -29,6 +32,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPost("{id:guid}/aportes")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.ObjetivosInvestimento)]
         public async Task<IActionResult> ConfirmarAporte(Guid id, [FromBody] ConfirmarAporteObjetivoRequest request)
         {
             try
@@ -43,6 +47,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPut("{metaId:guid}/aportes/{aporteId:guid}/alocacao")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.ObjetivosInvestimento)]
         public async Task<IActionResult> AlocarAporte(Guid metaId, Guid aporteId, [FromBody] AlocarAporteObjetivoRequest request)
         {
             try { return Ok(await ObterAporteService().AlocarAsync(metaId, aporteId, request)); }

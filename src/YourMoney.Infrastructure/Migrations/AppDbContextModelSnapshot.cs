@@ -17,7 +17,7 @@ namespace YourMoney.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1149,6 +1149,38 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasDatabaseName("UX_ReceitaRecorrenteOcorrencia_Usuario_Recorrencia_Mes");
 
                     b.ToTable("tbReceitaRecorrenteOcorrencia", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.RegraNegocioUsuario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("AtualizadaEm")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "Codigo")
+                        .IsUnique();
+
+                    b.ToTable("tbRegraNegocioUsuario", (string)null);
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.AporteObjetivoInvestimento", b =>

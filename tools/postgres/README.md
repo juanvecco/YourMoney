@@ -41,6 +41,11 @@ PostgreSQL. The imported schema is the pilot baseline; future schema changes
 need a separately reviewed PostgreSQL migration set before application. Never
 run `database update` or `EnsureCreated` against this imported database.
 
+For the business rules feature, review `add-business-rules.sql` and apply it to
+the PostgreSQL pilot before deploying the API that reads `tbRegraNegocioUsuario`.
+The script only creates the new choices table and indexes; it does not edit
+financial transactions or existing accounts.
+
 Pluggy credentials encrypted with the Windows DPAPI key ring cannot be decrypted
 by a new Linux key ring. Re-enter them through the existing authenticated UI
 after publication. The original notebook and its key ring must remain available

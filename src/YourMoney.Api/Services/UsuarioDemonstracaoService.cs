@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using YourMoney.Application.Services;
 using YourMoney.Domain.Entities;
 using YourMoney.Domain.Enums;
 using YourMoney.Infrastructure.Persistence;
@@ -40,10 +41,6 @@ public sealed class UsuarioDemonstracaoService : IUsuarioDemonstracaoService
             wallet = new Carteira(usuarioId, "Minha carteira", principal: true);
             _dbContext.Carteiras.Add(wallet);
         }
-        var contaPrincipal = new ContaFinanceira("Nubank (exemplo)", usuarioId, wallet.Id);
-        var carteira = new ContaFinanceira("Carteira (exemplo)", usuarioId, wallet.Id);
-        _dbContext.ContaFinanceira.AddRange(contaPrincipal, carteira);
-
         // A interface existente usa o valor 1 para a árvore de categorias de despesas.
         // O backend aceita os valores 1 e 2 ao validar e consultar essas categorias.
         const TipoTransacao tipoCategoriaDespesa = TipoTransacao.Receita;
@@ -70,16 +67,8 @@ public sealed class UsuarioDemonstracaoService : IUsuarioDemonstracaoService
             energia, aluguel, mercado, restaurante, combustivel, passeios, streaming);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var hoje = DateTime.Today;
-        var primeiroDiaDoMes = new DateTime(hoje.Year, hoje.Month, 1);
-        _dbContext.Receitas.Add(new Receita(
-            "Exemplo: salário mensal", 5000m, hoje, primeiroDiaDoMes, usuarioId,
-            NaturezaReceita.RendaDisponivel, idContaFinanceira: contaPrincipal.Id));
-
-        _dbContext.Despesas.AddRange(
-            new Despesa("Exemplo: compras do mercado", 420.50m, hoje, contaPrincipal.Id, mercado.Id, usuarioId),
-            new Despesa("Exemplo: conta de energia", 135m, hoje, contaPrincipal.Id, energia.Id, usuarioId),
-            new Despesa("Exemplo: assinatura de streaming", 39.90m, hoje, carteira.Id, streaming.Id, usuarioId));
+        _dbContext.RegrasNegocioUsuario.AddRange(
+            RegraNegocioCatalogo.Todas.Select(rule => new RegraNegocioUsuario(usuarioId, rule.Codigo, ativa: false)));
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

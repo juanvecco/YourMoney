@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.14" />
     <ProjectReference Include="..\..\src\YourMoney.Api\YourMoney.Api.csproj" />
     <ProjectReference Include="..\..\src\YourMoney.Application\YourMoney.Application.csproj" />
     <ProjectReference Include="..\..\src\YourMoney.Domain\YourMoney.Domain.csproj" />

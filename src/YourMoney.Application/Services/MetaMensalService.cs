@@ -21,6 +21,7 @@ namespace YourMoney.Application.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IGrupoObjetivoInvestimentoRepository? _grupoRepository;
         private readonly IAporteObjetivoInvestimentoRepository? _aporteRepository;
+        private readonly IRegraNegocioService? _regras;
 
         public MetaMensalService(
             IMetaMensalRepository metaMensalRepository,
@@ -28,7 +29,8 @@ namespace YourMoney.Application.Services
             IDespesaRepository despesaRepository,
             ICurrentUserService currentUserService,
             IGrupoObjetivoInvestimentoRepository? grupoRepository = null,
-            IAporteObjetivoInvestimentoRepository? aporteRepository = null)
+            IAporteObjetivoInvestimentoRepository? aporteRepository = null,
+            IRegraNegocioService? regras = null)
         {
             _metaMensalRepository = metaMensalRepository;
             _receitaRepository = receitaRepository;
@@ -36,6 +38,7 @@ namespace YourMoney.Application.Services
             _currentUserService = currentUserService;
             _grupoRepository = grupoRepository;
             _aporteRepository = aporteRepository;
+            _regras = regras;
         }
 
         public async Task<MetasMensaisResumoDTO> ObterResumoAsync(int? mes = null, int? ano = null)
@@ -49,6 +52,9 @@ namespace YourMoney.Application.Services
             ValidarCriacao(request);
             var referencia = NormalizarReferencia(request.MesReferencia);
             var usuarioId = _currentUserService.UserId;
+            if (request.GrupoObjetivoInvestimentoId.HasValue && _regras is not null
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.ObjetivosInvestimento))
+                throw new ConflitoMetaMensalException("Objetivos de investimento estão desativados.");
             var tipoDefinicao = ParseTipoDefinicao(request.TipoDefinicao);
             var receitaTotal = await ObterReceitaElegivelAsync(referencia, usuarioId);
             var grupo = await ValidarGrupoAsync(request.GrupoObjetivoInvestimentoId, usuarioId);
@@ -86,6 +92,12 @@ namespace YourMoney.Application.Services
             var meta = await _metaMensalRepository.GetByIdAsync(id, usuarioId);
             if (meta == null)
                 throw new InvalidOperationException("Meta não encontrada.");
+
+            if (request.GrupoObjetivoInvestimentoId.HasValue
+                && meta.GrupoObjetivoInvestimentoId != request.GrupoObjetivoInvestimentoId
+                && _regras is not null
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.ObjetivosInvestimento))
+                throw new ConflitoMetaMensalException("Objetivos de investimento estão desativados.");
 
             var grupo = await ValidarGrupoAsync(request.GrupoObjetivoInvestimentoId, usuarioId);
             if (meta.GrupoObjetivoInvestimentoId != request.GrupoObjetivoInvestimentoId

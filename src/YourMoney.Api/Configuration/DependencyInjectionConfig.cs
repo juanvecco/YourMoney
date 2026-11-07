@@ -13,6 +13,8 @@ namespace YourMoney.Api.Configuration
         {
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IRegraNegocioService, RegraNegocioService>();
+            services.AddScoped<IRegraNegocioUsuarioRepository, RegraNegocioUsuarioRepository>();
             services.AddScoped<IUsuarioDemonstracaoService, UsuarioDemonstracaoService>();
             services.AddScoped<IDespesaService, DespesaService>();
             services.AddScoped<IDespesaRepository, DespesaRepository>();

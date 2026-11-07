@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Entities;
+using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
 {
@@ -55,6 +57,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPost("parcelamento")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.Parcelamento)]
         [Authorize]
         public async Task<IActionResult> CriarParcelamento([FromBody] ParcelamentoDespesaRequest request)
         {

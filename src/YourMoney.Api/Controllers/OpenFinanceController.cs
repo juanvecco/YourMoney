@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.Interfaces;
+using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
 {
     [ApiController]
     [Authorize]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     [Route("api/[controller]")]
     public class OpenFinanceController : ControllerBase
     {

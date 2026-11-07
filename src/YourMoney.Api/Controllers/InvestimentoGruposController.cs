@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Repositories;
+using YourMoney.Application.Services;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers;
 
 [ApiController]
 [Authorize]
+[RegraNegocioAtiva(RegraNegocioCatalogo.ObjetivosInvestimento)]
 [Route("api/InvestimentoGrupos")]
 public sealed class InvestimentoGruposController : ControllerBase
 {

@@ -12,10 +12,12 @@ namespace YourMoney.Api.Controllers
     public class InvestimentoController : ControllerBase
     {
         private readonly IInvestimentoService _investimentoService;
+        private readonly IRegraNegocioService _regras;
 
-        public InvestimentoController(IInvestimentoService investimentoService)
+        public InvestimentoController(IInvestimentoService investimentoService, IRegraNegocioService regras = null)
         {
             _investimentoService = investimentoService;
+            _regras = regras;
         }
 
         [HttpPost]
@@ -23,6 +25,8 @@ namespace YourMoney.Api.Controllers
         {
             try
             {
+                var bloqueio = await VerificarAssociacoesAsync(request, null);
+                if (bloqueio is not null) return bloqueio;
                 var response = await _investimentoService.CriarInvestimentoAsync(request);
                 if (!response.CriadoAgora)
                     return Ok(response);
@@ -114,6 +118,9 @@ namespace YourMoney.Api.Controllers
         {
             try
             {
+                var atual = await _investimentoService.ObterPorIdAsync(id);
+                var bloqueio = await VerificarAssociacoesAsync(request, atual);
+                if (bloqueio is not null) return bloqueio;
                 return Ok(await _investimentoService.AtualizarInvestimentoAsync(id, request));
             }
             catch (ArgumentException ex)
@@ -144,6 +151,20 @@ namespace YourMoney.Api.Controllers
         }
 
         private static ErroApiResponse Erro(string code, string message) => new() { Code = code, Message = message };
+
+        private async Task<IActionResult> VerificarAssociacoesAsync(InvestimentoWriteRequest request, InvestimentoResponse atual)
+        {
+            if (_regras is null || request is null) return null;
+            if (request.ReceitaRecorrenteId.HasValue
+                && request.ReceitaRecorrenteId != atual?.ReceitaRecorrenteId
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.RendaSalarial))
+                return StatusCode(403, new { message = "Investimentos por renda salarial estão desativados." });
+            if (request.GrupoObjetivoId.HasValue
+                && request.GrupoObjetivoId != atual?.GrupoObjetivoId
+                && !await _regras.EstaAtivaAsync(RegraNegocioCatalogo.ObjetivosInvestimento))
+                return StatusCode(403, new { message = "Objetivos de investimento estão desativados." });
+            return null;
+        }
 
         private ObjectResult FalhaInesperada()
         {
