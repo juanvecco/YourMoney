@@ -23,8 +23,9 @@ backup available throughout the pilot.
    versioned configuration before making the repository public. Existing JWTs
    will expire after rotation.
 2. Generate a password protected PFX certificate with a private key for ASP.NET
-   Data Protection. Keep the PFX and password outside Git. Upload the PFX as a
-   Render secret file, for example `/etc/secrets/yourmoney-dp.pfx`. Preserve it
+   Data Protection. Keep the PFX and password outside Git. Enter the Base64
+   encoding of the PFX as a secret environment variable on Render, or upload
+   the binary PFX through a supported secret-file mechanism. Preserve it
    and its password across deployments; losing either makes newly protected
    values unreadable. Back it up in a private password manager or vault.
 3. Configure Render environment variables:
@@ -34,7 +35,7 @@ backup available throughout the pilot.
    | `DATABASE_PROVIDER` | `PostgreSQL` |
    | `DATABASE_CONNECTION_STRING` | Neon connection string with TLS |
    | `JwtSettings__Secret` | New random signing secret |
-   | `DATA_PROTECTION_CERTIFICATE_PATH` | Render PFX secret file path |
+   | `DATA_PROTECTION_CERTIFICATE_BASE64` | Base64 encoding of the PFX certificate |
    | `DATA_PROTECTION_CERTIFICATE_PASSWORD` | PFX password |
    | `ASPNETCORE_ENVIRONMENT` | `Production` |
    | `TLS_TERMINATED_BY_PROXY` | `true` (Render redirects HTTP to HTTPS) |

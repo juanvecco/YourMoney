@@ -17,9 +17,14 @@ var dataProtection = builder.Services
 
 if (!builder.Environment.IsDevelopment())
 {
-    var certificate = X509CertificateLoader.LoadPkcs12FromFile(
-        builder.Configuration["DATA_PROTECTION_CERTIFICATE_PATH"]!,
-        builder.Configuration["DATA_PROTECTION_CERTIFICATE_PASSWORD"]);
+    var certificateBase64 = builder.Configuration["DATA_PROTECTION_CERTIFICATE_BASE64"];
+    var certificate = string.IsNullOrWhiteSpace(certificateBase64)
+        ? X509CertificateLoader.LoadPkcs12FromFile(
+            builder.Configuration["DATA_PROTECTION_CERTIFICATE_PATH"]!,
+            builder.Configuration["DATA_PROTECTION_CERTIFICATE_PASSWORD"])
+        : X509CertificateLoader.LoadPkcs12(
+            Convert.FromBase64String(certificateBase64),
+            builder.Configuration["DATA_PROTECTION_CERTIFICATE_PASSWORD"]);
     dataProtection.PersistKeysToDbContext<ApplicationDbContext>()
         .ProtectKeysWithCertificate(certificate);
 }

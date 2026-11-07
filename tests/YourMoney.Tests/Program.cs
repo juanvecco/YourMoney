@@ -7,6 +7,7 @@ var tests = new (string Name, Func<Task> Run)[]
 {
     ("production config rejects weak secret without leaking values", DeploymentConfigTests.ProductionRejectsMissingSecretsWithoutEchoingValues),
     ("production config accepts external settings and persistent key context", DeploymentConfigTests.ProductionAcceptsExternalConfigAndPersistsKeysInDbContext),
+    ("production config accepts Base64 certificate", DeploymentConfigTests.ProductionAcceptsBase64CertificateConfig),
     ("wallet trims name and stores default state", CarteiraTests.TrimsNameAndStoresPrincipalState),
     ("wallet rejects empty and overlong names", CarteiraTests.RejectsEmptyAndOverlongNames),
     ("wallet rename updates normalized name", CarteiraTests.RenameUpdatesNormalizedName),
@@ -163,7 +164,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("startup script opens hosted dashboard as primary frontend url", StaticApplicationHostingTests.StartupScriptOpensHostedDashboardAsPrimaryFrontendUrl),
     ("startup script prints same frontend url it opens", StaticApplicationHostingTests.StartupScriptPrintsTheSameFrontendUrlItOpens),
     ("startup script publishes angular build before opening hosted frontend", StaticApplicationHostingTests.StartupScriptPublishesAngularBuildBeforeOpeningHostedFrontend),
-    ("startup script stops project API before build and migration", StaticApplicationHostingTests.StartupScriptStopsOnlyProjectApiBeforeBuildAndMigration),
+    ("startup script stops project API before build", StaticApplicationHostingTests.StartupScriptStopsOnlyProjectApiBeforeBuild),
     ("startup cmd delegates to powershell script", StaticApplicationHostingTests.StartupCmdDelegatesToPowerShellScript),
     ("cors allows local development origins without credential sharing", StaticApplicationHostingTests.CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing),
     ("api serves angular spa with route fallback", StaticApplicationHostingTests.ApiConfigurationServesAngularSpaWithRouteFallback),

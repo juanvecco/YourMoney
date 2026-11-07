@@ -24,8 +24,10 @@ public static class DeploymentConfig
             throw new InvalidOperationException("JwtSettings__Secret deve ter pelo menos 32 caracteres.");
 
         var certificatePath = configuration["DATA_PROTECTION_CERTIFICATE_PATH"];
-        if (string.IsNullOrWhiteSpace(certificatePath) || !File.Exists(certificatePath))
-            throw new InvalidOperationException("DATA_PROTECTION_CERTIFICATE_PATH deve apontar para um certificado existente.");
+        var certificateBase64 = configuration["DATA_PROTECTION_CERTIFICATE_BASE64"];
+        if (string.IsNullOrWhiteSpace(certificateBase64)
+            && (string.IsNullOrWhiteSpace(certificatePath) || !File.Exists(certificatePath)))
+            throw new InvalidOperationException("Configure DATA_PROTECTION_CERTIFICATE_BASE64 ou DATA_PROTECTION_CERTIFICATE_PATH com um certificado existente.");
 
         if (string.IsNullOrWhiteSpace(configuration["DATA_PROTECTION_CERTIFICATE_PASSWORD"]))
             throw new InvalidOperationException("DATA_PROTECTION_CERTIFICATE_PASSWORD é obrigatória.");
