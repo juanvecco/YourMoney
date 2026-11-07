@@ -8,24 +8,26 @@ namespace YourMoney.Tests.Application;
 
 public static class RegraNegocioServiceTests
 {
-    public static async Task KeepsLegacyDefaultsAndSeparatesRecurrences()
+    public static async Task DefaultsAllAccountsToDisabledAndSeparatesRecurrences()
     {
         var repo = new FakeRepository();
-        var service = new RegraNegocioService(repo, new FakeCurrentUser("legacy"));
+        var service = new RegraNegocioService(repo, new FakeCurrentUser("existing-user"));
         var initial = await service.ListarAsync();
-        TestAssert.True(initial.All(rule => rule.Ativa && rule.Efetiva), "Legacy choices must remain on");
+        TestAssert.True(initial.All(rule => !rule.Ativa && !rule.Efetiva), "Missing choices must be off for existing users");
 
-        await service.AtualizarAsync(RegraNegocioCatalogo.DespesasRecorrentes, false);
-        TestAssert.True(!await service.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Expense recurrence is off");
-        TestAssert.True(await service.EstaAtivaAsync(RegraNegocioCatalogo.ReceitasRecorrentes), "Revenue recurrence stays on");
+        await service.AtualizarAsync(RegraNegocioCatalogo.DespesasRecorrentes, true);
+        TestAssert.True(await service.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Expense recurrence can be enabled");
+        TestAssert.True(!await service.EstaAtivaAsync(RegraNegocioCatalogo.ReceitasRecorrentes), "Revenue recurrence stays off");
 
         var other = new RegraNegocioService(repo, new FakeCurrentUser("other"));
-        TestAssert.True(await other.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Other users are isolated");
+        TestAssert.True(!await other.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Other users stay off");
     }
 
     public static async Task DependencyDisablesEffectWithoutErasingPreference()
     {
         var service = new RegraNegocioService(new FakeRepository(), new FakeCurrentUser("owner"));
+        await service.AtualizarAsync(RegraNegocioCatalogo.ReservaEmergencia, true);
+        await service.AtualizarAsync(RegraNegocioCatalogo.ReceitasRecorrentes, true);
         await service.AtualizarAsync(RegraNegocioCatalogo.ReceitasRecorrentes, false);
         var reserve = (await service.ListarAsync()).Single(rule => rule.Codigo == RegraNegocioCatalogo.ReservaEmergencia);
         TestAssert.True(reserve.Ativa, "Child preference must remain selected");

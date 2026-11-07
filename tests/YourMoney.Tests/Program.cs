@@ -10,7 +10,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("disabled business rule blocks action", RegraNegocioAtivaFilterTests.RejectsDisabledActionBeforeMutation),
     ("enabled business rule allows action", RegraNegocioAtivaFilterTests.AllowsEnabledAction),
     ("business rule endpoint authorizes and validates updates", RegrasNegocioControllerTests.RequiresAuthenticationAndValidatesUpdates),
-    ("business rules keep legacy defaults and separate recurrences", RegraNegocioServiceTests.KeepsLegacyDefaultsAndSeparatesRecurrences),
+    ("business rules default off and separate recurrences", RegraNegocioServiceTests.DefaultsAllAccountsToDisabledAndSeparatesRecurrences),
     ("business rule dependencies preserve child preference", RegraNegocioServiceTests.DependencyDisablesEffectWithoutErasingPreference),
     ("business rules reject unknown keys", RegraNegocioServiceTests.RejectsUnknownRules),
     ("production config rejects weak secret without leaking values", DeploymentConfigTests.ProductionRejectsMissingSecretsWithoutEchoingValues),
