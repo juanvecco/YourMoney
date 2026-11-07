@@ -8,12 +8,15 @@ namespace YourMoney.Tests.Application;
 
 public static class RegraNegocioServiceTests
 {
-    public static async Task DefaultsAllAccountsToDisabledAndSeparatesRecurrences()
+    public static async Task DefaultsOpenFinanceOnAndSeparatesRecurrences()
     {
         var repo = new FakeRepository();
         var service = new RegraNegocioService(repo, new FakeCurrentUser("existing-user"));
         var initial = await service.ListarAsync();
-        TestAssert.True(initial.All(rule => !rule.Ativa && !rule.Efetiva), "Missing choices must be off for existing users");
+        TestAssert.True(initial.Single(rule => rule.Codigo == RegraNegocioCatalogo.OpenFinance).Efetiva,
+            "Open Finance must be on when an existing user has no saved choice");
+        TestAssert.True(initial.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance)
+            .All(rule => !rule.Ativa && !rule.Efetiva), "Other missing choices must remain off");
 
         await service.AtualizarAsync(RegraNegocioCatalogo.DespesasRecorrentes, true);
         TestAssert.True(await service.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Expense recurrence can be enabled");
@@ -21,6 +24,11 @@ public static class RegraNegocioServiceTests
 
         var other = new RegraNegocioService(repo, new FakeCurrentUser("other"));
         TestAssert.True(!await other.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Other users stay off");
+        TestAssert.True(await other.EstaAtivaAsync(RegraNegocioCatalogo.OpenFinance), "Other users start with Open Finance on");
+
+        await service.AtualizarAsync(RegraNegocioCatalogo.OpenFinance, false);
+        TestAssert.True(!await service.EstaAtivaAsync(RegraNegocioCatalogo.OpenFinance), "A user can turn Open Finance off later");
+        TestAssert.True(await other.EstaAtivaAsync(RegraNegocioCatalogo.OpenFinance), "One user's choice must not affect another");
     }
 
     public static async Task DependencyDisablesEffectWithoutErasingPreference()

@@ -5,7 +5,8 @@ public sealed record RegraNegocioDefinicao(
     string Nome,
     string Descricao,
     string Grupo,
-    IReadOnlyList<string> Dependencias);
+    IReadOnlyList<string> Dependencias,
+    bool AtivaPorPadrao = false);
 
 public static class RegraNegocioCatalogo
 {
@@ -21,7 +22,7 @@ public static class RegraNegocioCatalogo
 
     public static IReadOnlyList<RegraNegocioDefinicao> Todas { get; } = new[]
     {
-        new RegraNegocioDefinicao(OpenFinance, "Open Finance", "Exibe conexões, saldos e prévias bancárias. Importações continuam a exigir confirmação.", "Open Finance", Array.Empty<string>()),
+        new RegraNegocioDefinicao(OpenFinance, "Open Finance", "Exibe conexões, saldos e prévias bancárias. Importações continuam a exigir confirmação.", "Open Finance", Array.Empty<string>(), AtivaPorPadrao: true),
         new RegraNegocioDefinicao(DespesasRecorrentes, "Recorrência de despesas", "Mostra despesas recorrentes e sugestões mensais para confirmação.", "Despesas", Array.Empty<string>()),
         new RegraNegocioDefinicao(ReceitasRecorrentes, "Recorrência de receitas", "Mostra receitas recorrentes e sugestões mensais para confirmação.", "Receitas", Array.Empty<string>()),
         new RegraNegocioDefinicao(Parcelamento, "Parcelamento de despesas", "Permite distribuir uma nova despesa em parcelas.", "Despesas", Array.Empty<string>()),

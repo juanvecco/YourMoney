@@ -40,6 +40,8 @@ public interface IPluggyService
         CancellationToken cancellationToken = default,
         Guid? carteiraId = null);
 
+    Task<bool> PossuiConexoesAsync(string usuarioId, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<PluggyAccountDTO>> ListarContasAsync(
         string usuarioId,
         CancellationToken cancellationToken = default,

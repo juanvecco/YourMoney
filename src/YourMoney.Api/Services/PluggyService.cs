@@ -472,6 +472,10 @@ public sealed class PluggyService : IPluggyService
         return MapearConexao(connection);
     }
 
+    public Task<bool> PossuiConexoesAsync(string usuarioId, CancellationToken cancellationToken = default) =>
+        _dbContext.PluggyConnections.AsNoTracking()
+            .AnyAsync(connection => connection.UsuarioId == usuarioId, cancellationToken);
+
     public async Task<IReadOnlyList<PluggyConnectionDTO>> ListarConexoesAsync(
         string usuarioId,
         CancellationToken cancellationToken = default,

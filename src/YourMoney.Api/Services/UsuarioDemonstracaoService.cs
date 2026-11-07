@@ -68,7 +68,7 @@ public sealed class UsuarioDemonstracaoService : IUsuarioDemonstracaoService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         _dbContext.RegrasNegocioUsuario.AddRange(
-            RegraNegocioCatalogo.Todas.Select(rule => new RegraNegocioUsuario(usuarioId, rule.Codigo, ativa: false)));
+            RegraNegocioCatalogo.Todas.Select(rule => new RegraNegocioUsuario(usuarioId, rule.Codigo, rule.AtivaPorPadrao)));
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

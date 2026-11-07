@@ -12,7 +12,7 @@ namespace YourMoney.Tests.Api;
 
 public static class UsuarioInicialSemExemplosTests
 {
-    public static async Task CreatesEmptyFinancesAndDisabledAdvancedRules()
+    public static async Task CreatesEmptyFinancesWithOpenFinanceEnabled()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase($"new-user-{Guid.NewGuid():N}")
@@ -29,8 +29,10 @@ public static class UsuarioInicialSemExemplosTests
         TestAssert.Equal(0, await db.Despesas.CountAsync(), "No fictitious expense may appear");
         TestAssert.Equal(RegraNegocioCatalogo.Todas.Count, await db.RegrasNegocioUsuario.CountAsync(),
             "Every advanced rule needs a new-account choice");
-        TestAssert.True(await db.RegrasNegocioUsuario.AllAsync(rule => !rule.Ativa),
-            "Advanced functions start off for new accounts");
+        TestAssert.True(await db.RegrasNegocioUsuario.SingleAsync(rule => rule.Codigo == RegraNegocioCatalogo.OpenFinance) is { Ativa: true },
+            "Open Finance starts on for new accounts");
+        TestAssert.True(await db.RegrasNegocioUsuario.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance)
+            .AllAsync(rule => !rule.Ativa), "Other advanced functions start off for new accounts");
 
         await service.CriarDadosIniciaisAsync("new-user");
         TestAssert.Equal(RegraNegocioCatalogo.Todas.Count, await db.RegrasNegocioUsuario.CountAsync(),

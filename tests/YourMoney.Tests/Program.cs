@@ -5,14 +5,15 @@ using YourMoney.Tests.Infrastructure;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
-    ("new users start with empty finances and disabled advanced rules", UsuarioInicialSemExemplosTests.CreatesEmptyFinancesAndDisabledAdvancedRules),
+    ("new users start with empty finances and Open Finance enabled", UsuarioInicialSemExemplosTests.CreatesEmptyFinancesWithOpenFinanceEnabled),
     ("changing business rules preserves historical financial rows", UsuarioInicialSemExemplosTests.RuleChangesPreserveExistingFinancialRows),
     ("disabled business rule blocks action", RegraNegocioAtivaFilterTests.RejectsDisabledActionBeforeMutation),
     ("enabled business rule allows action", RegraNegocioAtivaFilterTests.AllowsEnabledAction),
     ("business rule endpoint authorizes and validates updates", RegrasNegocioControllerTests.RequiresAuthenticationAndValidatesUpdates),
-    ("business rules default off and separate recurrences", RegraNegocioServiceTests.DefaultsAllAccountsToDisabledAndSeparatesRecurrences),
+    ("business rules default Open Finance on and separate recurrences", RegraNegocioServiceTests.DefaultsOpenFinanceOnAndSeparatesRecurrences),
     ("business rule dependencies preserve child preference", RegraNegocioServiceTests.DependencyDisablesEffectWithoutErasingPreference),
     ("business rules reject unknown keys", RegraNegocioServiceTests.RejectsUnknownRules),
+    ("Open Finance connection status uses authenticated owner", PluggyControllerTests.ConnectionStatusUsesAuthenticatedOwner),
     ("production config rejects weak secret without leaking values", DeploymentConfigTests.ProductionRejectsMissingSecretsWithoutEchoingValues),
     ("production config accepts external settings and persistent key context", DeploymentConfigTests.ProductionAcceptsExternalConfigAndPersistsKeysInDbContext),
     ("production config accepts Base64 certificate", DeploymentConfigTests.ProductionAcceptsBase64CertificateConfig),

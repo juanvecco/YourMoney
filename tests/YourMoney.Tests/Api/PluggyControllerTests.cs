@@ -10,6 +10,21 @@ namespace YourMoney.Tests.Api;
 
 public static class PluggyControllerTests
 {
+    public static async Task ConnectionStatusUsesAuthenticatedOwner()
+    {
+        var pluggy = new FakePluggyService { HasConnections = true };
+        var controller = new PluggyController(pluggy, new FakeCurrentUserService("owner-123"));
+
+        var result = await controller.ObterStatusConexao(CancellationToken.None);
+
+        TestAssert.True(result is OkObjectResult, "Connection status should return 200 OK");
+        TestAssert.Equal("owner-123", pluggy.ConnectionStatusUserId,
+            "Connection status must use the authenticated user");
+        TestAssert.True(System.Text.Json.JsonSerializer.Serialize(((OkObjectResult)result).Value)
+            .Contains("\"hasConnections\":true", StringComparison.Ordinal),
+            "Connection status should expose only the boolean result");
+    }
+
     public static async Task ConnectTokenUsesAuthenticatedUser()
     {
         var pluggy = new FakePluggyService();
@@ -194,6 +209,8 @@ public static class PluggyControllerTests
 
     private sealed class FakePluggyService : IPluggyService
     {
+        public bool HasConnections { get; set; }
+        public string ConnectionStatusUserId { get; private set; } = string.Empty;
         public string ClientUserId { get; private set; } = string.Empty;
         public string ReconciliationUserId { get; private set; } = string.Empty;
         public Guid? RequestedWalletId { get; private set; }
@@ -234,6 +251,12 @@ public static class PluggyControllerTests
             CancellationToken cancellationToken = default,
             Guid? carteiraId = null) =>
             Task.FromResult<IReadOnlyList<PluggyConnectionDTO>>(Array.Empty<PluggyConnectionDTO>());
+
+        public Task<bool> PossuiConexoesAsync(string usuarioId, CancellationToken cancellationToken = default)
+        {
+            ConnectionStatusUserId = usuarioId;
+            return Task.FromResult(HasConnections);
+        }
 
         public Task<IReadOnlyList<PluggyAccountDTO>> ListarContasAsync(
             string usuarioId,

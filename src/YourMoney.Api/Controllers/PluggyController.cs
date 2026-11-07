@@ -186,6 +186,15 @@ public sealed class PluggyController : ControllerBase
         }
     }
 
+    [HttpGet("connection-status")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
+    public async Task<IActionResult> ObterStatusConexao(CancellationToken cancellationToken)
+    {
+        var hasConnections = await _pluggyService.PossuiConexoesAsync(
+            _currentUserService.UserId, cancellationToken);
+        return Ok(new { hasConnections });
+    }
+
     [HttpGet("connections")]
     [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     public async Task<IActionResult> ListarConexoes([FromQuery] Guid? carteiraId, CancellationToken cancellationToken)

@@ -26,7 +26,7 @@ public sealed class RegraNegocioService : IRegraNegocioService
             if (efetivas.TryGetValue(codigo, out var cached)) return cached;
             var definicao = RegraNegocioCatalogo.Obter(codigo)
                 ?? throw new KeyNotFoundException("Regra de negócio não encontrada.");
-            var escolha = escolhas.TryGetValue(codigo, out var ativa) && ativa;
+            var escolha = escolhas.TryGetValue(codigo, out var ativa) ? ativa : definicao.AtivaPorPadrao;
             var result = escolha && definicao.Dependencias.All(Efetiva);
             efetivas[codigo] = result;
             return result;
@@ -36,7 +36,7 @@ public sealed class RegraNegocioService : IRegraNegocioService
             .OrderBy(item => item.Grupo).ThenBy(item => item.Nome)
             .Select(item => new RegraNegocioDto(
                 item.Codigo, item.Nome, item.Descricao, item.Grupo,
-                escolhas.TryGetValue(item.Codigo, out var ativa) && ativa,
+                escolhas.TryGetValue(item.Codigo, out var ativa) ? ativa : item.AtivaPorPadrao,
                 Efetiva(item.Codigo), item.Dependencias))
             .ToArray();
     }
