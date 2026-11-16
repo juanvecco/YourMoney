@@ -330,6 +330,7 @@ namespace YourMoney.Tests.Fixtures
         }
         public Task<Despesa> GetDespesaByIdAsync(Guid id) => throw new NotImplementedException();
         public Task<DespesaDTO> ObterDtoPorIdAsync(Guid id) => Task.FromResult(QueryResponse.FirstOrDefault(d => d.Id == id) ?? new DespesaDTO { Id = id });
+        public Task<DespesaDTO> DefinirConferenciaAsync(Guid id, bool conferida) => Task.FromResult(new DespesaDTO { Id = id, Conferida = conferida });
         public Task RemoverDespesaAsync(Guid id) => Task.CompletedTask;
         public Task AtualizarAsync(Despesa despesa) => Task.CompletedTask;
         public Task<List<Despesa>> ListarAsync() => Task.FromResult(new List<Despesa>());

@@ -18,6 +18,7 @@ namespace YourMoney.Domain.Entities
         public int? NumeroParcela { get; private set; }
         public int? TotalParcelas { get; private set; }
         public decimal? ValorTotalParcelamento { get; private set; }
+        public bool Conferida { get; private set; }
         //public bool Pago { get; private set; }
         //public DateTime? DataPagamento { get; private set; }
         //public TipoRecorrencia TipoRecorrencia { get; private set; }
@@ -48,6 +49,7 @@ namespace YourMoney.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(descricao))
                 throw new ArgumentException("Descrição é obrigatória");
+            if (Descricao != null && Descricao != descricao.Trim()) Conferida = false;
             Descricao = descricao.Trim();
         }
 
@@ -55,25 +57,31 @@ namespace YourMoney.Domain.Entities
         {
             if (valor <= 0)
                 throw new ArgumentException("Valor deve ser maior que zero.", nameof(valor));
+            if (Valor != 0 && Valor != valor) Conferida = false;
             Valor = valor;
         }
 
         public void AtualizarData(DateTime data)
         {
+            if (Data != default && Data != data) Conferida = false;
             Data = data;
         }
         public void AtualizarContaFinanceira(Guid idContaFinanceira)
         {
             if (idContaFinanceira == Guid.Empty)
                 throw new ArgumentException("Conta Financeira é obrigatória.");
+            if (IdContaFinanceira != Guid.Empty && IdContaFinanceira != idContaFinanceira) Conferida = false;
             IdContaFinanceira = idContaFinanceira;
         }
         public void AtualizarCategoria(Guid idCategoria)
         {
             if (idCategoria == Guid.Empty)
                 throw new ArgumentException("Categoria é obrigatório.");
+            if (IdCategoria != Guid.Empty && IdCategoria != idCategoria) Conferida = false;
             IdCategoria = idCategoria;
         }
+
+        public void DefinirConferida(bool conferida) => Conferida = conferida;
 
         public void AplicarParcelamento(Guid parcelamentoId, int numeroParcela, int totalParcelas, decimal valorTotalParcelamento)
         {

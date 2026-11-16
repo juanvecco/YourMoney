@@ -9,6 +9,7 @@ namespace YourMoney.Infrastructure.Persistence
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Despesa> Despesas { get; set; }
+        public DbSet<FaturaConta> FaturasConta { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Receita> Receitas { get; set; }
         public DbSet<Investimento> Investimentos { get; set; }
@@ -34,6 +35,7 @@ namespace YourMoney.Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new DespesaConfiguration());
+            modelBuilder.ApplyConfiguration(new FaturaContaConfiguration());
             modelBuilder.ApplyConfiguration(new CategoriaConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaConfiguration());
             modelBuilder.ApplyConfiguration(new InvestimentoConfiguration());

@@ -195,6 +195,11 @@ namespace YourMoney.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("Conferida")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
@@ -370,6 +375,38 @@ namespace YourMoney.Infrastructure.Migrations
                         .HasDatabaseName("IX_DespesaRecorrenteOcorrencia_Usuario_Mes_Status");
 
                     b.ToTable("tbDespesaRecorrenteOcorrencia", (string)null);
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.FaturaConta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdContaFinanceira")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("MesReferencia")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("ValorInformado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdContaFinanceira");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "IdContaFinanceira", "MesReferencia")
+                        .IsUnique();
+
+                    b.ToTable("tbFaturaConta", (string)null);
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>
@@ -1301,6 +1338,17 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Navigation("DespesaConfirmada");
 
                     b.Navigation("DespesaRecorrente");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.FaturaConta", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.ContaFinanceira", "ContaFinanceira")
+                        .WithMany()
+                        .HasForeignKey("IdContaFinanceira")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContaFinanceira");
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.GrupoObjetivoInvestimento", b =>

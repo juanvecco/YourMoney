@@ -17,6 +17,8 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IRegraNegocioUsuarioRepository, RegraNegocioUsuarioRepository>();
             services.AddScoped<IUsuarioDemonstracaoService, UsuarioDemonstracaoService>();
             services.AddScoped<IDespesaService, DespesaService>();
+            services.AddScoped<IConciliacaoFaturaService, ConciliacaoFaturaService>();
+            services.AddScoped<IFaturaContaRepository, FaturaContaRepository>();
             services.AddScoped<IDespesaRepository, DespesaRepository>();
             services.AddScoped<IDespesaRecorrenteService, DespesaRecorrenteService>();
             services.AddScoped<IDespesaRecorrenteRepository, DespesaRecorrenteRepository>();

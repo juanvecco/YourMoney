@@ -46,6 +46,10 @@ the PostgreSQL pilot before deploying the API that reads `tbRegraNegocioUsuario`
 The script only creates the new choices table and indexes; it does not edit
 financial transactions or existing accounts.
 
+For bill reconciliation, review `add-bill-reconciliation.sql` and apply it before
+deploying the API that reads `tbFaturaConta` and `tbDespesa.Conferida`. It adds
+only the bill table and the review flag with a false default for existing expenses.
+
 Pluggy credentials encrypted with the Windows DPAPI key ring cannot be decrypted
 by a new Linux key ring. Re-enter them through the existing authenticated UI
 after publication. The original notebook and its key ring must remain available

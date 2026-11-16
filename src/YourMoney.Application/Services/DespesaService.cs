@@ -78,6 +78,14 @@ namespace YourMoney.Application.Services
             return MapearDespesa(despesa, valorReembolsado);
         }
 
+        public async Task<DespesaDTO> DefinirConferenciaAsync(Guid id, bool conferida)
+        {
+            var despesa = await GetDespesaByIdAsync(id);
+            despesa.DefinirConferida(conferida);
+            await _despesaRepository.AtualizarAsync(despesa);
+            return await ObterDtoPorIdAsync(id);
+        }
+
         public async Task RemoverDespesaAsync(Guid id)
         {
             var despesa = await _despesaRepository.GetByIdAsync(id, _currentUserService.UserId);
@@ -415,7 +423,8 @@ namespace YourMoney.Application.Services
                 ValorTotalParcelamento = despesa.ValorTotalParcelamento,
                 ValorReembolsado = valorReembolsadoArredondado,
                 ValorLiquido = valorLiquido,
-                PossuiReembolso = valorReembolsadoArredondado > 0
+                PossuiReembolso = valorReembolsadoArredondado > 0,
+                Conferida = despesa.Conferida
             };
         }
 

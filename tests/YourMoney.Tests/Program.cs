@@ -5,6 +5,11 @@ using YourMoney.Tests.Infrastructure;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("bill reconciliation keeps cents and all owner expenses", ConciliacaoFaturaServiceTests.PreservesCentsAndAllExpensesWithoutPagination),
+    ("bill reconciliation distinguishes absent and zero bill", ConciliacaoFaturaServiceTests.DistinguishesMissingBillFromZeroAndScopesOwner),
+    ("bill endpoint authorizes and maps errors", ConciliacaoFaturaControllerTests.AuthorizesAndMapsValidationAndOwnership),
+    ("expense review resets after edit", YourMoney.Tests.Domain.DespesaConferenciaTests.ChangesAndResetsOnEdit),
+    ("expense review uses authenticated owner", YourMoney.Tests.Application.DespesaConferenciaTests.UsesAuthenticatedOwner),
     ("new users start with empty finances and Open Finance enabled", UsuarioInicialSemExemplosTests.CreatesEmptyFinancesWithOpenFinanceEnabled),
     ("changing business rules preserves historical financial rows", UsuarioInicialSemExemplosTests.RuleChangesPreserveExistingFinancialRows),
     ("disabled business rule blocks action", RegraNegocioAtivaFilterTests.RejectsDisabledActionBeforeMutation),

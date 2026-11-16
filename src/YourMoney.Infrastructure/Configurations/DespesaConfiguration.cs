@@ -20,6 +20,7 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(d => d.Valor);
 
             builder.Property(d => d.Data).IsRequired();
+            builder.Property(d => d.Conferida).IsRequired().HasDefaultValue(false);
 
             builder.Property(d => d.ParcelamentoId);
 

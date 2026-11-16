@@ -150,6 +150,20 @@ namespace YourMoney.Api.Controllers
             return NoContent();
         }
 
+        public sealed class DefinirConferenciaRequest
+        {
+            public bool? Conferida { get; set; }
+        }
+
+        [HttpPut("{id:guid}/conferencia")]
+        public async Task<IActionResult> DefinirConferencia(Guid id, [FromBody] DefinirConferenciaRequest request)
+        {
+            if (request?.Conferida is null)
+                return BadRequest(new { message = "Informe o estado da conferência." });
+            try { return Ok(await _despesaService.DefinirConferenciaAsync(id, request.Conferida.Value)); }
+            catch (InvalidOperationException) { return NotFound(new { message = "Despesa não encontrada." }); }
+        }
+
         [HttpGet("por-referencia")]
         public async Task<IActionResult> ObterPorReferencia([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idContaFinanceira)
         {
