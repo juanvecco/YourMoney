@@ -14,6 +14,7 @@ public static class RegraNegocioCatalogo
     public const string DespesasRecorrentes = "despesas.recorrencia";
     public const string ReceitasRecorrentes = "receitas.recorrencia";
     public const string Parcelamento = "despesas.parcelamento";
+    public const string ConciliacaoFaturaCartao = "despesas.conciliacao-fatura-cartao";
     public const string ReservaEmergencia = "receitas.reserva-emergencia";
     public const string RendaSalarial = "investimentos.renda-salarial";
     public const string MetasMensais = "metas.mensais";
@@ -26,6 +27,7 @@ public static class RegraNegocioCatalogo
         new RegraNegocioDefinicao(DespesasRecorrentes, "Recorrência de despesas", "Mostra despesas recorrentes e sugestões mensais para confirmação.", "Despesas", Array.Empty<string>()),
         new RegraNegocioDefinicao(ReceitasRecorrentes, "Recorrência de receitas", "Mostra receitas recorrentes e sugestões mensais para confirmação.", "Receitas", Array.Empty<string>()),
         new RegraNegocioDefinicao(Parcelamento, "Parcelamento de despesas", "Permite distribuir uma nova despesa em parcelas.", "Despesas", Array.Empty<string>()),
+        new RegraNegocioDefinicao(ConciliacaoFaturaCartao, "Conciliação da fatura do cartão", "Permite informar o valor da fatura por conta e mês, comparar com as despesas e marcar lançamentos conferidos.", "Despesas", Array.Empty<string>(), AtivaPorPadrao: true),
         new RegraNegocioDefinicao(ReservaEmergencia, "Reserva de emergência", "Exibe projeções de reserva com base nas receitas recorrentes marcadas.", "Planejamento", new[] { ReceitasRecorrentes }),
         new RegraNegocioDefinicao(RendaSalarial, "Investimentos por renda salarial", "Permite associar investimentos a uma receita recorrente marcada como salário.", "Investimentos", new[] { ReceitasRecorrentes }),
         new RegraNegocioDefinicao(MetasMensais, "Metas mensais", "Mostra planejamento mensal, metas e alertas.", "Planejamento", Array.Empty<string>()),

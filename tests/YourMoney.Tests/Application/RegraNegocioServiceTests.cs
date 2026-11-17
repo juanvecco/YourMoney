@@ -15,8 +15,18 @@ public static class RegraNegocioServiceTests
         var initial = await service.ListarAsync();
         TestAssert.True(initial.Single(rule => rule.Codigo == RegraNegocioCatalogo.OpenFinance).Efetiva,
             "Open Finance must be on when an existing user has no saved choice");
-        TestAssert.True(initial.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance)
+        TestAssert.True(initial.Single(rule => rule.Codigo == RegraNegocioCatalogo.ConciliacaoFaturaCartao).Efetiva,
+            "Existing users must keep access to bill reconciliation after the rule is introduced");
+        TestAssert.True(initial.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance &&
+            rule.Codigo != RegraNegocioCatalogo.ConciliacaoFaturaCartao)
             .All(rule => !rule.Ativa && !rule.Efetiva), "Other missing choices must remain off");
+
+        await service.AtualizarAsync(RegraNegocioCatalogo.ConciliacaoFaturaCartao, false);
+        TestAssert.True(!await service.EstaAtivaAsync(RegraNegocioCatalogo.ConciliacaoFaturaCartao),
+            "A user can disable reconciliation without changing other business rules");
+        await service.AtualizarAsync(RegraNegocioCatalogo.ConciliacaoFaturaCartao, true);
+        TestAssert.True(await service.EstaAtivaAsync(RegraNegocioCatalogo.ConciliacaoFaturaCartao),
+            "A user can enable reconciliation again");
 
         await service.AtualizarAsync(RegraNegocioCatalogo.DespesasRecorrentes, true);
         TestAssert.True(await service.EstaAtivaAsync(RegraNegocioCatalogo.DespesasRecorrentes), "Expense recurrence can be enabled");

@@ -31,7 +31,10 @@ public static class UsuarioInicialSemExemplosTests
             "Every advanced rule needs a new-account choice");
         TestAssert.True(await db.RegrasNegocioUsuario.SingleAsync(rule => rule.Codigo == RegraNegocioCatalogo.OpenFinance) is { Ativa: true },
             "Open Finance starts on for new accounts");
-        TestAssert.True(await db.RegrasNegocioUsuario.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance)
+        TestAssert.True(await db.RegrasNegocioUsuario.SingleAsync(rule => rule.Codigo == RegraNegocioCatalogo.ConciliacaoFaturaCartao) is { Ativa: true },
+            "Bill reconciliation starts on for new accounts");
+        TestAssert.True(await db.RegrasNegocioUsuario.Where(rule => rule.Codigo != RegraNegocioCatalogo.OpenFinance &&
+            rule.Codigo != RegraNegocioCatalogo.ConciliacaoFaturaCartao)
             .AllAsync(rule => !rule.Ativa), "Other advanced functions start off for new accounts");
 
         await service.CriarDadosIniciaisAsync("new-user");

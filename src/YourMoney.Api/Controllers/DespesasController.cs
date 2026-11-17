@@ -156,6 +156,7 @@ namespace YourMoney.Api.Controllers
         }
 
         [HttpPut("{id:guid}/conferencia")]
+        [RegraNegocioAtiva(RegraNegocioCatalogo.ConciliacaoFaturaCartao)]
         public async Task<IActionResult> DefinirConferencia(Guid id, [FromBody] DefinirConferenciaRequest request)
         {
             if (request?.Conferida is null)
