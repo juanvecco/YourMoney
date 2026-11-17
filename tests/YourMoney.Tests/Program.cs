@@ -5,6 +5,7 @@ using YourMoney.Tests.Infrastructure;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("admin user list requires role and excludes password hashes", AdminUsuariosControllerTests.ListsNamesAndEmailsWithoutPasswordHashesForAdminsOnly),
     ("bill reconciliation keeps cents and all owner expenses", ConciliacaoFaturaServiceTests.PreservesCentsAndAllExpensesWithoutPagination),
     ("bill reconciliation distinguishes absent and zero bill", ConciliacaoFaturaServiceTests.DistinguishesMissingBillFromZeroAndScopesOwner),
     ("bill endpoint authorizes and maps errors", ConciliacaoFaturaControllerTests.AuthorizesAndMapsValidationAndOwnership),

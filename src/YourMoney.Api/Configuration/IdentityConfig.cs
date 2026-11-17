@@ -44,6 +44,7 @@ namespace YourMoney.Api.Configuration
                 })
                 .AddJwtBearer(options =>
                 {
+                    options.MapInboundClaims = false;
                     options.RequireHttpsMetadata = true;
                     options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -53,6 +54,7 @@ namespace YourMoney.Api.Configuration
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
+                        RoleClaimType = "role",
                         ValidIssuer = jwtSettings.Emissor,
                         ValidAudience = jwtSettings.ValidoEm
                     };

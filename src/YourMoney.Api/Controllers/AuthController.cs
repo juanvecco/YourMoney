@@ -238,6 +238,7 @@ namespace YourMoney.Api.Controllers
                     Id = user.Id,
                     Nome = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? user.UserName,
                     Email = user.Email,
+                    Roles = claims.Where(c => c.Type == "role").Select(c => c.Value),
                     Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
                 }
             };
