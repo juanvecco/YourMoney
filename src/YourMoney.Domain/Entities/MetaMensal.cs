@@ -38,7 +38,7 @@ namespace YourMoney.Domain.Entities
             AtualizarNome(nome);
             AtualizarDefinicao(tipoDefinicao, percentualReceita, valorMeta);
             AtualizarMesReferencia(mesReferencia);
-            CriadoEm = DateTime.UtcNow;
+            CriadoEm = AgoraUtcSemFuso();
         }
 
         public MetaMensal(
@@ -66,13 +66,13 @@ namespace YourMoney.Domain.Entities
         {
             AtualizarNome(nome);
             AtualizarDefinicao(tipoDefinicao, percentualReceita, valorMeta);
-            AtualizadoEm = DateTime.UtcNow;
+            AtualizadoEm = AgoraUtcSemFuso();
         }
 
         public void Renomear(string nome)
         {
             AtualizarNome(nome);
-            AtualizadoEm = DateTime.UtcNow;
+            AtualizadoEm = AgoraUtcSemFuso();
         }
 
         public void AssociarGrupoObjetivo(Guid? grupoObjetivoInvestimentoId)
@@ -80,7 +80,7 @@ namespace YourMoney.Domain.Entities
             if (grupoObjetivoInvestimentoId == Guid.Empty)
                 throw new ArgumentException("Objetivo financeiro associado é inválido.", nameof(grupoObjetivoInvestimentoId));
             GrupoObjetivoInvestimentoId = grupoObjetivoInvestimentoId;
-            AtualizadoEm = DateTime.UtcNow;
+            AtualizadoEm = AgoraUtcSemFuso();
         }
 
         public void AtualizarNome(string nome)
@@ -142,6 +142,11 @@ namespace YourMoney.Domain.Entities
 
             MesReferencia = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
         }
+
+        // O PostgreSQL armazena estes campos como timestamp without time zone.
+        // Preservamos o horário UTC sem o Kind, exigido pelo Npgsql para esse tipo.
+        private static DateTime AgoraUtcSemFuso() =>
+            DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
 
         private void AtualizarDefinicao(
             TipoDefinicaoMeta tipoDefinicao,

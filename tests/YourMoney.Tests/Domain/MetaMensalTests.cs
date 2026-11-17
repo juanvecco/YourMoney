@@ -15,6 +15,9 @@ namespace YourMoney.Tests.Domain
             TestAssert.Equal(25.5m, meta.PercentualReceita, "Percentage should be preserved");
             TestAssert.Equal(new DateTime(2026, 6, 1), meta.MesReferencia, "Reference month should normalize to first day");
             TestAssert.Equal("user-1", meta.UsuarioId, "Meta should keep owner");
+            TestAssert.Equal(DateTimeKind.Unspecified, meta.CriadoEm.Kind, "Creation timestamp must match PostgreSQL timestamp without time zone");
+            meta.AssociarGrupoObjetivo(null);
+            TestAssert.Equal(DateTimeKind.Unspecified, meta.AtualizadoEm!.Value.Kind, "Goal association timestamp must match PostgreSQL timestamp without time zone");
             return Task.CompletedTask;
         }
 
@@ -46,6 +49,7 @@ namespace YourMoney.Tests.Domain
             TestAssert.Equal<decimal?>(null, meta.PercentualReceita, "Inactive percentage should stay null");
 
             meta.Atualizar("Reserva percentual", TipoDefinicaoMeta.Percentual, 20.1234m, null);
+            TestAssert.Equal(DateTimeKind.Unspecified, meta.AtualizadoEm!.Value.Kind, "Update timestamp must match PostgreSQL timestamp without time zone");
 
             TestAssert.Equal(TipoDefinicaoMeta.Percentual, meta.TipoDefinicao, "Mode should change to percentage");
             TestAssert.Equal(20.1234m, meta.PercentualReceita, "Primary percentage should be preserved");
