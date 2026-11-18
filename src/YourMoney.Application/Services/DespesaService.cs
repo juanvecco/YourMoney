@@ -137,53 +137,43 @@ namespace YourMoney.Application.Services
             var tamanhoPagina = Math.Clamp(request.TamanhoPagina <= 0 ? 10 : request.TamanhoPagina, 1, 100);
             var idsCategoria = await ResolverIdsCategoriaFiltroAsync(request, usuarioId);
 
-            var despesas = await _despesaRepository.ConsultarAsync(
+            var consulta = await _despesaRepository.ConsultarPaginadoAsync(
                 request.Mes,
                 request.Ano,
                 usuarioId,
                 request.IdContaFinanceira,
-                idsCategoria);
+                idsCategoria,
+                pagina,
+                tamanhoPagina);
 
             var reembolsos = await _receitaRepository.GetTotaisReembolsadosPorDespesasAsync(
-                despesas.Select(d => d.Id).ToList(),
+                consulta.Itens.Select(d => d.Id).ToList(),
                 usuarioId);
 
-            var itensFiltrados = despesas
+            var itensPagina = consulta.Itens
                 .Select(d => MapearDespesa(d, reembolsos.TryGetValue(d.Id, out var valor) ? valor : 0m))
                 .ToList();
 
-            var totalResultados = itensFiltrados.Count;
-            var totalPaginas = totalResultados == 0
+            var totalPaginas = consulta.TotalResultados == 0
                 ? 0
-                : (int)Math.Ceiling(totalResultados / (decimal)tamanhoPagina);
-
-            if (totalPaginas > 0 && pagina > totalPaginas)
-                pagina = totalPaginas;
-
-            var itensPagina = totalResultados == 0
-                ? new List<DespesaDTO>()
-                : itensFiltrados
-                    .Skip((pagina - 1) * tamanhoPagina)
-                    .Take(tamanhoPagina)
-                    .ToList();
+                : (int)Math.Ceiling(consulta.TotalResultados / (decimal)tamanhoPagina);
 
             return new ConsultaDespesasResponse
             {
                 Itens = itensPagina,
-                PaginaAtual = totalResultados == 0 ? 1 : pagina,
+                PaginaAtual = consulta.PaginaAtual,
                 TamanhoPagina = tamanhoPagina,
-                TotalResultados = totalResultados,
+                TotalResultados = consulta.TotalResultados,
                 TotalPaginas = totalPaginas,
                 ValorTotalFiltrado = decimal.Round(
-                    itensFiltrados.Sum(d => d.ValorLiquido),
+                    consulta.TotaisPorConta.Sum(total => total.ValorLiquido),
                     2,
                     MidpointRounding.AwayFromZero),
-                TotaisPorConta = itensFiltrados
-                    .GroupBy(d => d.IdContaFinanceira)
-                    .Select(g => new ConsultaDespesasTotalPorContaDTO
+                TotaisPorConta = consulta.TotaisPorConta
+                    .Select(total => new ConsultaDespesasTotalPorContaDTO
                     {
-                        IdContaFinanceira = g.Key,
-                        Valor = decimal.Round(g.Sum(d => d.ValorLiquido), 2, MidpointRounding.AwayFromZero)
+                        IdContaFinanceira = total.IdContaFinanceira,
+                        Valor = decimal.Round(total.ValorLiquido, 2, MidpointRounding.AwayFromZero)
                     })
                     .OrderByDescending(t => t.Valor)
                     .ToList()

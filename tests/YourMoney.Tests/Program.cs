@@ -62,6 +62,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("despesa consulta controller returns empty total", DespesasControllerConsultaTests.ConsultaReturnsFilteredTotalForEmptyResponse),
     ("despesa consulta controller returns generic validation", DespesasControllerConsultaTests.ConsultaReturnsGenericValidationError),
     ("despesa repository consulta is scoped and filterable", DespesaRepositoryConsultaTests.RepositoryConsultaIsUserScopedAndFilterable),
+    ("despesa repository pages in storage and preserves net account totals", DespesaRepositoryConsultaTests.PaginatesBeforeMaterializingExpensesAndKeepsNetTotals),
     ("recurring expense entity creates monthly recurrence", DespesaRecorrenteTests.CreatesMonthlyRecurrenceAndClampsDueDate),
     ("recurring expense occurrence finalizes once", DespesaRecorrenteTests.OccurrenceCanBeConfirmedOrIgnoredOnlyOnce),
     ("recurring expense rejects invalid period", DespesaRecorrenteTests.RejectsInvalidRecurrencePeriod),
@@ -285,6 +286,9 @@ var tests = new (string Name, Func<Task> Run)[]
     ("Pluggy manual match rejects unrelated expenses", PluggyExpenseCandidateMatchingTests.UnrelatedManualExpenseIsNotSuggested),
 };
 
+if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("YM_TEST_POSTGRES")))
+    tests = [.. tests, ("despesa repository paginates and aggregates in PostgreSQL", DespesaRepositoryConsultaTests.PaginatesAndAggregatesInPostgreSql)];
+
 var failures = new List<string>();
 
 foreach (var test in tests)
@@ -297,7 +301,7 @@ foreach (var test in tests)
     catch (Exception ex)
     {
         failures.Add($"{test.Name}: {ex.Message}");
-        Console.WriteLine($"FAIL {test.Name}: {ex.Message}");
+        Console.WriteLine($"FAIL {test.Name}: {ex}");
     }
 }
 

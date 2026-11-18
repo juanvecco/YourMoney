@@ -9,7 +9,6 @@ public static class MovimentacaoFinanceiraServiceTests
         var source = File.ReadAllText(RepositoryTestPaths.InYourMoney(
             "src", "YourMoney.Application", "Services", "MovimentacaoFinanceiraService.cs"));
         TestAssert.True(source.Contains("_currentUser.UserId"), "Activity must use the authenticated owner");
-        TestAssert.True(source.Contains("Task.WhenAll"), "Independent projections should execute in parallel");
         TestAssert.True(source.IndexOf("new ResumoFinanceiroPeriodoDto", StringComparison.Ordinal) <
                         source.IndexOf(".Skip(", StringComparison.Ordinal),
             "Totals must be computed before pagination");

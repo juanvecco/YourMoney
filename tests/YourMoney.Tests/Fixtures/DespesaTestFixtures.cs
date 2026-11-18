@@ -102,6 +102,7 @@ namespace YourMoney.Tests.Fixtures
     public class InMemoryDespesaRepository : IDespesaRepository
     {
         public List<Despesa> Despesas { get; } = new();
+        public Dictionary<Guid, decimal> ReembolsosPorDespesa { get; } = new();
         public bool FailBatchInsert { get; set; }
 
         public Task<Despesa> GetByIdAsync(Guid id)
@@ -186,6 +187,25 @@ namespace YourMoney.Tests.Fixtures
                 .OrderByDescending(d => d.Data)
                 .ThenByDescending(d => d.Id)
                 .ToList());
+        }
+
+        public Task<ConsultaDespesasPaginada> ConsultarPaginadoAsync(
+            int mes, int ano, string usuarioId, Guid? idContaFinanceira,
+            IReadOnlyCollection<Guid> idsCategoria, int pagina, int tamanhoPagina)
+        {
+            var filtradas = Despesas
+                .Where(d => d.UsuarioId == usuarioId && d.Data.Month == mes && d.Data.Year == ano)
+                .Where(d => idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira)
+                .Where(d => idsCategoria == null || idsCategoria.Contains(d.IdCategoria))
+                .OrderByDescending(d => d.Data).ThenByDescending(d => d.Id).ToList();
+            var totalPaginas = filtradas.Count == 0 ? 0 : (int)Math.Ceiling(filtradas.Count / (decimal)tamanhoPagina);
+            var paginaAtual = totalPaginas == 0 ? 1 : Math.Min(Math.Max(pagina, 1), totalPaginas);
+            var totais = filtradas.GroupBy(d => d.IdContaFinanceira)
+                .Select(g => new TotalDespesasPorConta(g.Key, g.Count(),
+                    g.Sum(d => Math.Max(0m, d.Valor - ReembolsosPorDespesa.GetValueOrDefault(d.Id)))))
+                .ToList();
+            var itens = filtradas.Skip((paginaAtual - 1) * tamanhoPagina).Take(tamanhoPagina).ToList();
+            return Task.FromResult(new ConsultaDespesasPaginada(itens, paginaAtual, filtradas.Count, totais));
         }
 
         public Task<bool> ExisteAsync(Guid id, string usuarioId)

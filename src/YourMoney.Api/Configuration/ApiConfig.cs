@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.HttpOverrides;
 
 namespace YourMoney.Api.Configuration
@@ -45,7 +46,18 @@ namespace YourMoney.Api.Configuration
                     .GetValue<bool>("TLS_TERMINATED_BY_PROXY"))
                 app.UseHttpsRedirection();
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = context =>
+                {
+                    var name = context.File.Name;
+                    context.Context.Response.Headers.CacheControl = name is "index.html" or "ngsw.json" or "ngsw-worker.js"
+                        ? "no-cache"
+                        : Regex.IsMatch(name, @"-[A-Z0-9]{8,}\.(js|css|woff2?)$", RegexOptions.IgnoreCase)
+                            ? "public, max-age=31536000, immutable"
+                            : "public, max-age=86400";
+                }
+            });
             var objectiveImagesPath = Path.Combine(env.ContentRootPath, "App_Data", "ObjectiveImages");
             Directory.CreateDirectory(objectiveImagesPath);
             app.UseStaticFiles(new StaticFileOptions
@@ -81,6 +93,7 @@ namespace YourMoney.Api.Configuration
                         return;
                     }
 
+                    context.Response.Headers.CacheControl = "no-cache";
                     await context.Response.SendFileAsync(indexPath);
                 });
             });

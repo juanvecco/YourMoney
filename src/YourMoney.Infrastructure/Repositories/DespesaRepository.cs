@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using YourMoney.Domain.Entities;
+using YourMoney.Domain.Enums;
 using YourMoney.Domain.Repositories;
 using YourMoney.Infrastructure.Persistence;
 
@@ -136,6 +137,52 @@ namespace YourMoney.Infrastructure.Repositories
                 .OrderByDescending(d => d.Data)
                 .ThenByDescending(d => d.Id)
                 .ToListAsync();
+        }
+
+        public async Task<ConsultaDespesasPaginada> ConsultarPaginadoAsync(
+            int mes, int ano, string usuarioId, Guid? idContaFinanceira,
+            IReadOnlyCollection<Guid> idsCategoria, int pagina, int tamanhoPagina)
+        {
+            var inicio = new DateTime(ano, mes, 1);
+            var fimExclusivo = inicio.AddMonths(1);
+            var query = _context.Despesas.AsNoTracking()
+                .Where(d => d.UsuarioId == usuarioId
+                    && d.Data >= inicio && d.Data < fimExclusivo
+                    && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira));
+
+            if (idsCategoria != null)
+                query = query.Where(d => idsCategoria.Contains(d.IdCategoria));
+
+            var gastosPorConta = await query
+                .GroupBy(d => d.IdContaFinanceira)
+                .Select(grupo => new
+                {
+                    IdContaFinanceira = grupo.Key,
+                    Quantidade = grupo.Count(),
+                    ValorBruto = grupo.Sum(d => d.Valor)
+                })
+                .ToListAsync();
+
+            var reembolsosPorConta = await (
+                from despesa in query
+                join receita in _context.Receitas.AsNoTracking()
+                    .Where(r => r.UsuarioId == usuarioId && r.Natureza == NaturezaReceita.Reembolso)
+                    on (Guid?)despesa.Id equals receita.DespesaVinculadaId
+                group receita by despesa.IdContaFinanceira into grupo
+                select new { IdContaFinanceira = grupo.Key, Valor = grupo.Sum(r => r.Valor) }
+            ).ToDictionaryAsync(total => total.IdContaFinanceira, total => total.Valor);
+
+            var totalResultados = gastosPorConta.Sum(total => total.Quantidade);
+            var totalPaginas = totalResultados == 0 ? 0 : (int)Math.Ceiling(totalResultados / (decimal)tamanhoPagina);
+            var paginaAtual = totalPaginas == 0 ? 1 : Math.Min(Math.Max(pagina, 1), totalPaginas);
+            var itens = totalResultados == 0
+                ? new List<Despesa>()
+                : await query.OrderByDescending(d => d.Data).ThenByDescending(d => d.Id)
+                    .Skip((paginaAtual - 1) * tamanhoPagina).Take(tamanhoPagina).ToListAsync();
+
+            return new ConsultaDespesasPaginada(itens, paginaAtual, totalResultados,
+                gastosPorConta.Select(total => new TotalDespesasPorConta(total.IdContaFinanceira,
+                    total.Quantidade, Math.Max(0m, total.ValorBruto - reembolsosPorConta.GetValueOrDefault(total.IdContaFinanceira)))).ToList());
         }
 
         public async Task<bool> ExisteAsync(Guid id, string usuarioId)

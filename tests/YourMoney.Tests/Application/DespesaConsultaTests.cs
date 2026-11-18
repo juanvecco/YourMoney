@@ -71,6 +71,7 @@ namespace YourMoney.Tests.Application
             var receitaRepository = new InMemoryReceitaRepository();
             var despesa = new Despesa("Compra para terceiro", 150m, new DateTime(2026, 7, 5), DespesaTestFixtures.ContaId, DespesaTestFixtures.CategoriaId, "test-user");
             despesaRepository.Despesas.Add(despesa);
+            despesaRepository.ReembolsosPorDespesa[despesa.Id] = 50m;
             receitaRepository.Receitas.Add(new Receita(
                 "Reembolso",
                 50m,
