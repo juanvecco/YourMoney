@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using YourMoney.Api.Configuration;
@@ -39,6 +41,36 @@ public static class ExternalOnboardingTests
         TestAssert.Equal("service.example", jwt.Subject, "Apple assertion subject is service id");
         TestAssert.True(jwt.ValidTo - jwt.ValidFrom <= TimeSpan.FromMinutes(6), "Apple assertion expires quickly");
         TestAssert.Equal("KEY123", jwt.Header.Kid, "Apple assertion carries key id");
+        return Task.CompletedTask;
+    }
+
+    public static Task ConfiguredProvidersUseExpectedCallbacks()
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["JwtSettings:Secret"] = new string('x', 32),
+            ["DATABASE_CONNECTION_STRING"] = "Server=localhost;Database=YourMoneyTest;Trusted_Connection=True;TrustServerCertificate=True",
+            ["ExternalAuth:Google:ClientId"] = "google-client",
+            ["ExternalAuth:Google:ClientSecret"] = "google-secret",
+            ["ExternalAuth:Apple:ServiceId"] = "service.example",
+            ["ExternalAuth:Apple:TeamId"] = "TEAM123",
+            ["ExternalAuth:Apple:KeyId"] = "KEY123",
+            ["ExternalAuth:Apple:PrivateKeyBase64"] = "cHJpdmF0ZS1rZXk="
+        }).Build();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddIdentityConfiguration(config);
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>();
+        var google = options.Get("google");
+        var apple = options.Get("apple");
+        TestAssert.Equal("/signin-google", google.CallbackPath.Value, "Google uses the registered callback");
+        TestAssert.Equal("/signin-apple", apple.CallbackPath.Value, "Apple uses the registered callback");
+        TestAssert.Equal(IdentityConstants.ExternalScheme, google.SignInScheme, "Google uses the temporary external cookie");
+        TestAssert.Equal(IdentityConstants.ExternalScheme, apple.SignInScheme, "Apple uses the temporary external cookie");
+        TestAssert.True(google.UsePkce, "Google authorization uses PKCE");
+        TestAssert.Equal("form_post", apple.ResponseMode, "Apple posts authorization results to its callback");
+        TestAssert.True(apple.Events.OnAuthorizationCodeReceived != null, "Apple signs the code exchange");
         return Task.CompletedTask;
     }
 

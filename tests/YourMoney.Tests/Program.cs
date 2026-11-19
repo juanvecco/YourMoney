@@ -8,6 +8,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("registration validates onboarding choices", OnboardingTests.RegistrationRequiresSupportedGoalAndSource),
     ("social methods require complete config", ExternalOnboardingTests.MethodsRequireCompleteProviderConfiguration),
     ("Apple client assertion is short lived", ExternalOnboardingTests.AppleSecretUsesServiceIdAndShortExpiry),
+    ("social providers use server callbacks", ExternalOnboardingTests.ConfiguredProvidersUseExpectedCallbacks),
     ("social provider subject avoids email auto-link", ExternalOnboardingTests.ProviderSubjectResolvesWithoutEmailAutoLink),
     ("admin user list requires role and excludes password hashes", AdminUsuariosControllerTests.ListsNamesAndEmailsWithoutPasswordHashesForAdminsOnly),
     ("bill reconciliation keeps cents and all owner expenses", ConciliacaoFaturaServiceTests.PreservesCentsAndAllExpensesWithoutPagination),
