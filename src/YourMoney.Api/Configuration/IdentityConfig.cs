@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using YourMoney.Api.Extensions;
 using YourMoney.Infrastructure.Data;
+using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Configuration
 {
@@ -31,7 +33,7 @@ namespace YourMoney.Api.Configuration
 
             var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
 
-            services.AddAuthentication(options =>
+            var authentication = services.AddAuthentication(options =>
                 {
                     // AddIdentity registers its application cookie as the default
                     // scheme. API clients (Flutter and the Angular interceptor)
@@ -60,8 +62,88 @@ namespace YourMoney.Api.Configuration
                     };
                 });
 
+            if (ExternalProviderConfiguration.GoogleAvailable(configuration))
+            {
+                var google = ExternalProviderConfiguration.Google(configuration);
+                authentication.AddOpenIdConnect("google", options =>
+                {
+                    options.Authority = "https://accounts.google.com";
+                    options.ClientId = google.ClientId;
+                    options.ClientSecret = google.ClientSecret;
+                    options.CallbackPath = "/signin-google";
+                    options.SignInScheme = IdentityConstants.ExternalScheme;
+                    options.ResponseType = "code";
+                    options.UsePkce = true;
+                    options.SaveTokens = false;
+                    options.GetClaimsFromUserInfoEndpoint = false;
+                    options.MapInboundClaims = true;
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                    options.Scope.Add("email");
+                    options.Scope.Add("profile");
+                    options.Events = ExternalEvents(configuration, options.CallbackPath);
+                });
+            }
+
+            if (ExternalProviderConfiguration.AppleAvailable(configuration))
+            {
+                var apple = ExternalProviderConfiguration.Apple(configuration);
+                authentication.AddOpenIdConnect("apple", options =>
+                {
+                    options.Authority = "https://appleid.apple.com";
+                    options.ClientId = apple.ClientId;
+                    options.CallbackPath = "/signin-apple";
+                    options.SignInScheme = IdentityConstants.ExternalScheme;
+                    options.ResponseType = "code";
+                    options.ResponseMode = "form_post";
+                    options.UsePkce = false;
+                    options.SaveTokens = false;
+                    options.GetClaimsFromUserInfoEndpoint = false;
+                    options.MapInboundClaims = true;
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                    options.Scope.Add("email");
+                    options.Scope.Add("name");
+                    options.Events = ExternalEvents(configuration, options.CallbackPath);
+                    options.Events.OnAuthorizationCodeReceived = context =>
+                    {
+                        context.TokenEndpointRequest.ClientSecret = AppleClientSecret.Create(apple);
+                        return Task.CompletedTask;
+                    };
+                });
+            }
+
             return services;
         }
+
+        private static OpenIdConnectEvents ExternalEvents(IConfiguration configuration, PathString callbackPath) => new()
+        {
+            OnRedirectToIdentityProvider = context =>
+            {
+                // Render terminates TLS before the app receives the request. Use the
+                // configured public origin so the provider sees the registered HTTPS callback.
+                var publicOrigin = configuration["Frontend:BaseUrl"]?.TrimEnd('/');
+                if (string.IsNullOrWhiteSpace(publicOrigin) && configuration.GetValue<bool>("TLS_TERMINATED_BY_PROXY"))
+                    publicOrigin = "https://" + context.Request.Host;
+                if (!string.IsNullOrWhiteSpace(publicOrigin))
+                    context.ProtocolMessage.RedirectUri = publicOrigin + callbackPath;
+                return Task.CompletedTask;
+            },
+            OnRemoteFailure = context =>
+            {
+                context.HandleResponse();
+                var loginOnly = context.Properties?.Items.TryGetValue("login_only", out var mode) == true && mode == "true";
+                context.Response.Redirect(loginOnly ? "/login?externo=erro" : "/cadastro?externo=erro");
+                return Task.CompletedTask;
+            },
+            OnAccessDenied = context =>
+            {
+                context.HandleResponse();
+                var loginOnly = context.Properties?.Items.TryGetValue("login_only", out var mode) == true && mode == "true";
+                context.Response.Redirect(loginOnly ? "/login?externo=erro" : "/cadastro?externo=erro");
+                return Task.CompletedTask;
+            }
+        };
 
         public static IApplicationBuilder UseIdentityConfiguration(this IApplicationBuilder app)
         {

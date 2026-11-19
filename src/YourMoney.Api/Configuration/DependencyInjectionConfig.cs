@@ -52,6 +52,9 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<IPluggyService, PluggyService>();
             services.AddScoped<ICarteiraService, CarteiraService>();
             services.AddScoped<IPasswordResetDeliveryService, SmtpPasswordResetDeliveryService>();
+            services.AddScoped<JwtTokenService>();
+            services.AddSingleton(TimeProvider.System);
+            services.AddScoped<RegistrationInviteService>();
             return services;
         }
     }

@@ -5,6 +5,10 @@ using YourMoney.Tests.Infrastructure;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("registration validates onboarding choices", OnboardingTests.RegistrationRequiresSupportedGoalAndSource),
+    ("social methods require complete config", ExternalOnboardingTests.MethodsRequireCompleteProviderConfiguration),
+    ("Apple client assertion is short lived", ExternalOnboardingTests.AppleSecretUsesServiceIdAndShortExpiry),
+    ("social provider subject avoids email auto-link", ExternalOnboardingTests.ProviderSubjectResolvesWithoutEmailAutoLink),
     ("admin user list requires role and excludes password hashes", AdminUsuariosControllerTests.ListsNamesAndEmailsWithoutPasswordHashesForAdminsOnly),
     ("bill reconciliation keeps cents and all owner expenses", ConciliacaoFaturaServiceTests.PreservesCentsAndAllExpensesWithoutPagination),
     ("bill reconciliation distinguishes absent and zero bill", ConciliacaoFaturaServiceTests.DistinguishesMissingBillFromZeroAndScopesOwner),
@@ -288,6 +292,9 @@ var tests = new (string Name, Func<Task> Run)[]
 
 if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("YM_TEST_POSTGRES")))
     tests = [.. tests, ("despesa repository paginates and aggregates in PostgreSQL", DespesaRepositoryConsultaTests.PaginatesAndAggregatesInPostgreSql)];
+
+if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("YM_TEST_POSTGRES_IDENTITY")))
+    tests = [.. tests, ("registration invitations are single use and expire in PostgreSQL", InviteOnboardingTests.SingleUseExpiryAndRevocationInPostgreSql)];
 
 var failures = new List<string>();
 

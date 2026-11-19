@@ -2,11 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using YourMoney.Api.Extensions;
 using YourMoney.Api.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using YourMoney.Api.Services;
 
 namespace YourMoney.Api.Controllers
@@ -16,27 +12,30 @@ namespace YourMoney.Api.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtTokenService _jwtTokens;
         private readonly IPasswordResetDeliveryService _passwordResetDelivery;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
         private readonly IUsuarioDemonstracaoService _usuarioDemonstracaoService;
+        private readonly RegistrationInviteService _invites;
 
         public AuthController(SignInManager<IdentityUser> signInManager,
                               UserManager<IdentityUser> userManager,
-                              IOptions<JwtSettings> jwtSettings,
+                              JwtTokenService jwtTokens,
                               IPasswordResetDeliveryService passwordResetDelivery,
                               IConfiguration configuration,
                               ILogger<AuthController> logger,
-                              IUsuarioDemonstracaoService usuarioDemonstracaoService)
+                              IUsuarioDemonstracaoService usuarioDemonstracaoService,
+                              RegistrationInviteService invites)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _jwtSettings = jwtSettings.Value;
+            _jwtTokens = jwtTokens;
             _passwordResetDelivery = passwordResetDelivery;
             _configuration = configuration;
             _logger = logger;
             _usuarioDemonstracaoService = usuarioDemonstracaoService;
+            _invites = invites;
         }
 
         [HttpPost("nova-conta")]
@@ -44,11 +43,22 @@ namespace YourMoney.Api.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
+            var inviteCode = usuarioRegistro.CodigoConvite?.Trim();
+            if (!string.IsNullOrWhiteSpace(inviteCode))
+            {
+                var check = await _invites.CheckAsync(inviteCode, HttpContext.RequestAborted);
+                if (!check.Valido)
+                {
+                    AdicionarErroProcessamento(check.Motivo);
+                    return CustomResponse();
+                }
+            }
+
             var user = new IdentityUser
             {
                 UserName = usuarioRegistro.Email,
                 Email = usuarioRegistro.Email,
-                EmailConfirmed = true
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
@@ -63,19 +73,31 @@ namespace YourMoney.Api.Controllers
                 return CustomResponse();
             }
 
-            if (!string.IsNullOrWhiteSpace(usuarioRegistro.Nome))
+            var claims = new List<Claim>
             {
-                await _userManager.AddClaimAsync(user, new Claim("name", usuarioRegistro.Nome.Trim()));
+                new("name", usuarioRegistro.Nome.Trim()),
+                new("onboarding_goal", usuarioRegistro.ObjetivoInicial ?? "gastos")
+            };
+            if (!string.IsNullOrWhiteSpace(usuarioRegistro.OrigemConhecimento))
+                claims.Add(new Claim("referral_source", usuarioRegistro.OrigemConhecimento.Trim()));
+            if (!string.IsNullOrWhiteSpace(inviteCode)
+                && RegistrationInviteService.TryKey(inviteCode, out var adminId, out _))
+                claims.Add(new Claim("invited_by", adminId));
+
+            var claimResult = await _userManager.AddClaimsAsync(user, claims);
+            if (!claimResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+                AdicionarErroProcessamento("Não foi possível preparar sua conta. Tente novamente.");
+                return CustomResponse();
             }
 
-            if (!string.IsNullOrWhiteSpace(usuarioRegistro.OrigemConhecimento))
+            if (!string.IsNullOrWhiteSpace(inviteCode)
+                && !await _invites.ConsumeAsync(inviteCode, user.Id, HttpContext.RequestAborted))
             {
-                var origem = usuarioRegistro.OrigemConhecimento.Trim();
-                var claimResult = await _userManager.AddClaimAsync(user, new Claim("referral_source", origem));
-                if (!claimResult.Succeeded)
-                {
-                    _logger.LogWarning("Não foi possível salvar a origem opcional informada no cadastro.");
-                }
+                await _userManager.DeleteAsync(user);
+                AdicionarErroProcessamento("Este convite não está mais disponível. Remova-o ou peça outro link.");
+                return CustomResponse();
             }
 
             try
@@ -85,6 +107,8 @@ namespace YourMoney.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Não foi possível preparar os dados iniciais da nova conta.");
+                if (!string.IsNullOrWhiteSpace(inviteCode))
+                    await _invites.ReleaseAsync(inviteCode, user.Id, HttpContext.RequestAborted);
                 await _userManager.DeleteAsync(user);
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
@@ -176,72 +200,9 @@ namespace YourMoney.Api.Controllers
         private async Task<UsuarioRespostaLogin> GerarJwt(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-
             if (user == null)
-            {
                 throw new InvalidOperationException("Usuário não encontrado ao gerar JWT.");
-            }
-            var claims = await _userManager.GetClaimsAsync(user);
-
-            var identityClaims = await ObterClaimsUsuario(claims, user);
-            var encodedToken = CodificarToken(identityClaims);
-            
-            return ObterRespostaToken(encodedToken, user, claims);
-        }
-
-        private async Task<ClaimsIdentity> ObterClaimsUsuario(ICollection<Claim> claims, IdentityUser user)
-        {
-            var userRoles = await _userManager.GetRolesAsync(user);
-
-            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-            if (!claims.Any(c => c.Type == "name") && !string.IsNullOrWhiteSpace(user.UserName))
-            {
-                claims.Add(new Claim("name", user.UserName));
-            }
-            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-
-            foreach (var userRole in userRoles)
-            {
-                claims.Add(new Claim("role", userRole));
-            }
-
-            var identityClaims = new ClaimsIdentity();
-            identityClaims.AddClaims(claims);
-
-            return identityClaims;
-        }
-
-        private string CodificarToken(ClaimsIdentity identityClaims)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
-            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
-            {
-                Issuer = _jwtSettings.Emissor,
-                Audience = _jwtSettings.ValidoEm,
-                Subject = identityClaims,
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            });
-            return tokenHandler.WriteToken(token);
-        }
-
-        private UsuarioRespostaLogin ObterRespostaToken(string encodedToken, IdentityUser user, IEnumerable<Claim> claims)
-        {
-            return new UsuarioRespostaLogin
-            {
-                AccessToken = encodedToken,
-                ExpiresIn = TimeSpan.FromMinutes(_jwtSettings.ExpirationInMinutes).TotalSeconds,
-                UsuarioToken = new UsuarioToken
-                {
-                    Id = user.Id,
-                    Nome = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? user.UserName,
-                    Email = user.Email,
-                    Roles = claims.Where(c => c.Type == "role").Select(c => c.Value),
-                    Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
-                }
-            };
+            return await _jwtTokens.GenerateAsync(user);
         }
 
     }

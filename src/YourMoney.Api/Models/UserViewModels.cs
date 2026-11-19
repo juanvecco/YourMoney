@@ -5,7 +5,11 @@ namespace YourMoney.Api.Models
     public class UsuarioRegistro
     {
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Informe um nome de 2 a 100 caracteres")]
         public string Nome { get; set; }
+
+        [RegularExpression("^(gastos|cartao|objetivos|saldo)$", ErrorMessage = "Escolha um objetivo válido")]
+        public string ObjetivoInicial { get; set; } = "gastos";
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [EmailAddress(ErrorMessage = "O campo {0} está em formato inválido")]
@@ -19,7 +23,10 @@ namespace YourMoney.Api.Models
         public string SenhaConfirmacao { get; set; }
 
         [StringLength(120, ErrorMessage = "A origem deve ter até {1} caracteres")]
+        [RegularExpression("^(instagram|google-play|amigo-familiar|tiktok|google|facebook|youtube|linkedin|outro|prefiro-nao-responder)$", ErrorMessage = "Escolha uma origem válida")]
         public string OrigemConhecimento { get; set; }
+
+        public string CodigoConvite { get; set; }
     }
 
     public class UsuarioLogin
@@ -29,6 +36,22 @@ namespace YourMoney.Api.Models
         public string Email { get; set; }
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         public string Senha { get; set; }
+    }
+
+    public sealed class CadastroExternoInicio
+    {
+        [StringLength(100, MinimumLength = 2)]
+        public string Nome { get; set; }
+
+        [RegularExpression("^(gastos|cartao|objetivos|saldo)$")]
+        public string ObjetivoInicial { get; set; }
+
+        [RegularExpression("^(instagram|google-play|amigo-familiar|tiktok|google|facebook|youtube|linkedin|outro|prefiro-nao-responder)$")]
+        public string OrigemConhecimento { get; set; }
+
+        public string CodigoConvite { get; set; }
+
+        public bool ModoEntrar { get; set; }
     }
 
     public class UsuarioEsqueceuSenha
