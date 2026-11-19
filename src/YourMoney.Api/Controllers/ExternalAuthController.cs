@@ -65,8 +65,9 @@ public sealed class ExternalAuthController : MainController
             || (provider == "apple" && !ExternalProviderConfiguration.AppleAvailable(_configuration)))
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { mensagem = "Este método de acesso ainda não está disponível." });
         if (!ModelState.IsValid) return BadRequest(new { mensagem = "Revise seu nome e suas respostas antes de continuar." });
+        var goals = OnboardingGoals.Resolve(request.ObjetivosIniciais, request.ObjetivoInicial);
         if (!request.ModoEntrar && (string.IsNullOrWhiteSpace(request.Nome)
-            || string.IsNullOrWhiteSpace(request.ObjetivoInicial)))
+            || goals == null))
             return BadRequest(new { mensagem = "Revise seu nome e suas respostas antes de continuar." });
         if (!string.IsNullOrWhiteSpace(request.CodigoConvite)
             && !(await _invites.CheckAsync(request.CodigoConvite.Trim(), HttpContext.RequestAborted)).Valido)
@@ -74,7 +75,8 @@ public sealed class ExternalAuthController : MainController
 
         var properties = _signIn.ConfigureExternalAuthenticationProperties(provider, Url.Action(nameof(Return))!);
         properties.Items["onboarding_name"] = request.Nome?.Trim() ?? "";
-        properties.Items["onboarding_goal"] = request.ObjetivoInicial ?? "";
+        properties.Items["onboarding_goal"] = goals?.FirstOrDefault() ?? "";
+        properties.Items["onboarding_goals"] = string.Join(',', goals ?? []);
         properties.Items["onboarding_source"] = request.OrigemConhecimento ?? "";
         properties.Items["onboarding_invite"] = request.CodigoConvite ?? "";
         properties.Items["login_only"] = request.ModoEntrar ? "true" : "false";
@@ -110,11 +112,13 @@ public sealed class ExternalAuthController : MainController
 
                 string Item(string key) => info.AuthenticationProperties?.Items.TryGetValue(key, out var value) == true ? value : null;
                 var name = Item("onboarding_name")?.Trim();
-                var goal = Item("onboarding_goal");
+                var goals = OnboardingGoals.Resolve(
+                    Item("onboarding_goals")?.Split(',', StringSplitOptions.RemoveEmptyEntries),
+                    Item("onboarding_goal"));
                 var source = Item("onboarding_source");
                 var inviteCode = Item("onboarding_invite")?.Trim();
                 if (string.IsNullOrWhiteSpace(name) || name.Length > 100
-                    || goal is not ("gastos" or "cartao" or "objetivos" or "saldo"))
+                    || goals == null)
                     return Redirect("/cadastro?externo=erro");
                 if (!string.IsNullOrWhiteSpace(inviteCode)
                     && !(await _invites.CheckAsync(inviteCode, HttpContext.RequestAborted)).Valido)
@@ -128,7 +132,8 @@ public sealed class ExternalAuthController : MainController
                 {
                     var linked = await _users.AddLoginAsync(user, info);
                     if (!linked.Succeeded) throw new InvalidOperationException("Falha ao vincular identidade externa.");
-                    var claims = new List<Claim> { new("name", name), new("onboarding_goal", goal) };
+                    var claims = new List<Claim> { new("name", name) };
+                    claims.AddRange(goals.Select(goal => new Claim("onboarding_goal", goal)));
                     if (!string.IsNullOrWhiteSpace(source)) claims.Add(new Claim("referral_source", source));
                     if (!string.IsNullOrWhiteSpace(inviteCode)
                         && RegistrationInviteService.TryKey(inviteCode, out var adminId, out _))

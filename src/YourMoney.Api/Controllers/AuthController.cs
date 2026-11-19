@@ -43,6 +43,13 @@ namespace YourMoney.Api.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
+            var goals = OnboardingGoals.Resolve(usuarioRegistro.ObjetivosIniciais, usuarioRegistro.ObjetivoInicial);
+            if (goals == null)
+            {
+                AdicionarErroProcessamento("Escolha um ou mais objetivos válidos.");
+                return CustomResponse();
+            }
+
             var inviteCode = usuarioRegistro.CodigoConvite?.Trim();
             if (!string.IsNullOrWhiteSpace(inviteCode))
             {
@@ -75,9 +82,9 @@ namespace YourMoney.Api.Controllers
 
             var claims = new List<Claim>
             {
-                new("name", usuarioRegistro.Nome.Trim()),
-                new("onboarding_goal", usuarioRegistro.ObjetivoInicial ?? "gastos")
+                new("name", usuarioRegistro.Nome.Trim())
             };
+            claims.AddRange(goals.Select(goal => new Claim("onboarding_goal", goal)));
             if (!string.IsNullOrWhiteSpace(usuarioRegistro.OrigemConhecimento))
                 claims.Add(new Claim("referral_source", usuarioRegistro.OrigemConhecimento.Trim()));
             if (!string.IsNullOrWhiteSpace(inviteCode)

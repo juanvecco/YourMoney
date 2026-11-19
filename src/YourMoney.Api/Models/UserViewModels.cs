@@ -11,6 +11,8 @@ namespace YourMoney.Api.Models
         [RegularExpression("^(gastos|cartao|objetivos|saldo)$", ErrorMessage = "Escolha um objetivo válido")]
         public string ObjetivoInicial { get; set; } = "gastos";
 
+        public List<string>? ObjetivosIniciais { get; set; }
+
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [EmailAddress(ErrorMessage = "O campo {0} está em formato inválido")]
         public string Email { get; set; }
@@ -45,6 +47,8 @@ namespace YourMoney.Api.Models
 
         [RegularExpression("^(gastos|cartao|objetivos|saldo)$")]
         public string ObjetivoInicial { get; set; }
+
+        public List<string>? ObjetivosIniciais { get; set; }
 
         [RegularExpression("^(instagram|google-play|amigo-familiar|tiktok|google|facebook|youtube|linkedin|outro|prefiro-nao-responder)$")]
         public string OrigemConhecimento { get; set; }

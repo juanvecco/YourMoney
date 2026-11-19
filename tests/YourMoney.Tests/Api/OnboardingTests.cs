@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using YourMoney.Api.Models;
+using YourMoney.Api.Services;
 using YourMoney.Tests.Fixtures;
 
 namespace YourMoney.Tests.Api;
@@ -27,6 +28,14 @@ public static class OnboardingTests
         TestAssert.True(IsValid(model), "Referral source remains optional for existing API clients");
         model.ObjetivoInicial = "gastos";
         TestAssert.True(IsValid(model), "Existing clients can use the default goal");
+        model.ObjetivosIniciais = ["cartao", "gastos"];
+        TestAssert.True(IsValid(model), "Multiple goals are accepted in registration");
+        TestAssert.True(OnboardingGoals.Resolve(model.ObjetivosIniciais, model.ObjetivoInicial)!.SequenceEqual(["cartao", "gastos"]),
+            "All selected goals should be retained in order");
+        TestAssert.True(OnboardingGoals.Resolve(["cartao", "invalido"], "gastos") == null,
+            "Unknown goals must not be silently discarded");
+        TestAssert.True(OnboardingGoals.Resolve(null, "gastos")!.SequenceEqual(["gastos"]),
+            "Existing clients still use their single goal");
         return Task.CompletedTask;
     }
 
