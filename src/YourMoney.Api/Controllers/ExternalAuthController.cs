@@ -24,6 +24,7 @@ public sealed class ExternalAuthController : MainController
     private const string GoogleLinkFlowCookie = "ym_google_link_flow";
     private const string GoogleLinkPendingCookie = "ym_google_link_pending";
     private const string GoogleLinkStartPath = "/api/identidade/externo/vincular/google/iniciar";
+    private const string GoogleLinkReturnPath = "/api/identidade/externo/vincular/google/retorno";
     private const string LegacyGoogleLinkReturnPath = "/api/identidade/externo/retorno";
     private const string GoogleLinkPendingPath = "/api/identidade/vincular/google";
     private readonly SignInManager<IdentityUser> _signIn;
@@ -140,14 +141,17 @@ public sealed class ExternalAuthController : MainController
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { mensagem = "A conexão com Google não está disponível no momento." });
 
-        // Use o caminho exato gerado para o callback OIDC e permita o retorno entre sites.
-        var returnUrl = Url.Action(nameof(Return))!;
-        var returnPath = new Uri(new Uri($"{Request.Scheme}://{Request.Host}"), returnUrl).AbsolutePath;
         Response.Cookies.Delete(GoogleLinkFlowCookie, new CookieOptions
         {
             Secure = true,
             SameSite = SameSiteMode.Lax,
             Path = LegacyGoogleLinkReturnPath
+        });
+        Response.Cookies.Delete(GoogleLinkFlowCookie, new CookieOptions
+        {
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = GoogleLinkReturnPath
         });
         Response.Cookies.Append(GoogleLinkFlowCookie,
             _googleLinkStartProtector.Protect(JsonSerializer.Serialize(ticket), TimeSpan.FromMinutes(5)),
@@ -156,14 +160,61 @@ public sealed class ExternalAuthController : MainController
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Path = returnPath,
+                Path = GoogleLinkReturnPath,
                 MaxAge = TimeSpan.FromMinutes(5)
             });
 
-        var properties = _signIn.ConfigureExternalAuthenticationProperties("google", returnUrl);
+        var properties = _signIn.ConfigureExternalAuthenticationProperties("google", GoogleLinkReturnPath);
         properties.Items["account_link"] = "true";
         properties.Items["account_link_user"] = ticket.UserId;
         return Challenge(properties, "google");
+    }
+
+    [AllowAnonymous]
+    [HttpGet("externo/vincular/google/retorno")]
+    public async Task<IActionResult> ReturnGoogleLink()
+    {
+        var protectedFlow = Request.Cookies[GoogleLinkFlowCookie];
+        Response.Cookies.Delete(GoogleLinkFlowCookie, new CookieOptions
+        {
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = GoogleLinkReturnPath
+        });
+
+        GoogleLinkStartTicket? linkFlowTicket = null;
+        if (!string.IsNullOrWhiteSpace(protectedFlow))
+        {
+            try
+            {
+                linkFlowTicket = JsonSerializer.Deserialize<GoogleLinkStartTicket>(
+                    _googleLinkStartProtector.Unprotect(protectedFlow));
+            }
+            catch (Exception)
+            {
+                // Treat an invalid or expired marker as a failed link attempt.
+            }
+        }
+
+        var info = await _signIn.GetExternalLoginInfoAsync();
+        _logger.LogWarning(
+            "Google link callback. FlowCookiePresent={FlowCookiePresent}; ExternalInfoPresent={ExternalInfoPresent}; Provider={Provider}",
+            !string.IsNullOrWhiteSpace(protectedFlow),
+            info != null,
+            info?.LoginProvider ?? "none");
+
+        try
+        {
+            if (linkFlowTicket == null || string.IsNullOrWhiteSpace(linkFlowTicket.UserId)
+                || info == null || info.LoginProvider != "google" || string.IsNullOrWhiteSpace(info.ProviderKey))
+                return Redirect("/configuracao?secao=seguranca&google=erro");
+
+            return await ReturnFromGoogleLinkAsync(info, linkFlowTicket.UserId);
+        }
+        finally
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
     }
 
     [Authorize]
