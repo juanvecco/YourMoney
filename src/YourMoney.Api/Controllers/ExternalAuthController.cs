@@ -21,8 +21,10 @@ public sealed class ExternalAuthController : MainController
 {
     private const string TicketCookie = "ym_external_ticket";
     private const string GoogleLinkStartCookie = "ym_google_link_start";
+    private const string GoogleLinkFlowCookie = "ym_google_link_flow";
     private const string GoogleLinkPendingCookie = "ym_google_link_pending";
     private const string GoogleLinkStartPath = "/api/identidade/externo/vincular/google/iniciar";
+    private const string GoogleLinkReturnPath = "/api/identidade/externo/retorno";
     private const string GoogleLinkPendingPath = "/api/identidade/vincular/google";
     private readonly SignInManager<IdentityUser> _signIn;
     private readonly UserManager<IdentityUser> _users;
@@ -138,6 +140,17 @@ public sealed class ExternalAuthController : MainController
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { mensagem = "A conexão com Google não está disponível no momento." });
 
+        Response.Cookies.Append(GoogleLinkFlowCookie,
+            _googleLinkStartProtector.Protect(JsonSerializer.Serialize(ticket), TimeSpan.FromMinutes(5)),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Path = GoogleLinkReturnPath,
+                MaxAge = TimeSpan.FromMinutes(5)
+            });
+
         var properties = _signIn.ConfigureExternalAuthenticationProperties("google", Url.Action(nameof(Return))!);
         properties.Items["account_link"] = "true";
         properties.Items["account_link_user"] = ticket.UserId;
@@ -216,7 +229,36 @@ public sealed class ExternalAuthController : MainController
     [HttpGet("externo/retorno")]
     public async Task<IActionResult> Return()
     {
+        var linkFlowCookiePresent = Request.Cookies.ContainsKey(GoogleLinkFlowCookie);
+        GoogleLinkStartTicket? linkFlowTicket = null;
+        if (linkFlowCookiePresent)
+        {
+            var protectedFlow = Request.Cookies[GoogleLinkFlowCookie];
+            Response.Cookies.Delete(GoogleLinkFlowCookie, new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Path = GoogleLinkReturnPath
+            });
+            try
+            {
+                linkFlowTicket = JsonSerializer.Deserialize<GoogleLinkStartTicket>(_googleLinkStartProtector.Unprotect(protectedFlow!));
+            }
+            catch (Exception)
+            {
+                return Redirect("/configuracao?secao=seguranca&google=erro");
+            }
+        }
+
         var info = await _signIn.GetExternalLoginInfoAsync();
+        if (linkFlowCookiePresent)
+        {
+            if (info == null || info.LoginProvider != "google" || string.IsNullOrWhiteSpace(info.ProviderKey)
+                || string.IsNullOrWhiteSpace(linkFlowTicket?.UserId))
+                return Redirect("/configuracao?secao=seguranca&google=erro");
+            return await ReturnFromGoogleLinkAsync(info, linkFlowTicket.UserId);
+        }
+
         if (info == null || info.LoginProvider is not ("google" or "apple")
             || string.IsNullOrWhiteSpace(info.ProviderKey))
             return Redirect("/cadastro?externo=erro");
@@ -350,10 +392,12 @@ public sealed class ExternalAuthController : MainController
         return CustomResponse(await _jwtTokens.GenerateAsync(user));
     }
 
-    private async Task<IActionResult> ReturnFromGoogleLinkAsync(ExternalLoginInfo info)
+    private async Task<IActionResult> ReturnFromGoogleLinkAsync(ExternalLoginInfo info, string? intendedUserId = null)
     {
         var properties = info.AuthenticationProperties;
-        var userId = properties?.Items.TryGetValue("account_link_user", out var storedUserId) == true
+        var userId = !string.IsNullOrWhiteSpace(intendedUserId)
+            ? intendedUserId
+            : properties?.Items.TryGetValue("account_link_user", out var storedUserId) == true
             ? storedUserId
             : null;
         if (info.LoginProvider != "google" || string.IsNullOrWhiteSpace(userId))
