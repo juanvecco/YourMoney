@@ -55,6 +55,7 @@ namespace YourMoney.Api.Configuration
             services.AddScoped<JwtTokenService>();
             services.AddSingleton(TimeProvider.System);
             services.AddScoped<RegistrationInviteService>();
+            services.AddScoped<ExternalAccountLinkService>();
             return services;
         }
     }

@@ -132,6 +132,11 @@ namespace YourMoney.Api.Configuration
             OnRemoteFailure = context =>
             {
                 context.HandleResponse();
+                if (context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true && linkMode == "true")
+                {
+                    context.Response.Redirect("/configuracao?secao=seguranca&google=erro");
+                    return Task.CompletedTask;
+                }
                 var loginOnly = context.Properties?.Items.TryGetValue("login_only", out var mode) == true && mode == "true";
                 context.Response.Redirect(loginOnly ? "/login?externo=erro" : "/cadastro?externo=erro");
                 return Task.CompletedTask;
@@ -139,6 +144,11 @@ namespace YourMoney.Api.Configuration
             OnAccessDenied = context =>
             {
                 context.HandleResponse();
+                if (context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true && linkMode == "true")
+                {
+                    context.Response.Redirect("/configuracao?secao=seguranca&google=cancelado");
+                    return Task.CompletedTask;
+                }
                 var loginOnly = context.Properties?.Items.TryGetValue("login_only", out var mode) == true && mode == "true";
                 context.Response.Redirect(loginOnly ? "/login?externo=erro" : "/cadastro?externo=erro");
                 return Task.CompletedTask;

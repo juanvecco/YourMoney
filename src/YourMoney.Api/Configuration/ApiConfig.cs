@@ -12,14 +12,26 @@ namespace YourMoney.Api.Configuration
 
             services.AddCors(options =>
             {
+                var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                    ?? new[] { "http://localhost:4200", "http://127.0.0.1:4200" };
+                var frontendBaseUrl = configuration["Frontend:BaseUrl"];
+                if (Uri.TryCreate(frontendBaseUrl, UriKind.Absolute, out var frontendUri))
+                    allowedOrigins = [.. allowedOrigins, frontendUri.GetLeftPart(UriPartial.Authority)];
+                allowedOrigins = allowedOrigins.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+
                 options.AddDefaultPolicy(policy =>
                 {
-                    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                        ?? new[] { "http://localhost:4200", "http://127.0.0.1:4200" };
-
                     policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod();
+                });
+
+                options.AddPolicy("GoogleAccountLink", policy =>
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
                 });
             });
 

@@ -61,10 +61,16 @@ namespace YourMoney.Api.Controllers
                 }
             }
 
+            if (await _userManager.FindByEmailAsync(usuarioRegistro.Email.Trim()) != null)
+            {
+                AdicionarErroProcessamento("Este e-mail já tem uma conta. Entre com e-mail e senha; se esqueceu sua senha, recupere o acesso. Depois, conecte Google em Configurações > Segurança e acesso.");
+                return CustomResponse();
+            }
+
             var user = new IdentityUser
             {
-                UserName = usuarioRegistro.Email,
-                Email = usuarioRegistro.Email,
+                UserName = usuarioRegistro.Email.Trim(),
+                Email = usuarioRegistro.Email.Trim(),
                 EmailConfirmed = false
             };
 
@@ -72,6 +78,11 @@ namespace YourMoney.Api.Controllers
 
             if (!result.Succeeded)
             {
+                if (result.Errors.Any(error => error.Code is "DuplicateEmail" or "DuplicateUserName"))
+                {
+                    AdicionarErroProcessamento("Este e-mail já tem uma conta. Entre com e-mail e senha; se esqueceu sua senha, recupere o acesso. Depois, conecte Google em Configurações > Segurança e acesso.");
+                    return CustomResponse();
+                }
                 foreach (var error in result.Errors)
                 {
                     AdicionarErroProcessamento(error.Description);

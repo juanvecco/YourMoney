@@ -1,7 +1,10 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +20,10 @@ namespace YourMoney.Api.Controllers;
 public sealed class ExternalAuthController : MainController
 {
     private const string TicketCookie = "ym_external_ticket";
+    private const string GoogleLinkStartCookie = "ym_google_link_start";
+    private const string GoogleLinkPendingCookie = "ym_google_link_pending";
+    private const string GoogleLinkStartPath = "/api/identidade/externo/vincular/google/iniciar";
+    private const string GoogleLinkPendingPath = "/api/identidade/vincular/google";
     private readonly SignInManager<IdentityUser> _signIn;
     private readonly UserManager<IdentityUser> _users;
     private readonly IConfiguration _configuration;
@@ -26,6 +33,9 @@ public sealed class ExternalAuthController : MainController
     private readonly ILogger<ExternalAuthController> _logger;
     private readonly RegistrationInviteService _invites;
     private readonly ApplicationDbContext _db;
+    private readonly ITimeLimitedDataProtector _googleLinkStartProtector;
+    private readonly ITimeLimitedDataProtector _googleLinkPendingProtector;
+    private readonly ExternalAccountLinkService _accountLinks;
 
     public ExternalAuthController(
         SignInManager<IdentityUser> signIn,
@@ -36,7 +46,8 @@ public sealed class ExternalAuthController : MainController
         IUsuarioDemonstracaoService initialData,
         ILogger<ExternalAuthController> logger,
         RegistrationInviteService invites,
-        ApplicationDbContext db)
+        ApplicationDbContext db,
+        ExternalAccountLinkService accountLinks)
     {
         _signIn = signIn;
         _users = users;
@@ -47,6 +58,9 @@ public sealed class ExternalAuthController : MainController
         _logger = logger;
         _invites = invites;
         _db = db;
+        _accountLinks = accountLinks;
+        _googleLinkStartProtector = dataProtection.CreateProtector("YourMoney.GoogleLink.Start.v1").ToTimeLimitedDataProtector();
+        _googleLinkPendingProtector = dataProtection.CreateProtector("YourMoney.GoogleLink.Pending.v1").ToTimeLimitedDataProtector();
     }
 
     [HttpGet("metodos")]
@@ -55,6 +69,122 @@ public sealed class ExternalAuthController : MainController
         google = ExternalProviderConfiguration.GoogleAvailable(_configuration),
         apple = ExternalProviderConfiguration.AppleAvailable(_configuration)
     });
+
+    [Authorize]
+    [HttpGet("vinculos")]
+    public async Task<ActionResult> GetAccountLinkStatus()
+    {
+        var userId = CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        var status = await _accountLinks.GetStatusAsync(userId, HttpContext.RequestAborted);
+        return status == null ? Unauthorized() : CustomResponse(status);
+    }
+
+    [Authorize]
+    [EnableCors("GoogleAccountLink")]
+    [HttpPost("vincular/google/preparar")]
+    public async Task<ActionResult> PrepareGoogleLink([FromBody] PrepareGoogleLinkRequest request)
+    {
+        var userId = CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        if (!ExternalProviderConfiguration.GoogleAvailable(_configuration))
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { mensagem = "A conexão com Google não está disponível no momento." });
+
+        var result = await _accountLinks.PrepareAsync(userId, request.SenhaAtual, HttpContext.RequestAborted);
+        if (!result.Succeeded) return MapLinkFailure(result.Failure);
+
+        Response.Cookies.Delete(GoogleLinkPendingCookie, new CookieOptions { Path = GoogleLinkPendingPath, Secure = true, SameSite = SameSiteMode.None });
+
+        var ticket = new GoogleLinkStartTicket(userId, result.Ticket!);
+        Response.Cookies.Append(GoogleLinkStartCookie,
+            _googleLinkStartProtector.Protect(JsonSerializer.Serialize(ticket), TimeSpan.FromMinutes(5)),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = GoogleLinkStartPath,
+                MaxAge = TimeSpan.FromMinutes(5)
+            });
+
+        return CustomResponse(new PrepareGoogleLinkResponse(GoogleLinkStartPath));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("externo/vincular/google/iniciar")]
+    public async Task<IActionResult> StartGoogleLink()
+    {
+        if (!IsAllowedFrontendOrigin()) return Forbid();
+        var protectedTicket = Request.Cookies[GoogleLinkStartCookie];
+        Response.Cookies.Delete(GoogleLinkStartCookie, new CookieOptions { Path = GoogleLinkStartPath, Secure = true, SameSite = SameSiteMode.None });
+        if (string.IsNullOrWhiteSpace(protectedTicket)) return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
+
+        GoogleLinkStartTicket? ticket;
+        try
+        {
+            var json = _googleLinkStartProtector.Unprotect(protectedTicket);
+            ticket = JsonSerializer.Deserialize<GoogleLinkStartTicket>(json);
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
+        }
+
+        if (ticket == null || string.IsNullOrWhiteSpace(ticket.UserId) || string.IsNullOrWhiteSpace(ticket.Nonce)
+            || !await _accountLinks.ConsumeStartTicketAsync(ticket.UserId, ticket.Nonce, HttpContext.RequestAborted))
+            return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
+        if (!ExternalProviderConfiguration.GoogleAvailable(_configuration))
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { mensagem = "A conexão com Google não está disponível no momento." });
+
+        var properties = _signIn.ConfigureExternalAuthenticationProperties("google", Url.Action(nameof(Return))!);
+        properties.Items["account_link"] = "true";
+        properties.Items["account_link_user"] = ticket.UserId;
+        return Challenge(properties, "google");
+    }
+
+    [Authorize]
+    [EnableCors("GoogleAccountLink")]
+    [HttpGet("vincular/google/pendente")]
+    public async Task<ActionResult> GetPendingGoogleLink()
+    {
+        var userId = CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        var pending = ReadPendingTicket();
+        if (pending == null) return Unauthorized();
+        var result = await _accountLinks.GetPendingAsync(userId, pending, HttpContext.RequestAborted);
+        return result == null ? Unauthorized() : CustomResponse(result);
+    }
+
+    [Authorize]
+    [EnableCors("GoogleAccountLink")]
+    [HttpPost("vincular/google/confirmar")]
+    public async Task<ActionResult> ConfirmGoogleLink()
+    {
+        var userId = CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        var pending = ReadPendingTicket();
+        Response.Cookies.Delete(GoogleLinkPendingCookie, new CookieOptions { Path = GoogleLinkPendingPath, Secure = true, SameSite = SameSiteMode.None });
+        if (pending == null) return Unauthorized();
+
+        var result = await _accountLinks.ConfirmAsync(userId, pending, HttpContext.RequestAborted);
+        if (!result.Succeeded) return MapLinkFailure(result.Failure);
+        return CustomResponse(result.Status);
+    }
+
+    [Authorize]
+    [EnableCors("GoogleAccountLink")]
+    [HttpPost("vincular/google/cancelar")]
+    public async Task<ActionResult> CancelGoogleLink()
+    {
+        var userId = CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        var pending = ReadPendingTicket();
+        Response.Cookies.Delete(GoogleLinkPendingCookie, new CookieOptions { Path = GoogleLinkPendingPath, Secure = true, SameSite = SameSiteMode.None });
+        await _accountLinks.CancelPendingAsync(userId, pending, HttpContext.RequestAborted);
+        return NoContent();
+    }
 
     [HttpPost("externo/iniciar/{provider}")]
     public async Task<IActionResult> Start(string provider, [FromForm] CadastroExternoInicio request)
@@ -93,13 +223,19 @@ public sealed class ExternalAuthController : MainController
 
         try
         {
+            if (info.AuthenticationProperties?.Items.TryGetValue("account_link", out var linkMode) == true
+                && linkMode == "true")
+                return await ReturnFromGoogleLinkAsync(info);
+
             var email = info.Principal.FindFirstValue(ClaimTypes.Email)
                 ?? info.Principal.FindFirstValue("email");
             var loginOnly = info.AuthenticationProperties?.Items.TryGetValue("login_only", out var mode) == true && mode == "true";
             var resolution = await ExternalAccountResolver.ResolveAsync(
                 _users, info.LoginProvider, info.ProviderKey, email, loginOnly);
             if (resolution.Status == ExternalAccountStatus.LoginNotLinked)
-                return Redirect("/login?externo=conta-inexistente");
+                return Redirect(info.LoginProvider == "google"
+                    ? "/login?externo=google-nao-vinculado"
+                    : "/login?externo=conta-inexistente");
             if (resolution.Status == ExternalAccountStatus.EmailAlreadyRegistered)
                 return Redirect("/cadastro?externo=conta-existente");
             var user = resolution.User;
@@ -213,4 +349,89 @@ public sealed class ExternalAuthController : MainController
         if (user == null || await _users.IsLockedOutAsync(user)) return Unauthorized();
         return CustomResponse(await _jwtTokens.GenerateAsync(user));
     }
+
+    private async Task<IActionResult> ReturnFromGoogleLinkAsync(ExternalLoginInfo info)
+    {
+        var properties = info.AuthenticationProperties;
+        var userId = properties?.Items.TryGetValue("account_link_user", out var storedUserId) == true
+            ? storedUserId
+            : null;
+        if (info.LoginProvider != "google" || string.IsNullOrWhiteSpace(userId))
+            return Redirect("/configuracao?secao=seguranca&google=erro");
+
+        var user = await _users.FindByIdAsync(userId);
+        if (user == null || await _users.IsLockedOutAsync(user))
+            return Redirect("/configuracao?secao=seguranca&google=erro");
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email)
+            ?? info.Principal.FindFirstValue("email");
+        var emailVerified = info.Principal.FindFirstValue("email_verified");
+        if (!ExternalAccountLinkService.IsVerifiedEmailMatch(user.Email, email, emailVerified, _users.KeyNormalizer!))
+            return Redirect("/configuracao?secao=seguranca&google=email-diferente");
+
+        var pending = await _accountLinks.CreatePendingAsync(user.Id, info.ProviderKey, email!, HttpContext.RequestAborted);
+        if (!pending.Succeeded)
+        {
+            return pending.Failure switch
+            {
+                ExternalAccountLinkFailure.AlreadyLinked => Redirect("/configuracao?secao=seguranca&google=conectado"),
+                ExternalAccountLinkFailure.IdentityConflict => Redirect("/configuracao?secao=seguranca&google=conflito"),
+                _ => Redirect("/configuracao?secao=seguranca&google=erro")
+            };
+        }
+
+        var ticket = new GoogleLinkPendingTicket(user.Id, info.ProviderKey, email!, pending.Ticket!);
+        Response.Cookies.Append(GoogleLinkPendingCookie,
+            _googleLinkPendingProtector.Protect(JsonSerializer.Serialize(ticket), TimeSpan.FromMinutes(5)),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = GoogleLinkPendingPath,
+                MaxAge = TimeSpan.FromMinutes(5)
+            });
+        return Redirect("/configuracao?secao=seguranca&google=pendente");
+    }
+
+    private string? CurrentUserId() =>
+        User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    private GoogleLinkPendingTicket? ReadPendingTicket()
+    {
+        var protectedTicket = Request.Cookies[GoogleLinkPendingCookie];
+        if (string.IsNullOrWhiteSpace(protectedTicket)) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<GoogleLinkPendingTicket>(_googleLinkPendingProtector.Unprotect(protectedTicket));
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private bool IsAllowedFrontendOrigin()
+    {
+        var origin = Request.Headers.Origin.FirstOrDefault();
+        if (!Uri.TryCreate(origin, UriKind.Absolute, out var requestedOrigin)) return false;
+        var allowed = new List<string>();
+        var frontend = _configuration["Frontend:BaseUrl"]?.TrimEnd('/');
+        if (!string.IsNullOrWhiteSpace(frontend)) allowed.Add(frontend);
+        allowed.AddRange(_configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? []);
+        allowed.Add($"{Request.Scheme}://{Request.Host}");
+        return allowed.Any(candidate => Uri.TryCreate(candidate, UriKind.Absolute, out var allowedOrigin)
+            && string.Equals(allowedOrigin.GetLeftPart(UriPartial.Authority), requestedOrigin.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase));
+    }
+
+    private ActionResult MapLinkFailure(ExternalAccountLinkFailure failure) => failure switch
+    {
+        ExternalAccountLinkFailure.InvalidPassword => BadRequest(new { mensagem = "A senha não confere. Confira a senha da sua conta YourMoney e tente novamente." }),
+        ExternalAccountLinkFailure.AccountLocked => Unauthorized(new { mensagem = "Por segurança, entre novamente na sua conta antes de conectar o Google." }),
+        ExternalAccountLinkFailure.AccountNotFound => Unauthorized(),
+        ExternalAccountLinkFailure.AlreadyLinked => Conflict(new { mensagem = "O Google já está conectado a esta conta." }),
+        ExternalAccountLinkFailure.EmailMismatch => UnprocessableEntity(new { mensagem = "O Google precisa usar o mesmo e-mail verificado da sua conta YourMoney." }),
+        ExternalAccountLinkFailure.IdentityConflict => Conflict(new { mensagem = "Esta conta Google já está conectada a outra conta YourMoney." }),
+        _ => Unauthorized(new { mensagem = "A tentativa expirou ou já foi usada. Inicie novamente." })
+    };
 }

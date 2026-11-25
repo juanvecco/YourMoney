@@ -86,7 +86,7 @@ namespace YourMoney.Tests.Api
             return Task.CompletedTask;
         }
 
-        public static Task CorsAllowsLocalDevelopmentOriginsWithoutCredentialSharing()
+        public static Task CorsScopesCredentialSharingToGoogleLinkEndpoints()
         {
             var apiConfigPath = Path.Combine(
                 FindSolutionRoot(),
@@ -103,7 +103,13 @@ namespace YourMoney.Tests.Api
                 "API should accept only configured local development frontend origins");
             TestAssert.True(source.Contains("AllowAnyHeader", StringComparison.Ordinal), "API should accept Authorization headers from local development origins");
             TestAssert.True(source.Contains("AllowAnyMethod", StringComparison.Ordinal), "API should accept protected REST methods from local development origins");
-            TestAssert.True(!source.Contains("AllowCredentials", StringComparison.Ordinal), "API should not enable credential sharing for bearer-token local origins");
+            var defaultPolicyStart = source.IndexOf("AddDefaultPolicy", StringComparison.Ordinal);
+            var linkPolicyStart = source.IndexOf("AddPolicy(\"GoogleAccountLink\"", StringComparison.Ordinal);
+            var defaultPolicy = source[defaultPolicyStart..linkPolicyStart];
+            var linkPolicy = source[linkPolicyStart..source.IndexOf("});", linkPolicyStart, StringComparison.Ordinal)];
+            TestAssert.True(!defaultPolicy.Contains("AllowCredentials", StringComparison.Ordinal), "Default bearer-token endpoints should not share browser credentials");
+            TestAssert.True(linkPolicy.Contains("AllowCredentials", StringComparison.Ordinal), "Google link endpoints need their short-lived HttpOnly handoff cookies");
+            TestAssert.True(source.Contains("WithOrigins(allowedOrigins)", StringComparison.Ordinal), "Credentialed Google-link CORS must remain limited to configured frontend origins");
 
             return Task.CompletedTask;
         }

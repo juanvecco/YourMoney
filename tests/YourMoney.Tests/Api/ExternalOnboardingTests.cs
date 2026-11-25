@@ -2,12 +2,16 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using YourMoney.Api.Configuration;
+using YourMoney.Api.Controllers;
+using YourMoney.Api.Models;
 using YourMoney.Api.Services;
 using YourMoney.Infrastructure.Data;
 using YourMoney.Tests.Fixtures;
@@ -99,5 +103,31 @@ public static class ExternalOnboardingTests
             "Login-only flow cannot create a surprise account");
         var newAccount = await ExternalAccountResolver.ResolveAsync(users, "apple", "apple-sub", "new@example.test", false);
         TestAssert.Equal(ExternalAccountStatus.New, newAccount.Status, "Unknown provider subject can begin new registration");
+    }
+
+    public static Task GoogleLinkEndpointsUseAuthenticatedAccountAndScopedCookiePolicy()
+    {
+        var controller = typeof(ExternalAuthController);
+        foreach (var name in new[] { nameof(ExternalAuthController.GetAccountLinkStatus), nameof(ExternalAuthController.PrepareGoogleLink),
+                     nameof(ExternalAuthController.GetPendingGoogleLink), nameof(ExternalAuthController.ConfirmGoogleLink), nameof(ExternalAuthController.CancelGoogleLink) })
+        {
+            var method = controller.GetMethod(name)!;
+            TestAssert.True(method.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length > 0,
+                $"{name} requires the current authenticated account");
+            TestAssert.True(method.GetParameters().All(parameter => parameter.ParameterType != typeof(string)),
+                $"{name} does not accept a client-selected user id");
+        }
+
+        var prepare = controller.GetMethod(nameof(ExternalAuthController.PrepareGoogleLink))!;
+        TestAssert.Equal(typeof(PrepareGoogleLinkRequest), prepare.GetParameters().Single().ParameterType,
+            "Preparation accepts only the current password request");
+        var prepareCors = prepare.GetCustomAttributes(typeof(EnableCorsAttribute), true).Cast<EnableCorsAttribute>().Single();
+        TestAssert.Equal("GoogleAccountLink", prepareCors.PolicyName, "Credentialed CORS is scoped to link preparation");
+
+        var continuation = controller.GetMethod(nameof(ExternalAuthController.StartGoogleLink))!;
+        TestAssert.True(continuation.GetCustomAttributes(typeof(AllowAnonymousAttribute), true).Length > 0,
+            "Top-level OIDC continuation uses its protected one-use cookie, not the SPA bearer token");
+        TestAssert.Equal(0, continuation.GetParameters().Length, "Continuation accepts no user id or ticket from the browser");
+        return Task.CompletedTask;
     }
 }
