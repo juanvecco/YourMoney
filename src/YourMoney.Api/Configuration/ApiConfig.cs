@@ -71,6 +71,38 @@ namespace YourMoney.Api.Configuration
                 }
             });
             app.UseRouting();
+            app.Use(async (context, next) =>
+            {
+                const string googleLinkReturnPath = "/api/identidade/externo/vincular/google/retorno";
+                if (!string.Equals(context.Request.Path.Value, googleLinkReturnPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    await next();
+                    return;
+                }
+
+                var logger = context.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.GoogleLinkReturn");
+                logger.LogWarning(
+                    "Google link return request reached routing. EndpointMatched={EndpointMatched}",
+                    context.GetEndpoint() != null);
+                context.Response.OnStarting(() =>
+                {
+                    var location = context.Response.Headers.Location.ToString();
+                    string? redirectPath = null;
+                    if (Uri.TryCreate(location, UriKind.Absolute, out var absoluteLocation))
+                        redirectPath = absoluteLocation.AbsolutePath;
+                    else if (!string.IsNullOrWhiteSpace(location))
+                        redirectPath = location.Split('?', '#')[0];
+
+                    logger.LogWarning(
+                        "Google link return response. StatusCode={StatusCode}; RedirectPath={RedirectPath}",
+                        context.Response.StatusCode,
+                        redirectPath ?? "none");
+                    return Task.CompletedTask;
+                });
+                await next();
+            });
             app.UseCors();
 
             app.UseIdentityConfiguration();
