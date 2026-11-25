@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
+using System.Security.Claims;
+using System.Text;
 using YourMoney.Application.DTOs;
 using YourMoney.Application.Interfaces;
 using YourMoney.Domain.Repositories;
 using YourMoney.Application.Services;
 using YourMoney.Api.Services;
+using System.Text.RegularExpressions;
 
 namespace YourMoney.Api.Controllers;
 
@@ -15,13 +19,32 @@ namespace YourMoney.Api.Controllers;
 public sealed class InvestimentoGruposController : ControllerBase
 {
     private const long TamanhoMaximoImagem = 5 * 1024 * 1024;
+    private static readonly Regex NomeImagemValido = new(@"^[0-9a-f]{32}\.(png|jpg|webp)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly HashSet<string> ImagensPadrao = new(StringComparer.Ordinal)
+    {
+        "/assets/objectives/city-lx-sedan.jpg",
+        "/assets/objectives/financial-freedom.jpg",
+        "/assets/objectives/long-term.jpg",
+        "/assets/objectives/emergency-fund.jpg"
+    };
     private readonly IGrupoObjetivoInvestimentoService _service;
     private readonly IWebHostEnvironment? _environment;
+    private readonly ICurrentUserService? _currentUser;
+    private readonly bool _uploadsImagemHabilitados;
 
-    public InvestimentoGruposController(IGrupoObjetivoInvestimentoService service, IWebHostEnvironment? environment = null)
+    public InvestimentoGruposController(
+        IGrupoObjetivoInvestimentoService service,
+        ICurrentUserService? currentUser = null,
+        IWebHostEnvironment? environment = null,
+        IConfiguration? configuration = null)
     {
         _service = service;
+        _currentUser = currentUser;
         _environment = environment;
+        var configuracaoUploads = configuration?["OBJECTIVE_IMAGE_UPLOADS_ENABLED"];
+        _uploadsImagemHabilitados = bool.TryParse(configuracaoUploads, out var habilitados)
+            ? habilitados
+            : environment?.IsDevelopment() == true;
     }
 
     [HttpGet]
@@ -52,6 +75,7 @@ public sealed class InvestimentoGruposController : ControllerBase
     {
         try
         {
+            ValidarImagemParaSalvar(request?.ImagemUrl, null);
             var response = await _service.CriarAsync(request);
             return CreatedAtAction(nameof(Obter), new { id = response.Id }, response);
         }
@@ -64,6 +88,10 @@ public sealed class InvestimentoGruposController : ControllerBase
     [RequestSizeLimit(TamanhoMaximoImagem + 64 * 1024)]
     public async Task<IActionResult> EnviarImagem([FromForm] IFormFile? imagem)
     {
+        if (!_uploadsImagemHabilitados)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                Erro("upload_imagem_indisponivel", "O envio de imagens está temporariamente indisponível neste piloto."));
+
         if (imagem == null || imagem.Length == 0)
             return BadRequest(Erro("imagem_obrigatoria", "Selecione uma imagem para o objetivo."));
         if (imagem.Length > TamanhoMaximoImagem)
@@ -73,10 +101,7 @@ public sealed class InvestimentoGruposController : ControllerBase
         if (extensao == null)
             return BadRequest(Erro("imagem_invalida", "Use uma imagem PNG, JPEG ou WebP válida."));
 
-        var raizAplicacao = _environment?.ContentRootPath;
-        if (string.IsNullOrWhiteSpace(raizAplicacao))
-            raizAplicacao = AppContext.BaseDirectory;
-        var pasta = Path.Combine(raizAplicacao, "App_Data", "ObjectiveImages");
+        var pasta = PastaImagensTitular(ObterRaizAplicacao());
         Directory.CreateDirectory(pasta);
 
         var nomeArquivo = $"{Guid.NewGuid():N}{extensao}";
@@ -87,10 +112,64 @@ public sealed class InvestimentoGruposController : ControllerBase
         return Ok(new { imagemUrl = $"/uploads/objetivos/{nomeArquivo}" });
     }
 
+    [HttpGet("imagens/status")]
+    public IActionResult ObterStatusUploadImagem() => Ok(new { uploadHabilitado = _uploadsImagemHabilitados });
+
+    [HttpGet("imagens/{nomeArquivo}")]
+    public async Task<IActionResult> ObterImagem(string nomeArquivo)
+    {
+        if (!NomeImagemValido.IsMatch(nomeArquivo ?? string.Empty))
+            return NotFound();
+
+        var raizAplicacao = ObterRaizAplicacao();
+        var arquivoTitular = Path.Combine(PastaImagensTitular(raizAplicacao), nomeArquivo);
+        if (System.IO.File.Exists(arquivoTitular))
+            return ServirImagemPrivada(arquivoTitular, nomeArquivo);
+
+        // Compatibility for images uploaded before private per-user folders existed.
+        // A legacy image is served only when one of this user's saved goals references it.
+        var urlLegada = $"/uploads/objetivos/{nomeArquivo}";
+        var imagensTitular = await _service.ListarAsync(true);
+        if (!imagensTitular.Any(grupo => string.Equals(grupo.ImagemUrl, urlLegada, StringComparison.Ordinal)))
+            return NotFound();
+
+        var arquivoLegado = Path.Combine(PastaImagensLegadas(raizAplicacao), nomeArquivo);
+        if (!System.IO.File.Exists(arquivoLegado))
+            return NotFound();
+
+        return ServirImagemPrivada(arquivoLegado, nomeArquivo);
+    }
+
+    [HttpDelete("imagens/{nomeArquivo}")]
+    public async Task<IActionResult> ExcluirImagemTemporaria(string nomeArquivo)
+    {
+        if (!NomeImagemValido.IsMatch(nomeArquivo ?? string.Empty))
+            return NotFound();
+
+        var url = $"/uploads/objetivos/{nomeArquivo}";
+        var grupos = await _service.ListarAsync(true);
+        if (grupos.Any(grupo => string.Equals(grupo.ImagemUrl, url, StringComparison.Ordinal)))
+            return Conflict(Erro("imagem_em_uso", "A imagem está associada a um objetivo."));
+
+        var arquivo = Path.Combine(PastaImagensTitular(ObterRaizAplicacao()), nomeArquivo);
+        if (System.IO.File.Exists(arquivo))
+            System.IO.File.Delete(arquivo);
+
+        return NoContent();
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Renomear(Guid id, [FromBody] RenomearGrupoObjetivoRequest request)
     {
-        try { return Ok(await _service.RenomearAsync(id, request)); }
+        try
+        {
+            var atual = await _service.ObterAsync(id);
+            ValidarImagemParaSalvar(request?.ImagemUrl, atual);
+            var atualizado = await _service.RenomearAsync(id, request);
+            if (!string.Equals(atual.ImagemUrl, atualizado.ImagemUrl, StringComparison.Ordinal))
+                await ExcluirImagemPrivadaSeOrfaAsync(atual.ImagemUrl);
+            return Ok(atualizado);
+        }
         catch (ArgumentException ex) { return BadRequest(Erro("grupo_invalido", ex.Message)); }
         catch (KeyNotFoundException ex) { return NotFound(Erro("grupo_nao_encontrado", ex.Message)); }
         catch (GrupoObjetivoConflitoException ex) { return Conflict(Erro(ex.Codigo, ex.Message)); }
@@ -102,7 +181,9 @@ public sealed class InvestimentoGruposController : ControllerBase
     {
         try
         {
+            var atual = await _service.ObterAsync(id);
             await _service.ExcluirAsync(id, request);
+            await ExcluirImagemPrivadaSeOrfaAsync(atual.ImagemUrl);
             return NoContent();
         }
         catch (ArgumentException ex) { return BadRequest(Erro("exclusao_invalida", ex.Message)); }
@@ -129,6 +210,94 @@ public sealed class InvestimentoGruposController : ControllerBase
     }
 
     private static ErroApiResponse Erro(string code, string message) => new() { Code = code, Message = message };
+
+    private void ValidarImagemParaSalvar(string? imagemUrl, GrupoObjetivoInvestimentoResponse? objetivoAtual)
+    {
+        if (string.IsNullOrWhiteSpace(imagemUrl) || ImagensPadrao.Contains(imagemUrl))
+            return;
+
+        if (!TryObterNomeImagem(imagemUrl, out var nomeArquivo))
+            throw new ArgumentException("A imagem do objetivo é inválida.");
+
+        var arquivoTitular = Path.Combine(PastaImagensTitular(ObterRaizAplicacao()), nomeArquivo);
+        if (System.IO.File.Exists(arquivoTitular))
+            return;
+
+        // Allows keeping an image from the legacy public directory on the same owned goal.
+        if (objetivoAtual != null && string.Equals(objetivoAtual.ImagemUrl, imagemUrl, StringComparison.Ordinal))
+            return;
+
+        throw new ArgumentException("Envie novamente a imagem para associá-la a este objetivo.");
+    }
+
+    private async Task ExcluirImagemPrivadaSeOrfaAsync(string? imagemUrl)
+    {
+        if (!TryObterNomeImagem(imagemUrl, out var nomeArquivo))
+            return;
+
+        var grupos = await _service.ListarAsync(true);
+        if (grupos.Any(grupo => string.Equals(grupo.ImagemUrl, imagemUrl, StringComparison.Ordinal)))
+            return;
+
+        var arquivo = Path.Combine(PastaImagensTitular(ObterRaizAplicacao()), nomeArquivo);
+        if (!System.IO.File.Exists(arquivo))
+            return;
+
+        try { System.IO.File.Delete(arquivo); }
+        catch (IOException) { /* A remoção do objetivo já foi concluída; a limpeza pode ser repetida depois. */ }
+        catch (UnauthorizedAccessException) { /* A remoção do objetivo já foi concluída; a limpeza pode ser repetida depois. */ }
+    }
+
+    private PhysicalFileResult ServirImagemPrivada(string caminho, string nomeArquivo)
+    {
+        Response.Headers.CacheControl = "private, no-store";
+        Response.Headers.XContentTypeOptions = "nosniff";
+        return PhysicalFile(caminho, ObterContentType(nomeArquivo));
+    }
+
+    private string ObterRaizAplicacao()
+    {
+        var raiz = _environment?.ContentRootPath;
+        return string.IsNullOrWhiteSpace(raiz) ? AppContext.BaseDirectory : raiz;
+    }
+
+    private string PastaImagensTitular(string raizAplicacao)
+    {
+        var userId = _currentUser?.UserId
+            ?? User?.FindFirstValue("sub")
+            ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new UnauthorizedAccessException("Usuário autenticado não identificado.");
+        var hashTitular = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(userId)));
+        return Path.Combine(raizAplicacao, "App_Data", "ObjectiveImages", hashTitular);
+    }
+
+    private static string PastaImagensLegadas(string raizAplicacao) =>
+        Path.Combine(raizAplicacao, "App_Data", "ObjectiveImages");
+
+    private static bool TryObterNomeImagem(string? imagemUrl, out string nomeArquivo)
+    {
+        nomeArquivo = string.Empty;
+        const string prefixo = "/uploads/objetivos/";
+        if (string.IsNullOrWhiteSpace(imagemUrl) || !imagemUrl.StartsWith(prefixo, StringComparison.Ordinal))
+            return false;
+
+        var candidato = imagemUrl[prefixo.Length..];
+        if (!NomeImagemValido.IsMatch(candidato))
+            return false;
+
+        nomeArquivo = candidato;
+        return true;
+    }
+
+    private static string ObterContentType(string nomeArquivo) =>
+        Path.GetExtension(nomeArquivo).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".jpg" => "image/jpeg",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
 
     private static async Task<string?> DetectarExtensaoAsync(IFormFile imagem)
     {

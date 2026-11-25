@@ -52,11 +52,12 @@ namespace YourMoney.Application.Services
                 request.Data.Date,
                 request.IdContaFinanceira,
                 request.IdCategoria);
+            despesa.AtualizarMesReferencia(request.MesReferencia);
             despesa.DefinirUsuario(usuarioId);
 
             await _despesaRepository.AdicionarAsync(despesa);
 
-            return MapearCriacaoDespesa(despesa, request.MesReferencia.Date);
+            return MapearCriacaoDespesa(despesa);
         }
 
         public async Task<Despesa> GetDespesaByIdAsync(Guid id)
@@ -116,7 +117,7 @@ namespace YourMoney.Application.Services
         public async Task<List<DespesaDTO>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
         {
             var despesas = await _despesaRepository.ObterPorMesAnoAsync(mes, ano, _currentUserService.UserId, idContaFinanceira);
-            var filtradas = despesas.Where(d => d.Data.Month == mes && d.Data.Year == ano
+            var filtradas = despesas.Where(d => d.MesReferencia.Month == mes && d.MesReferencia.Year == ano
                                         && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
                            .ToList();
             var reembolsos = await _receitaRepository.GetTotaisReembolsadosPorDespesasAsync(
@@ -193,6 +194,7 @@ namespace YourMoney.Application.Services
                     request.DataInicial.Date,
                     request.IdContaFinanceira,
                     request.IdCategoria);
+                despesa.AtualizarMesReferencia(request.MesReferenciaInicial ?? request.DataInicial);
                 despesa.DefinirUsuario(usuarioId);
 
                 await _despesaRepository.AdicionarAsync(despesa);
@@ -218,6 +220,8 @@ namespace YourMoney.Application.Services
                     CalcularDataParcela(request.DataInicial, index),
                     request.IdContaFinanceira,
                     request.IdCategoria);
+                despesa.AtualizarMesReferencia(
+                    (request.MesReferenciaInicial ?? request.DataInicial).AddMonths(index));
                 despesa.DefinirUsuario(usuarioId);
 
                 despesa.AplicarParcelamento(
@@ -405,6 +409,7 @@ namespace YourMoney.Application.Services
                 Descricao = despesa.Descricao,
                 Valor = despesa.Valor,
                 Data = despesa.Data,
+                MesReferencia = despesa.MesReferencia,
                 IdContaFinanceira = despesa.IdContaFinanceira,
                 IdCategoria = despesa.IdCategoria,
                 ParcelamentoId = despesa.ParcelamentoId,
@@ -418,7 +423,7 @@ namespace YourMoney.Application.Services
             };
         }
 
-        private static CriarDespesaResponse MapearCriacaoDespesa(Despesa despesa, DateTime mesReferencia)
+        private static CriarDespesaResponse MapearCriacaoDespesa(Despesa despesa)
         {
             return new CriarDespesaResponse
             {
@@ -426,7 +431,7 @@ namespace YourMoney.Application.Services
                 Descricao = despesa.Descricao,
                 Valor = despesa.Valor,
                 Data = despesa.Data,
-                MesReferencia = mesReferencia,
+                MesReferencia = despesa.MesReferencia,
                 IdContaFinanceira = despesa.IdContaFinanceira,
                 IdCategoria = despesa.IdCategoria
             };
@@ -441,6 +446,7 @@ namespace YourMoney.Application.Services
                 Descricao = dto.Descricao,
                 Valor = dto.Valor,
                 Data = dto.Data,
+                MesReferencia = dto.MesReferencia,
                 IdContaFinanceira = dto.IdContaFinanceira,
                 IdCategoria = dto.IdCategoria,
                 ParcelamentoId = dto.ParcelamentoId,

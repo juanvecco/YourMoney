@@ -5,6 +5,7 @@ namespace YourMoney.Application.DTOs
         public string? Descricao { get; set; }
         public decimal ValorTotal { get; set; }
         public DateTime DataInicial { get; set; }
+        public DateTime? MesReferenciaInicial { get; set; }
         public int QuantidadeParcelas { get; set; }
         public Guid IdContaFinanceira { get; set; }
         public Guid IdCategoria { get; set; }

@@ -203,6 +203,9 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("MesReferencia")
+                        .HasColumnType("date");
+
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -244,6 +247,9 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.HasIndex("ParcelamentoId")
                         .HasDatabaseName("IX_Despesa_ParcelamentoId");
+
+                    b.HasIndex("UsuarioId", "MesReferencia")
+                        .HasDatabaseName("IX_Despesa_UsuarioId_MesReferencia");
 
                     b.HasIndex("UsuarioId");
 

@@ -10,6 +10,7 @@ namespace YourMoney.Domain.Entities
         public string Descricao { get; private set; }
         public Decimal Valor { get; private set; }
         public DateTime Data { get; private set; }
+        public DateTime MesReferencia { get; private set; }
         public Guid IdContaFinanceira { get; private set; }
         public virtual ContaFinanceira ContaFinanceira { get; private set; }
         public Guid IdCategoria { get; private set; }
@@ -32,6 +33,7 @@ namespace YourMoney.Domain.Entities
             AtualizarDescricao(descricao);
             AtualizarValor(valor);
             AtualizarData(data);
+            AtualizarMesReferencia(data);
             AtualizarContaFinanceira(idContaFinanceira);
             AtualizarCategoria(idCategoria);
             //TipoRecorrencia = tipoRecorrencia;
@@ -65,6 +67,17 @@ namespace YourMoney.Domain.Entities
         {
             if (Data != default && Data != data) Conferida = false;
             Data = data;
+        }
+
+        public void AtualizarMesReferencia(DateTime mesReferencia)
+        {
+            if (mesReferencia == default)
+                throw new ArgumentException("Mês de referência é obrigatório.", nameof(mesReferencia));
+
+            var mesNormalizado = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
+            if (MesReferencia != default && MesReferencia != mesNormalizado)
+                Conferida = false;
+            MesReferencia = mesNormalizado;
         }
         public void AtualizarContaFinanceira(Guid idContaFinanceira)
         {

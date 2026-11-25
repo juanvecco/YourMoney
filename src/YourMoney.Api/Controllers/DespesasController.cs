@@ -70,8 +70,8 @@ namespace YourMoney.Api.Controllers
                     nameof(ObterPorReferencia),
                     new
                     {
-                        mes = primeiraParcela?.Data.Month,
-                        ano = primeiraParcela?.Data.Year,
+                        mes = primeiraParcela?.MesReferencia?.Month,
+                        ano = primeiraParcela?.MesReferencia?.Year,
                         idContaFinanceira = primeiraParcela?.IdContaFinanceira
                     },
                     response);
@@ -140,10 +140,18 @@ namespace YourMoney.Api.Controllers
         public async Task<IActionResult> AtualizarDespesa(Guid id, [FromBody] DespesaDTO dto)
         {
             var despesa = await _despesaService.GetDespesaByIdAsync(id);
+            var dataOriginal = despesa.Data;
+            var referenciaAcompanhavaData = despesa.MesReferencia.Year == dataOriginal.Year
+                && despesa.MesReferencia.Month == dataOriginal.Month;
 
             despesa.AtualizarDescricao(dto.Descricao);
             despesa.AtualizarValor(dto.Valor);
             despesa.AtualizarData(dto.Data);
+            if (dto.MesReferencia.HasValue)
+                despesa.AtualizarMesReferencia(dto.MesReferencia.Value);
+            else if (referenciaAcompanhavaData
+                     && (dto.Data.Year != dataOriginal.Year || dto.Data.Month != dataOriginal.Month))
+                despesa.AtualizarMesReferencia(dto.Data);
             despesa.AtualizarContaFinanceira(dto.IdContaFinanceira);
             despesa.AtualizarCategoria(dto.IdCategoria);
             await _despesaService.AtualizarAsync(despesa);

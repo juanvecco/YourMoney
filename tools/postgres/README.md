@@ -50,6 +50,11 @@ For bill reconciliation, review `add-bill-reconciliation.sql` and apply it befor
 deploying the API that reads `tbFaturaConta` and `tbDespesa.Conferida`. It adds
 only the bill table and the review flag with a false default for existing expenses.
 
+For persisted expense reference months, review `add-expense-reference-month.sql`
+and apply it to PostgreSQL after a verified backup and before deploying the API
+that reads `tbDespesa.MesReferencia`. It backfills existing rows from `Data` and
+adds the user/month index. Do not run the SQL Server EF migration against Neon.
+
 Pluggy credentials encrypted with the Windows DPAPI key ring cannot be decrypted
 by a new Linux key ring. Re-enter them through the existing authenticated UI
 after publication. The original notebook and its key ring must remain available

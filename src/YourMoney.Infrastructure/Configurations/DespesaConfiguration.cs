@@ -20,6 +20,7 @@ namespace YourMoney.Infrastructure.Configurations
             builder.Property(d => d.Valor);
 
             builder.Property(d => d.Data).IsRequired();
+            builder.Property(d => d.MesReferencia).HasColumnType("date").IsRequired();
             builder.Property(d => d.Conferida).IsRequired().HasDefaultValue(false);
 
             builder.Property(d => d.ParcelamentoId);
@@ -53,6 +54,9 @@ namespace YourMoney.Infrastructure.Configurations
 
             builder.HasIndex(d => d.ParcelamentoId)
                 .HasDatabaseName("IX_Despesa_ParcelamentoId");
+
+            builder.HasIndex(d => new { d.UsuarioId, d.MesReferencia })
+                .HasDatabaseName("IX_Despesa_UsuarioId_MesReferencia");
 
             builder.HasIndex(d => new { d.ParcelamentoId, d.NumeroParcela })
                 .HasDatabaseName("IX_Despesa_Parcelamento_Parcela");

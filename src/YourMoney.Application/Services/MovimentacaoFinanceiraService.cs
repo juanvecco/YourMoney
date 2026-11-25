@@ -146,7 +146,7 @@ public sealed class MovimentacaoFinanceiraService : IMovimentacaoFinanceiraServi
     private static MovimentacaoFinanceiraDto Mapear(Despesa item) => new()
     {
         Id = item.Id, Tipo = "despesa", Descricao = item.Descricao, Data = item.Data,
-        MesReferencia = new DateTime(item.Data.Year, item.Data.Month, 1), Valor = item.Valor,
+        MesReferencia = item.MesReferencia, Valor = item.Valor,
         ContaFinanceiraId = item.IdContaFinanceira, ContaFinanceiraNome = item.ContaFinanceira?.Descricao,
         Categoria = item.Categoria?.Descricao, RotaOrigem = "/despesas"
     };

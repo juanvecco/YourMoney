@@ -65,33 +65,30 @@ namespace YourMoney.Application.Services
         public async Task<List<GraficoDTO>> GetGraficoDespesasPorCategoriaAsync(int mes, int ano)
         {
             var despesas = await _despesaRepository.GetByMesAnoAsync(mes, ano, _currentUserService.UserId);
+            var resumo = await GetDespesasPorCategoriaAsync(despesas);
 
-            return despesas
-                //.GroupBy(d => d.CategoriaId)
-                .Select(g => new GraficoDTO
+            return resumo
+                .Select(categoria => new GraficoDTO
                 {
-                    //Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    //Valor = g.Sum(d => d.Valor),
-                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
+                    Label = categoria.NomeCategoria,
+                    Valor = categoria.Total,
+                    Cor = categoria.Cor
                 })
-                .OrderByDescending(g => g.Valor)
                 .ToList();
         }
 
         public async Task<List<GraficoDTO>> GetGraficoReceitasPorCategoriaAsync(int mes, int ano)
         {
             var receitas = await _receitaRepository.GetByMesAnoAsync(mes, ano, _currentUserService.UserId);
+            var resumo = await GetReceitasPorCategoriaAsync(receitas);
 
-            return receitas
-                //.Where(r => r.Recebida)
-                //.GroupBy(r => r.CategoriaId)
-                .Select(g => new GraficoDTO
+            return resumo
+                .Select(categoria => new GraficoDTO
                 {
-                    //Label = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    //Valor = g.Sum(r => r.Valor.Valor),
-                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
+                    Label = categoria.NomeCategoria,
+                    Valor = categoria.Total,
+                    Cor = categoria.Cor
                 })
-                .OrderByDescending(g => g.Valor)
                 .ToList();
         }
 
@@ -124,34 +121,46 @@ namespace YourMoney.Application.Services
 
         private async Task<List<CategoriaResumoDTO>> GetDespesasPorCategoriaAsync(List<Domain.Entities.Despesa> despesas)
         {
+            if (despesas.Count == 0)
+                return new List<CategoriaResumoDTO>();
+
+            var categorias = await _categoriaRepository.GetAllAsync(_currentUserService.UserId);
+            var categoriasPorId = categorias.ToDictionary(categoria => categoria.Id);
 
             return despesas
-                //.GroupBy(d => d.CategoriaId)
-                .Select(g => new CategoriaResumoDTO
+                .GroupBy(despesa => despesa.IdCategoria)
+                .Select(grupo => new CategoriaResumoDTO
                 {
-                    //CategoriaId = g.Key,
-                    //NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    //Total = g.Sum(d => d.Valor),
-                    //Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#6c757d"
+                    CategoriaId = grupo.Key,
+                    NomeCategoria = categoriasPorId.TryGetValue(grupo.Key, out var categoria)
+                        ? categoria.Descricao
+                        : "Categoria removida",
+                    Total = grupo.Sum(despesa => despesa.Valor),
+                    // Categoria ainda não possui cor persistida; manter o tom neutro usado pelo contrato antigo.
+                    Cor = "#6c757d"
                 })
                 .OrderByDescending(c => c.Total)
+                .ThenBy(c => c.NomeCategoria, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
         private async Task<List<CategoriaResumoDTO>> GetReceitasPorCategoriaAsync(List<Domain.Entities.Receita> receitas)
         {
+            if (receitas.Count == 0)
+                return new List<CategoriaResumoDTO>();
 
-            return receitas
-                //.GroupBy(r => r.CategoriaId)
-                .Select(g => new CategoriaResumoDTO
+            // Receita não tem CategoriaId no modelo atual. Informar um total explicitamente
+            // sem categoria evita inventar uma classificação ou retornar DTOs vazios por lançamento.
+            return new List<CategoriaResumoDTO>
+            {
+                new()
                 {
-                    //CategoriaId = g.Key,
-                    //NomeCategoria = categorias.FirstOrDefault(c => c.Id == g.Key)?.Nome ?? "Sem Categoria",
-                    //Total = g.Sum(r => r.Valor.Valor),
-                   // Cor = categorias.FirstOrDefault(c => c.Id == g.Key)?.Cor ?? "#28a745"
-                })
-                .OrderByDescending(c => c.Total)
-                .ToList();
+                    CategoriaId = Guid.Empty,
+                    NomeCategoria = "Sem categoria",
+                    Total = receitas.Sum(receita => receita.Valor),
+                    Cor = "#28a745"
+                }
+            };
         }
     }
 }

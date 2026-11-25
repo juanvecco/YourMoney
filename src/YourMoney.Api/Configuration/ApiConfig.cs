@@ -58,13 +58,6 @@ namespace YourMoney.Api.Configuration
                             : "public, max-age=86400";
                 }
             });
-            var objectiveImagesPath = Path.Combine(env.ContentRootPath, "App_Data", "ObjectiveImages");
-            Directory.CreateDirectory(objectiveImagesPath);
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(objectiveImagesPath),
-                RequestPath = "/uploads/objetivos"
-            });
             app.UseRouting();
             app.UseCors();
 
@@ -75,6 +68,12 @@ namespace YourMoney.Api.Configuration
                 endpoints.MapControllers();
                 endpoints.MapFallback(async context =>
                 {
+                    if (context.Request.Path.StartsWithSegments("/uploads/objetivos"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        return;
+                    }
+
                     if (context.Request.Path.StartsWithSegments("/api"))
                     {
                         context.Response.StatusCode = StatusCodes.Status404NotFound;

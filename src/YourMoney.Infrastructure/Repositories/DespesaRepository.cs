@@ -76,8 +76,8 @@ namespace YourMoney.Infrastructure.Repositories
                 .Include(d => d.ContaFinanceira)
                 .Include(d => d.Categoria)
                 .Where(d => d.UsuarioId == usuarioId
-                    && d.Data >= inicio
-                    && d.Data < fimExclusivo)
+                    && d.MesReferencia >= inicio
+                    && d.MesReferencia < fimExclusivo)
                 .ToListAsync();
         }
 
@@ -85,7 +85,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return await _context.Despesas
                 //.Include(r => r.Categoria)
-                .Where(r => r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => r.MesReferencia.Month == mes && r.MesReferencia.Year == ano)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -93,7 +93,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> GetByMesAnoAsync(int mes, int ano, string usuarioId)
         {
             return await _context.Despesas
-                .Where(r => r.UsuarioId == usuarioId && r.Data.Month == mes && r.Data.Year == ano)
+                .Where(r => r.UsuarioId == usuarioId && r.MesReferencia.Month == mes && r.MesReferencia.Year == ano)
                 .OrderByDescending(r => r.Data)
                 .ToListAsync();
         }
@@ -101,7 +101,7 @@ namespace YourMoney.Infrastructure.Repositories
         public async Task<List<Despesa>> ObterPorMesAnoAsync(int mes, int ano, Guid? idContaFinanceira = null)
         {
             return await _context.Despesas
-                .Where(d => d.Data.Month == mes && d.Data.Year == ano
+                .Where(d => d.MesReferencia.Month == mes && d.MesReferencia.Year == ano
                             && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
                 .ToListAsync();
         }
@@ -110,7 +110,7 @@ namespace YourMoney.Infrastructure.Repositories
         {
             return await _context.Despesas
                 .Where(d => d.UsuarioId == usuarioId
-                            && d.Data.Month == mes && d.Data.Year == ano
+                            && d.MesReferencia.Month == mes && d.MesReferencia.Year == ano
                             && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira))
                 .ToListAsync();
         }
@@ -124,8 +124,8 @@ namespace YourMoney.Infrastructure.Repositories
         {
             var query = _context.Despesas
                 .Where(d => d.UsuarioId == usuarioId
-                            && d.Data.Month == mes
-                            && d.Data.Year == ano
+                            && d.MesReferencia.Month == mes
+                            && d.MesReferencia.Year == ano
                             && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira));
 
             if (idsCategoria != null)
@@ -147,7 +147,7 @@ namespace YourMoney.Infrastructure.Repositories
             var fimExclusivo = inicio.AddMonths(1);
             var query = _context.Despesas.AsNoTracking()
                 .Where(d => d.UsuarioId == usuarioId
-                    && d.Data >= inicio && d.Data < fimExclusivo
+                    && d.MesReferencia >= inicio && d.MesReferencia < fimExclusivo
                     && (idContaFinanceira == null || d.IdContaFinanceira == idContaFinanceira));
 
             if (idsCategoria != null)
