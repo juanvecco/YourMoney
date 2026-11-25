@@ -152,9 +152,9 @@ public sealed class ExternalAuthController : MainController
         var userId = CurrentUserId();
         if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         var pending = ReadPendingTicket();
-        if (pending == null) return Unauthorized();
+        if (pending == null) return PendingGoogleLinkExpired();
         var result = await _accountLinks.GetPendingAsync(userId, pending, HttpContext.RequestAborted);
-        return result == null ? Unauthorized() : CustomResponse(result);
+        return result == null ? PendingGoogleLinkExpired() : CustomResponse(result);
     }
 
     [Authorize]
@@ -166,7 +166,7 @@ public sealed class ExternalAuthController : MainController
         if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         var pending = ReadPendingTicket();
         Response.Cookies.Delete(GoogleLinkPendingCookie, new CookieOptions { Path = GoogleLinkPendingPath, Secure = true, SameSite = SameSiteMode.None });
-        if (pending == null) return Unauthorized();
+        if (pending == null) return PendingGoogleLinkExpired();
 
         var result = await _accountLinks.ConfirmAsync(userId, pending, HttpContext.RequestAborted);
         if (!result.Succeeded) return MapLinkFailure(result.Failure);
@@ -432,6 +432,10 @@ public sealed class ExternalAuthController : MainController
         ExternalAccountLinkFailure.AlreadyLinked => Conflict(new { mensagem = "O Google já está conectado a esta conta." }),
         ExternalAccountLinkFailure.EmailMismatch => UnprocessableEntity(new { mensagem = "O Google precisa usar o mesmo e-mail verificado da sua conta YourMoney." }),
         ExternalAccountLinkFailure.IdentityConflict => Conflict(new { mensagem = "Esta conta Google já está conectada a outra conta YourMoney." }),
+        ExternalAccountLinkFailure.InvalidTicket => PendingGoogleLinkExpired(),
         _ => Unauthorized(new { mensagem = "A tentativa expirou ou já foi usada. Inicie novamente." })
     };
+
+    private ActionResult PendingGoogleLinkExpired() =>
+        StatusCode(StatusCodes.Status410Gone, new { mensagem = "A confirmação expirou ou não está mais disponível. Inicie novamente a conexão com Google." });
 }
