@@ -12,6 +12,8 @@ namespace YourMoney.Api.Configuration
 {
     public static class IdentityConfig
     {
+        private const string GoogleLinkReturnPath = "/api/identidade/externo/vincular/google/retorno";
+
         public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -132,6 +134,26 @@ namespace YourMoney.Api.Configuration
                     .GetRequiredService<ILoggerFactory>()
                     .CreateLogger("YourMoney.ExternalIdentity");
                 logger.LogWarning("External identity token validated. CallbackPath={CallbackPath}", callbackPath.Value);
+                return Task.CompletedTask;
+            },
+            OnTicketReceived = context =>
+            {
+                var isAccountLinkFlow = context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true
+                    && linkMode == "true";
+                if (isAccountLinkFlow)
+                {
+                    context.ReturnUri = GoogleLinkReturnPath;
+                    if (context.Properties != null) context.Properties.RedirectUri = GoogleLinkReturnPath;
+                }
+
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.ExternalIdentity");
+                logger.LogWarning(
+                    "External identity ticket received. CallbackPath={CallbackPath}; AccountLinkFlow={AccountLinkFlow}; DedicatedReturnSelected={DedicatedReturnSelected}",
+                    callbackPath.Value,
+                    isAccountLinkFlow,
+                    string.Equals(context.ReturnUri, GoogleLinkReturnPath, StringComparison.Ordinal));
                 return Task.CompletedTask;
             },
             OnRedirectToIdentityProvider = context =>
