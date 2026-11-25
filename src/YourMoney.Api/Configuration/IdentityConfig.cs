@@ -140,20 +140,25 @@ namespace YourMoney.Api.Configuration
             {
                 var isAccountLinkFlow = context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true
                     && linkMode == "true";
+                var dedicatedReturnForced = false;
                 if (isAccountLinkFlow)
                 {
                     context.ReturnUri = GoogleLinkReturnPath;
                     if (context.Properties != null) context.Properties.RedirectUri = GoogleLinkReturnPath;
+                    context.Response.Redirect(GoogleLinkReturnPath);
+                    context.HandleResponse();
+                    dedicatedReturnForced = true;
                 }
 
                 var logger = context.HttpContext.RequestServices
                     .GetRequiredService<ILoggerFactory>()
                     .CreateLogger("YourMoney.ExternalIdentity");
                 logger.LogWarning(
-                    "External identity ticket received. CallbackPath={CallbackPath}; AccountLinkFlow={AccountLinkFlow}; DedicatedReturnSelected={DedicatedReturnSelected}",
+                    "External identity ticket received. CallbackPath={CallbackPath}; AccountLinkFlow={AccountLinkFlow}; DedicatedReturnSelected={DedicatedReturnSelected}; DedicatedReturnForced={DedicatedReturnForced}",
                     callbackPath.Value,
                     isAccountLinkFlow,
-                    string.Equals(context.ReturnUri, GoogleLinkReturnPath, StringComparison.Ordinal));
+                    string.Equals(context.ReturnUri, GoogleLinkReturnPath, StringComparison.Ordinal),
+                    dedicatedReturnForced);
                 return Task.CompletedTask;
             },
             OnRedirectToIdentityProvider = context =>
