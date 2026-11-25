@@ -118,6 +118,22 @@ namespace YourMoney.Api.Configuration
 
         private static OpenIdConnectEvents ExternalEvents(IConfiguration configuration, PathString callbackPath) => new()
         {
+            OnAuthorizationCodeReceived = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.ExternalIdentity");
+                logger.LogWarning("External identity authorization code received. CallbackPath={CallbackPath}", callbackPath.Value);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.ExternalIdentity");
+                logger.LogWarning("External identity token validated. CallbackPath={CallbackPath}", callbackPath.Value);
+                return Task.CompletedTask;
+            },
             OnRedirectToIdentityProvider = context =>
             {
                 // Render terminates TLS before the app receives the request. Use the
@@ -131,6 +147,13 @@ namespace YourMoney.Api.Configuration
             },
             OnRemoteFailure = context =>
             {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.ExternalIdentity");
+                logger.LogError(
+                    "External identity remote failure. CallbackPath={CallbackPath}; FailureType={FailureType}",
+                    callbackPath.Value,
+                    context.Failure?.GetType().Name ?? "none");
                 context.HandleResponse();
                 if (context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true && linkMode == "true")
                 {
@@ -143,6 +166,10 @@ namespace YourMoney.Api.Configuration
             },
             OnAccessDenied = context =>
             {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("YourMoney.ExternalIdentity");
+                logger.LogWarning("External identity access denied. CallbackPath={CallbackPath}", callbackPath.Value);
                 context.HandleResponse();
                 if (context.Properties?.Items.TryGetValue("account_link", out var linkMode) == true && linkMode == "true")
                 {
