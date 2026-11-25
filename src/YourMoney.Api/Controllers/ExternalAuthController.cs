@@ -118,8 +118,14 @@ public sealed class ExternalAuthController : MainController
     [HttpPost("externo/vincular/google/iniciar")]
     public async Task<IActionResult> StartGoogleLink()
     {
-        if (!IsAllowedFrontendOrigin()) return Forbid();
+        var allowedFrontendOrigin = IsAllowedFrontendOrigin();
         var protectedTicket = Request.Cookies[GoogleLinkStartCookie];
+        _logger.LogWarning(
+            "Google link start request. FrontendOriginAllowed={FrontendOriginAllowed}; StartTicketCookiePresent={StartTicketCookiePresent}",
+            allowedFrontendOrigin,
+            !string.IsNullOrWhiteSpace(protectedTicket));
+        if (!allowedFrontendOrigin) return Forbid();
+
         Response.Cookies.Delete(GoogleLinkStartCookie, new CookieOptions { Path = GoogleLinkStartPath, Secure = true, SameSite = SameSiteMode.None });
         if (string.IsNullOrWhiteSpace(protectedTicket)) return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
 
@@ -134,8 +140,15 @@ public sealed class ExternalAuthController : MainController
             return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
         }
 
-        if (ticket == null || string.IsNullOrWhiteSpace(ticket.UserId) || string.IsNullOrWhiteSpace(ticket.Nonce)
-            || !await _accountLinks.ConsumeStartTicketAsync(ticket.UserId, ticket.Nonce, HttpContext.RequestAborted))
+        var startTicketConsumed = ticket != null
+            && !string.IsNullOrWhiteSpace(ticket.UserId)
+            && !string.IsNullOrWhiteSpace(ticket.Nonce)
+            && await _accountLinks.ConsumeStartTicketAsync(ticket.UserId, ticket.Nonce, HttpContext.RequestAborted);
+        _logger.LogWarning(
+            "Google link start ticket checked. TicketDecoded={TicketDecoded}; TicketConsumed={TicketConsumed}",
+            ticket != null,
+            startTicketConsumed);
+        if (!startTicketConsumed)
             return BadRequest(new { mensagem = "A tentativa expirou. Inicie novamente." });
         if (!ExternalProviderConfiguration.GoogleAvailable(_configuration))
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
@@ -167,6 +180,8 @@ public sealed class ExternalAuthController : MainController
         var properties = _signIn.ConfigureExternalAuthenticationProperties("google", GoogleLinkReturnPath);
         properties.Items["account_link"] = "true";
         properties.Items["account_link_user"] = ticket.UserId;
+        _logger.LogWarning("Issuing Google OIDC challenge. DedicatedCallbackConfigured={DedicatedCallbackConfigured}",
+            properties.RedirectUri == GoogleLinkReturnPath);
         return Challenge(properties, "google");
     }
 
