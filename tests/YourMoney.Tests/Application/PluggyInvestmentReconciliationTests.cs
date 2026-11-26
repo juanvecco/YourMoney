@@ -9,7 +9,10 @@ public static class PluggyInvestmentReconciliationTests
 {
     private static readonly MethodInfo EligibilityMethod = typeof(PluggyService).GetMethod(
         "PodeReconciliarComoInvestimento",
-        BindingFlags.NonPublic | BindingFlags.Static)
+        BindingFlags.NonPublic | BindingFlags.Static,
+        binder: null,
+        types: [typeof(PluggyTransactionPreviewDTO)],
+        modifiers: null)
         ?? throw new InvalidOperationException("Investment transaction eligibility rule was not found.");
 
     public static Task OnlyFinalizedBrlDebitsAreEligible()
@@ -17,32 +20,32 @@ public static class PluggyInvestmentReconciliationTests
         TestAssert.True(Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "POSTED", Amount = -20.50m,
-            CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "INVESTMENT"
         }), "A posted BRL debit should be eligible for explicit review");
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "CREDIT", Status = "POSTED", Amount = 20m,
-            CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "EXCLUDED"
         }), "A credit must not be classified as an investment purchase");
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "PENDING", Amount = -20m,
-            CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "INVESTMENT"
         }), "A pending debit must not be eligible");
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "AUTHORIZED", Amount = -20m,
-            CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "INVESTMENT"
         }), "An authorization without a finalized posted status must not be eligible");
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "POSTED", OperationType = "TRANSFER",
-            Amount = -20m, CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            Amount = -20m, CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "EXCLUDED"
         }), "A transfer must remain unavailable");
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "POSTED", Amount = -20.501m,
-            CurrencyCode = "BRL", AccountCurrencyCode = "BRL"
+            CurrencyCode = "BRL", AccountCurrencyCode = "BRL", Classification = "INVESTMENT"
         }), "A source value with fractions smaller than cents must not be rounded silently");
         return Task.CompletedTask;
     }
@@ -52,13 +55,13 @@ public static class PluggyInvestmentReconciliationTests
         TestAssert.True(!Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "POSTED", Amount = -20m,
-            CurrencyCode = "USD", AccountCurrencyCode = "USD"
+            CurrencyCode = "USD", AccountCurrencyCode = "USD", Classification = "INVESTMENT"
         }), "A foreign-currency transaction without a trusted BRL amount must be unavailable");
         TestAssert.True(Elegivel(new PluggyTransactionPreviewDTO
         {
             Direction = "DEBIT", Status = "POSTED", Amount = -20m,
             CurrencyCode = "USD", AmountInAccountCurrency = 100m,
-            AccountCurrencyCode = "BRL"
+            AccountCurrencyCode = "BRL", Classification = "INVESTMENT"
         }), "A provider-supplied BRL equivalent on a BRL account may be reviewed");
         return Task.CompletedTask;
     }

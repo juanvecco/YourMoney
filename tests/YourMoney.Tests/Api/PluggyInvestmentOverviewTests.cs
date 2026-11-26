@@ -61,8 +61,8 @@ public static class PluggyInvestmentOverviewTests
             "Investment candidates must be scoped to the authenticated owner");
         TestAssert.True(projection.Contains("source.PossibleDuplicateCandidates = matchingCandidates", StringComparison.Ordinal),
             "The overview should return every matching investment for review");
-        TestAssert.True(projection.Contains("PodeReconciliarComoInvestimento(source)", StringComparison.Ordinal),
-            "Ineligible transactions should remain unavailable for investment actions");
+        TestAssert.True(projection.Contains("source.Classification is not (\"INVESTMENT\" or \"REVIEW\")", StringComparison.Ordinal),
+            "Only investments or uncertain transactions should remain available in the investment context");
         return Task.CompletedTask;
     }
 }

@@ -10,6 +10,9 @@ public sealed class PluggyExpenseReconciliationRequestDTO
     [Required, RegularExpression("^(create|link|replace)$")]
     public string Action { get; set; } = string.Empty;
 
+    [RegularExpression("^(expense)$")]
+    public string? ReviewedClassification { get; set; }
+
     public Guid? TargetExpenseId { get; set; }
 
     public string? ExpectedDescription { get; set; }

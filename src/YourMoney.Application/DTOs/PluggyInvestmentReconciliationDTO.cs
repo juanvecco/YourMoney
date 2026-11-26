@@ -10,6 +10,9 @@ public sealed class PluggyInvestmentReconciliationRequestDTO
     [Required, RegularExpression("^(create|link|replace)$")]
     public string Action { get; set; } = string.Empty;
 
+    [RegularExpression("^(investment)$")]
+    public string? ReviewedClassification { get; set; }
+
     public Guid? TargetInvestmentId { get; set; }
     public string? ExpectedDescription { get; set; }
     public decimal? ExpectedAmount { get; set; }

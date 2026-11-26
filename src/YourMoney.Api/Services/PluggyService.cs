@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Data;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -1055,6 +1056,23 @@ public sealed class PluggyService : IPluggyService
                     transaction.CurrencyCode,
                     transaction.AmountInAccountCurrency,
                     account.CurrencyCode);
+                var classification = PluggyTransactionClassifier.Classify(new PluggyTransactionClassificationInput
+                {
+                    Type = transaction.Type,
+                    Status = transaction.Status,
+                    OperationType = transaction.OperationType,
+                    OperationTypeAdditionalInfo = transaction.OperationTypeAdditionalInfo,
+                    Category = transaction.Category,
+                    CategoryId = TextoMetadado(transaction.CategoryId),
+                    Description = transaction.Description,
+                    AccountType = account.Type,
+                    MerchantName = TextoMetadado(transaction.Merchant?.Name),
+                    MerchantCategory = TextoMetadado(transaction.Merchant?.Category),
+                    CreditCardBillId = TextoMetadado(transaction.CreditCardMetadata?.BillId),
+                    PaymentMethod = TextoMetadado(transaction.PaymentData?.Method),
+                    PaymentReason = TextoMetadado(transaction.PaymentData?.Reason),
+                    PaymentReceiver = TextoMetadado(transaction.PaymentData?.Receiver)
+                });
                 transactions.Add(new PluggyTransactionPreviewDTO
                 {
                     TransactionId = transaction.Id,
@@ -1072,6 +1090,8 @@ public sealed class PluggyService : IPluggyService
                     AccountCurrencyCode = string.IsNullOrWhiteSpace(account.CurrencyCode) ? "BRL" : account.CurrencyCode,
                     Direction = NormalizarDirecao(transaction.Type),
                     OperationType = transaction.OperationType,
+                    Classification = classification.Classification,
+                    ClassificationReason = classification.Reason,
                     Status = transaction.Status,
                     Importable = suggestedAmountBrl.HasValue,
                     SuggestedAmountBrl = suggestedAmountBrl,
@@ -1086,8 +1106,13 @@ public sealed class PluggyService : IPluggyService
             .OrderByDescending(transaction => transaction.Date)
             .Take(100)
             .ToArray();
-        await AnexarSituacaoCadastroAsync(usuarioId, carteiraId, latestTransactions, cancellationToken, targetType);
-        return latestTransactions;
+        var targetTransactions = latestTransactions
+            .Where(transaction => PluggyTransactionClassifier.IsAvailableInTarget(
+                transaction.Classification,
+                targetType))
+            .ToArray();
+        await AnexarSituacaoCadastroAsync(usuarioId, carteiraId, targetTransactions, cancellationToken, targetType);
+        return targetTransactions;
     }
 
     public async Task<PluggyTransactionImportResultDTO> ImportarTransacaoAsync(
@@ -1124,6 +1149,10 @@ public sealed class PluggyService : IPluggyService
                 StringComparison.Ordinal));
         if (source is null)
             throw new KeyNotFoundException("A transação não foi encontrada nas conexões Meu Pluggy deste usuário.");
+        if (request.RecordType == "expense"
+            && !PodeReconciliarComoDespesa(source, request.ReviewedClassification))
+            throw new PluggyTransactionNotImportableException(
+                "Esta transação não foi classificada como despesa de consumo ou ainda não teve sua natureza confirmada.");
         if (!source.Importable)
             throw new PluggyTransactionNotImportableException(
                 source.ImportUnavailableReason ?? "Esta transação não pode ser cadastrada como valor em reais.");
@@ -1249,9 +1278,9 @@ public sealed class PluggyService : IPluggyService
         if (existingSource is not null)
             throw new PluggyTransactionAlreadyRegisteredException(existingSource);
 
-        if (!PodeReconciliarComoDespesa(source))
+        if (!PodeReconciliarComoDespesa(source, request.ReviewedClassification))
             throw new PluggyTransactionNotImportableException(
-                "Esta transação não é um débito confirmado compatível com o cadastro de despesas.");
+                "Esta transação não foi classificada como despesa de consumo ou ainda não teve sua natureza confirmada.");
         if (!source.Importable)
             throw new PluggyTransactionNotImportableException(
                 source.ImportUnavailableReason ?? "Esta transação não possui um valor BRL confiável.");
@@ -1272,7 +1301,8 @@ public sealed class PluggyService : IPluggyService
                 Amount = request.Amount!.Value,
                 Date = request.Date!.Value,
                 IdContaFinanceira = request.IdContaFinanceira,
-                IdCategoria = request.IdCategoria
+                IdCategoria = request.IdCategoria,
+                ReviewedClassification = request.ReviewedClassification
             }, cancellationToken, walletId);
 
             return new PluggyExpenseReconciliationResultDTO
@@ -1533,9 +1563,9 @@ public sealed class PluggyService : IPluggyService
             throw new PluggyTransactionAlreadyRegisteredException(existingSource);
         }
 
-        if (!PodeReconciliarComoInvestimento(source) || !source.Importable)
+        if (!PodeReconciliarComoInvestimento(source, request.ReviewedClassification) || !source.Importable)
             throw new PluggyTransactionNotImportableException(
-                source.ImportUnavailableReason ?? "Esta transação não pode ser revisada como investimento.");
+                source.ImportUnavailableReason ?? "Esta transação não foi classificada como investimento ou ainda não teve sua natureza confirmada.");
 
         if (request.Action == "create")
         {
@@ -1712,23 +1742,32 @@ public sealed class PluggyService : IPluggyService
             == decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
 
     private static bool PodeReconciliarComoDespesa(PluggyTransactionPreviewDTO source)
-    {
-        if (!string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(source.Status, "PENDING", StringComparison.OrdinalIgnoreCase))
-            return false;
+        => PodeReconciliarComoDespesa(source, null);
 
-        var operation = string.Concat((source.OperationType ?? string.Empty)
-            .Where(char.IsLetterOrDigit))
-            .ToUpperInvariant();
-        return !operation.Contains("TRANSFER", StringComparison.Ordinal)
-            && !operation.Contains("REVERSAL", StringComparison.Ordinal)
-            && !operation.Contains("REFUND", StringComparison.Ordinal)
-            && !operation.Contains("ESTORNO", StringComparison.Ordinal);
-    }
+    private static bool PodeReconciliarComoDespesa(
+        PluggyTransactionPreviewDTO source,
+        string? reviewedClassification) =>
+        string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(source.Status, "POSTED", StringComparison.OrdinalIgnoreCase)
+        && (string.Equals(source.Classification, "EXPENSE", StringComparison.OrdinalIgnoreCase)
+            && string.IsNullOrWhiteSpace(reviewedClassification)
+            || string.Equals(source.Classification, "REVIEW", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(reviewedClassification, "expense", StringComparison.OrdinalIgnoreCase));
 
     private static bool PodeReconciliarComoInvestimento(PluggyTransactionPreviewDTO source)
+        => PodeReconciliarComoInvestimento(source, null);
+
+    private static bool PodeReconciliarComoInvestimento(
+        PluggyTransactionPreviewDTO source,
+        string? reviewedClassification)
     {
-        if (!PodeReconciliarComoDespesa(source)
+        var destinoConfirmado =
+            string.Equals(source.Classification, "INVESTMENT", StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrWhiteSpace(reviewedClassification)
+            || string.Equals(source.Classification, "REVIEW", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(reviewedClassification, "investment", StringComparison.OrdinalIgnoreCase);
+        if (!destinoConfirmado
+            || !string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase)
             || !string.Equals(source.Status, "POSTED", StringComparison.OrdinalIgnoreCase))
             return false;
         var value = ObterValorParaCadastro(
@@ -1739,6 +1778,26 @@ public sealed class PluggyService : IPluggyService
         return value.HasValue
             && value.Value > 0
             && value.Value == decimal.Round(value.Value, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private static string? TextoMetadado(JsonElement? value)
+    {
+        if (!value.HasValue)
+            return null;
+
+        var item = value.Value;
+        return item.ValueKind switch
+        {
+            JsonValueKind.String => item.GetString(),
+            JsonValueKind.Number => item.GetRawText(),
+            JsonValueKind.Object => string.Join(" ", item.EnumerateObject()
+                .Select(property => TextoMetadado(property.Value))
+                .Where(text => !string.IsNullOrWhiteSpace(text))),
+            JsonValueKind.Array => string.Join(" ", item.EnumerateArray()
+                .Select(child => TextoMetadado(child))
+                .Where(text => !string.IsNullOrWhiteSpace(text))),
+            _ => null
+        };
     }
 
     public async Task RemoverConexaoAsync(
@@ -1906,10 +1965,11 @@ public sealed class PluggyService : IPluggyService
                 source.AccountCurrencyCode);
             if (expectedRecordType is null)
                 continue;
-            if (expectedRecordType == "investment" && !PodeReconciliarComoInvestimento(source))
+            if (expectedRecordType == "investment"
+                && source.Classification is not ("INVESTMENT" or "REVIEW"))
             {
                 source.Importable = false;
-                source.ImportUnavailableReason = "Somente débitos finalizados, em BRL confiável e sem transferência ou estorno, podem ser revisados como investimento.";
+                source.ImportUnavailableReason = "Esta transação não foi classificada como aquisição de investimento.";
                 continue;
             }
             if (!amount.HasValue)
@@ -2451,6 +2511,27 @@ public sealed class PluggyService : IPluggyService
         public string? CurrencyCode { get; set; }
     }
 
+    private sealed class PluggyMerchant
+    {
+        public PluggyMerchant() { }
+        public JsonElement? Name { get; set; }
+        public JsonElement? Category { get; set; }
+    }
+
+    private sealed class PluggyPaymentData
+    {
+        public PluggyPaymentData() { }
+        public JsonElement? Method { get; set; }
+        public JsonElement? Reason { get; set; }
+        public JsonElement? Receiver { get; set; }
+    }
+
+    private sealed class PluggyCreditCardMetadata
+    {
+        public PluggyCreditCardMetadata() { }
+        public JsonElement? BillId { get; set; }
+    }
+
     private sealed class PluggyTransaction
     {
         public string Id { get; set; } = string.Empty;
@@ -2461,6 +2542,12 @@ public sealed class PluggyService : IPluggyService
         public decimal? AmountInAccountCurrency { get; set; }
         public string? Type { get; set; }
         public string? OperationType { get; set; }
+        public string? OperationTypeAdditionalInfo { get; set; }
+        public string? Category { get; set; }
+        public JsonElement? CategoryId { get; set; }
+        public PluggyMerchant? Merchant { get; set; }
+        public PluggyPaymentData? PaymentData { get; set; }
+        public PluggyCreditCardMetadata? CreditCardMetadata { get; set; }
         public string Status { get; set; } = string.Empty;
     }
 }

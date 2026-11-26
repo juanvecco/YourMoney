@@ -10,6 +10,9 @@ public sealed class PluggyTransactionImportRequestDTO
     [Required]
     public string RecordType { get; set; } = string.Empty;
 
+    [RegularExpression("^(expense)$")]
+    public string? ReviewedClassification { get; set; }
+
     [Required, StringLength(255, MinimumLength = 1)]
     public string Description { get; set; } = string.Empty;
 

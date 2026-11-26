@@ -45,6 +45,8 @@ public sealed class PluggyTransactionPreviewDTO
     public string AccountCurrencyCode { get; set; } = "BRL";
     public string Direction { get; set; } = "UNKNOWN";
     public string? OperationType { get; set; }
+    public string Classification { get; set; } = "REVIEW";
+    public string ClassificationReason { get; set; } = "AMBIGUOUS";
     public string Status { get; set; } = string.Empty;
     public bool PreviewOnly { get; set; } = true;
     public string RegistrationStatus { get; set; } = "PENDING";
