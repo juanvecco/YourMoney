@@ -1043,74 +1043,83 @@ public sealed class PluggyService : IPluggyService
             var path = "v2/transactions"
                 + $"?accountId={Uri.EscapeDataString(account.AccountId)}"
                 + $"&dateFrom={dateFrom}&dateTo={dateTo}";
-            var page = await ObterAsync<PluggyCursorPage<PluggyTransaction>>(
-                path,
-                apiKey,
-                "Não foi possível carregar as transações da instituição.",
-                cancellationToken);
-
-            foreach (var transaction in page.Results ?? [])
+            var requestedPaths = new HashSet<string>(StringComparer.Ordinal);
+            while (!string.IsNullOrWhiteSpace(path))
             {
-                var suggestedAmountBrl = ObterValorParaCadastro(
-                    transaction.Amount,
-                    transaction.CurrencyCode,
-                    transaction.AmountInAccountCurrency,
-                    account.CurrencyCode);
-                var classification = PluggyTransactionClassifier.Classify(new PluggyTransactionClassificationInput
+                if (!requestedPaths.Add(path))
+                    throw new PluggyIntegrationException("A instituição retornou uma paginação repetida para as transações.");
+
+                var page = await ObterAsync<PluggyCursorPage<PluggyTransaction>>(
+                    path,
+                    apiKey,
+                    "Não foi possível carregar as transações da instituição.",
+                    cancellationToken);
+
+                foreach (var transaction in page.Results ?? [])
                 {
-                    Type = transaction.Type,
-                    Status = transaction.Status,
-                    OperationType = transaction.OperationType,
-                    OperationTypeAdditionalInfo = transaction.OperationTypeAdditionalInfo,
-                    Category = transaction.Category,
-                    CategoryId = TextoMetadado(transaction.CategoryId),
-                    Description = transaction.Description,
-                    AccountType = account.Type,
-                    MerchantName = TextoMetadado(transaction.Merchant?.Name),
-                    MerchantCategory = TextoMetadado(transaction.Merchant?.Category),
-                    CreditCardBillId = TextoMetadado(transaction.CreditCardMetadata?.BillId),
-                    PaymentMethod = TextoMetadado(transaction.PaymentData?.Method),
-                    PaymentReason = TextoMetadado(transaction.PaymentData?.Reason),
-                    PaymentReceiver = TextoMetadado(transaction.PaymentData?.Receiver)
-                });
-                transactions.Add(new PluggyTransactionPreviewDTO
-                {
-                    TransactionId = transaction.Id,
-                    ConnectionId = account.ConnectionId,
-                    AccountId = account.AccountId,
-                    InstitutionName = account.InstitutionName,
-                    AccountName = account.Name,
-                    Date = transaction.Date,
-                    Description = string.IsNullOrWhiteSpace(transaction.Description)
-                        ? "Transação bancária"
-                        : transaction.Description,
-                    Amount = transaction.Amount,
-                    CurrencyCode = string.IsNullOrWhiteSpace(transaction.CurrencyCode) ? "BRL" : transaction.CurrencyCode,
-                    AmountInAccountCurrency = transaction.AmountInAccountCurrency,
-                    AccountCurrencyCode = string.IsNullOrWhiteSpace(account.CurrencyCode) ? "BRL" : account.CurrencyCode,
-                    Direction = NormalizarDirecao(transaction.Type),
-                    OperationType = transaction.OperationType,
-                    Classification = classification.Classification,
-                    ClassificationReason = classification.Reason,
-                    Status = transaction.Status,
-                    Importable = suggestedAmountBrl.HasValue,
-                    SuggestedAmountBrl = suggestedAmountBrl,
-                    ImportUnavailableReason = suggestedAmountBrl.HasValue
-                        ? null
-                        : "A conta ou o valor da transação não possui uma equivalência confiável em reais."
-                });
+                    var suggestedAmountBrl = ObterValorParaCadastro(
+                        transaction.Amount,
+                        transaction.CurrencyCode,
+                        transaction.AmountInAccountCurrency,
+                        account.CurrencyCode);
+                    var classification = PluggyTransactionClassifier.Classify(new PluggyTransactionClassificationInput
+                    {
+                        Type = transaction.Type,
+                        Status = transaction.Status,
+                        OperationType = transaction.OperationType,
+                        OperationTypeAdditionalInfo = transaction.OperationTypeAdditionalInfo,
+                        Category = transaction.Category,
+                        CategoryId = TextoMetadado(transaction.CategoryId),
+                        Description = transaction.Description,
+                        AccountType = account.Type,
+                        MerchantName = TextoMetadado(transaction.Merchant?.Name),
+                        MerchantCategory = TextoMetadado(transaction.Merchant?.Category),
+                        CreditCardBillId = TextoMetadado(transaction.CreditCardMetadata?.BillId),
+                        PaymentMethod = TextoMetadado(transaction.PaymentData?.Method),
+                        PaymentReason = TextoMetadado(transaction.PaymentData?.Reason),
+                        PaymentReceiver = TextoMetadado(transaction.PaymentData?.Receiver)
+                    });
+                    transactions.Add(new PluggyTransactionPreviewDTO
+                    {
+                        TransactionId = transaction.Id,
+                        ConnectionId = account.ConnectionId,
+                        AccountId = account.AccountId,
+                        InstitutionName = account.InstitutionName,
+                        AccountName = account.Name,
+                        Date = transaction.Date,
+                        Description = string.IsNullOrWhiteSpace(transaction.Description)
+                            ? "Transação bancária"
+                            : transaction.Description,
+                        Amount = transaction.Amount,
+                        CurrencyCode = string.IsNullOrWhiteSpace(transaction.CurrencyCode) ? "BRL" : transaction.CurrencyCode,
+                        AmountInAccountCurrency = transaction.AmountInAccountCurrency,
+                        AccountCurrencyCode = string.IsNullOrWhiteSpace(account.CurrencyCode) ? "BRL" : account.CurrencyCode,
+                        Direction = NormalizarDirecao(transaction.Type),
+                        OperationType = transaction.OperationType,
+                        Classification = classification.Classification,
+                        ClassificationReason = classification.Reason,
+                        Status = transaction.Status,
+                        Importable = suggestedAmountBrl.HasValue,
+                        SuggestedAmountBrl = suggestedAmountBrl,
+                        ImportUnavailableReason = suggestedAmountBrl.HasValue
+                            ? null
+                            : "A conta ou o valor da transação não possui uma equivalência confiável em reais."
+                    });
+                }
+
+                path = string.IsNullOrWhiteSpace(page.Next)
+                    ? string.Empty
+                    : "v2/transactions" + page.Next;
             }
         }
 
         var latestTransactions = transactions
             .OrderByDescending(transaction => transaction.Date)
-            .Take(100)
-            .ToArray();
-        var targetTransactions = latestTransactions
             .Where(transaction => PluggyTransactionClassifier.IsAvailableInTarget(
                 transaction.Classification,
                 targetType))
             .ToArray();
+        var targetTransactions = latestTransactions;
         await AnexarSituacaoCadastroAsync(usuarioId, carteiraId, targetTransactions, cancellationToken, targetType);
         return targetTransactions;
     }

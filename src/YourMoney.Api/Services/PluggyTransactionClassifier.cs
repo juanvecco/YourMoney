@@ -65,7 +65,14 @@ public static class PluggyTransactionClassifier
             paymentContext,
             Normalize(source.MerchantCategory));
         var transfer = HasAny(structuredContext, "TRANSFER", "TRANSFERENCIA", "INTERNAL TRANSFER")
-            || HasAny(description, "TRANSFERENCIA ENTRE CONTAS", "TRANSFERENCIA PARA CORRETORA", "TRANSFER TO BROKER");
+            || HasAny(description,
+                "TRANSFERENCIA ENTRE CONTAS",
+                "TRANSFERENCIA PARA CORRETORA",
+                "TRANSFER TO BROKER",
+                "TRANSFERENCIA ENVIADA",
+                "TRANSFERENCIA RECEBIDA",
+                "TRANSFERENCIA VIA PIX",
+                "TRANSFERENCIA PELO PIX");
         var pixMayBeTransfer = HasAny(description, "PIX ENVIADO", "PIX TRANSFERIDO", "PIX TRANSFER");
         var redemption = HasAny(structuredContext, "RESGATE", "REDEMPTION", "INVESTMENT WITHDRAWAL")
             || HasAny(description, "RESGATE", "REDEMPTION");
