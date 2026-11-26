@@ -23,6 +23,10 @@ public sealed class PluggyTransactionImportRequestDTO
 
     public Guid? IdContaFinanceira { get; set; }
     public Guid? IdCategoria { get; set; }
+
+    [StringLength(100, MinimumLength = 1)]
+    public string? NewCategoryDescription { get; set; }
+    public Guid? NewCategoryParentId { get; set; }
     public string? Natureza { get; set; }
     public Guid? DespesaVinculadaId { get; set; }
 }
@@ -32,5 +36,6 @@ public sealed class PluggyTransactionImportResultDTO
     public string TransactionId { get; set; } = string.Empty;
     public string RecordType { get; set; } = string.Empty;
     public Guid RecordId { get; set; }
+    public Guid? IdCategoria { get; set; }
     public DateTimeOffset RegisteredAt { get; set; }
 }

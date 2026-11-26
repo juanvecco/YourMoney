@@ -75,9 +75,10 @@ public static class PluggyTransactionClassificationTests
         var previewMapper = source[previewStart..importStart];
         TestAssert.True(previewMapper.Contains("Classification = classification.Classification", StringComparison.Ordinal)
             && previewMapper.Contains("transaction.Description", StringComparison.Ordinal)
+            && previewMapper.Contains("Category = transaction.Category", StringComparison.Ordinal)
             && !previewMapper.Contains("SaveChanges", StringComparison.Ordinal)
             && !previewMapper.Contains(".Remove(", StringComparison.Ordinal),
-            "Classification should remain a read-only projection of provider data");
+            "Category and classification should remain a read-only projection of provider data");
 
         var registeredStart = source.IndexOf(
             "private async Task AnexarSituacaoCadastroAsync(",
@@ -93,6 +94,31 @@ public static class PluggyTransactionClassificationTests
             && registrationProjection.Contains("source.RegisteredRecordId = link.RecordId", StringComparison.Ordinal)
             && registrationProjection.Contains("continue;", StringComparison.Ordinal),
             "A previously registered source should retain its original link and remain unavailable for duplicate creation");
+        return Task.CompletedTask;
+    }
+
+    public static Task NewCategoryIsSavedInsideExpenseImportTransaction()
+    {
+        var source = File.ReadAllText(RepositoryTestPaths.InYourMoney(
+            "src", "YourMoney.Api", "Services", "PluggyService.cs"));
+        var start = source.IndexOf(
+            "public async Task<PluggyTransactionImportResultDTO> ImportarTransacaoAsync(",
+            StringComparison.Ordinal);
+        var end = source.IndexOf(
+            "public async Task<PluggyExpenseReconciliationResultDTO> ReconciliarDespesaAsync(",
+            start,
+            StringComparison.Ordinal);
+        TestAssert.True(start >= 0 && end > start, "The expense import transaction should be present");
+        var method = source[start..end];
+        var transactionStart = method.IndexOf("BeginTransactionAsync", StringComparison.Ordinal);
+        var resolveCategory = method.IndexOf("PluggyExpenseCategoryResolver.Resolve", StringComparison.Ordinal);
+        var addCategory = method.IndexOf("_categoriaService.AdicionarAsync", StringComparison.Ordinal);
+        var createExpense = method.IndexOf("_despesaService.CriarDespesaAsync", StringComparison.Ordinal);
+        var addImport = method.IndexOf("_dbContext.PluggyTransactionImports.Add", StringComparison.Ordinal);
+        var commit = method.IndexOf("CommitAsync", StringComparison.Ordinal);
+        TestAssert.True(transactionStart >= 0 && resolveCategory > transactionStart && addCategory > resolveCategory
+            && createExpense > addCategory && addImport > createExpense && commit > addImport,
+            "Category creation, expense creation, and source linking must be ordered inside one transaction");
         return Task.CompletedTask;
     }
 

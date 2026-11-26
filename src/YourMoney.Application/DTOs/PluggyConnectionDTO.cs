@@ -37,6 +37,7 @@ public sealed class PluggyTransactionPreviewDTO
     public string AccountId { get; set; } = string.Empty;
     public string InstitutionName { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
+    public string? Category { get; set; }
     public DateTimeOffset Date { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }

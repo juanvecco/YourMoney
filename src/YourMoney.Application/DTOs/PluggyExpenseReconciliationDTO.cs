@@ -28,6 +28,10 @@ public sealed class PluggyExpenseReconciliationRequestDTO
     public DateOnly? Date { get; set; }
     public Guid? IdContaFinanceira { get; set; }
     public Guid? IdCategoria { get; set; }
+
+    [StringLength(100, MinimumLength = 1)]
+    public string? NewCategoryDescription { get; set; }
+    public Guid? NewCategoryParentId { get; set; }
     public bool ConfirmPossibleDuplicate { get; set; }
 }
 
@@ -37,5 +41,6 @@ public sealed class PluggyExpenseReconciliationResultDTO
     public string Action { get; set; } = string.Empty;
     public string RecordType { get; set; } = "expense";
     public Guid RecordId { get; set; }
+    public Guid? IdCategoria { get; set; }
     public DateTimeOffset RegisteredAt { get; set; }
 }

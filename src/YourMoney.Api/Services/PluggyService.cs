@@ -190,6 +190,7 @@ public sealed class PluggyService : IPluggyService
     private readonly IDespesaService _despesaService;
     private readonly IReceitaService _receitaService;
     private readonly IInvestimentoService _investimentoService;
+    private readonly ICategoriaService _categoriaService;
     private static readonly SemaphoreSlim AuthenticationLock = new(1, 1);
 
     public PluggyService(
@@ -202,7 +203,8 @@ public sealed class PluggyService : IPluggyService
         YourMoney.Domain.Repositories.ICarteiraRepository carteiraRepository,
         IDespesaService despesaService,
         IReceitaService receitaService,
-        IInvestimentoService investimentoService)
+        IInvestimentoService investimentoService,
+        ICategoriaService categoriaService)
     {
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
@@ -215,6 +217,7 @@ public sealed class PluggyService : IPluggyService
         _despesaService = despesaService;
         _receitaService = receitaService;
         _investimentoService = investimentoService;
+        _categoriaService = categoriaService;
     }
 
     public async Task<PluggyCredentialStatusDTO> ObterConfiguracaoCredenciaisAsync(
@@ -1086,6 +1089,7 @@ public sealed class PluggyService : IPluggyService
                         AccountId = account.AccountId,
                         InstitutionName = account.InstitutionName,
                         AccountName = account.Name,
+                        Category = transaction.Category,
                         Date = transaction.Date,
                         Description = string.IsNullOrWhiteSpace(transaction.Description)
                             ? "Transação bancária"
@@ -1143,6 +1147,10 @@ public sealed class PluggyService : IPluggyService
             throw new ArgumentException("O valor deve ser maior que zero.");
         if (request.Date == default)
             throw new ArgumentException("A data é obrigatória.");
+        if (request.RecordType == "expense")
+            ValidarSelecaoCategoria(request.IdCategoria, request.NewCategoryDescription, request.NewCategoryParentId);
+        else if (!string.IsNullOrWhiteSpace(request.NewCategoryDescription) || request.NewCategoryParentId.HasValue)
+            throw new ArgumentException("Categorias novas só podem ser usadas ao cadastrar uma despesa.");
         if (!request.IdContaFinanceira.HasValue || request.IdContaFinanceira.Value == Guid.Empty
             || !await _dbContext.ContaFinanceira.AnyAsync(account =>
                 account.Id == request.IdContaFinanceira.Value
@@ -1185,8 +1193,16 @@ public sealed class PluggyService : IPluggyService
             {
                 if (!request.IdContaFinanceira.HasValue || request.IdContaFinanceira.Value == Guid.Empty)
                     throw new ArgumentException("Selecione a conta financeira da despesa.");
-                if (!request.IdCategoria.HasValue || request.IdCategoria.Value == Guid.Empty)
-                    throw new ArgumentException("Selecione a categoria da despesa.");
+
+                var categoriasDoUsuario = await _categoriaService.GetAllAsync();
+                var categoria = request.IdCategoria.HasValue
+                    ? PluggyExpenseCategoryResolver.ResolveExisting(categoriasDoUsuario, request.IdCategoria.Value)
+                    : PluggyExpenseCategoryResolver.ResolveNew(
+                        categoriasDoUsuario,
+                        request.NewCategoryParentId!.Value,
+                        request.NewCategoryDescription!);
+                if (!categoriasDoUsuario.Any(item => item.Id == categoria.Id))
+                    await _categoriaService.AdicionarAsync(categoria);
 
                 var expense = await _despesaService.CriarDespesaAsync(new CriarDespesaRequest
                 {
@@ -1195,9 +1211,10 @@ public sealed class PluggyService : IPluggyService
                     Data = date,
                     MesReferencia = monthReference,
                     IdContaFinanceira = request.IdContaFinanceira.Value,
-                    IdCategoria = request.IdCategoria.Value
+                    IdCategoria = categoria.Id
                 });
                 recordId = expense.Id;
+                request.IdCategoria = categoria.Id;
             }
             else
             {
@@ -1233,6 +1250,7 @@ public sealed class PluggyService : IPluggyService
                 TransactionId = source.TransactionId,
                 RecordType = request.RecordType,
                 RecordId = recordId,
+                IdCategoria = request.RecordType == "expense" ? request.IdCategoria : null,
                 RegisteredAt = registeredAt
             };
         }
@@ -1270,6 +1288,9 @@ public sealed class PluggyService : IPluggyService
             throw new ArgumentException("A transação de origem é obrigatória.");
         if (request.Action is not ("create" or "link" or "replace"))
             throw new ArgumentException("Escolha uma ação válida para a despesa.");
+        if (request.Action != "create"
+            && (!string.IsNullOrWhiteSpace(request.NewCategoryDescription) || request.NewCategoryParentId.HasValue))
+            throw new ArgumentException("Categorias novas só podem ser usadas ao cadastrar uma despesa.");
 
         var source = (await ListarTransacoesPreviewAsync(usuarioId, cancellationToken, walletId))
             .SingleOrDefault(transaction => string.Equals(
@@ -1311,6 +1332,8 @@ public sealed class PluggyService : IPluggyService
                 Date = request.Date!.Value,
                 IdContaFinanceira = request.IdContaFinanceira,
                 IdCategoria = request.IdCategoria,
+                NewCategoryDescription = request.NewCategoryDescription,
+                NewCategoryParentId = request.NewCategoryParentId,
                 ReviewedClassification = request.ReviewedClassification
             }, cancellationToken, walletId);
 
@@ -1320,6 +1343,7 @@ public sealed class PluggyService : IPluggyService
                 Action = "create",
                 RecordType = "expense",
                 RecordId = imported.RecordId,
+                IdCategoria = imported.IdCategoria,
                 RegisteredAt = imported.RegisteredAt
             };
         }
@@ -1749,6 +1773,24 @@ public sealed class PluggyService : IPluggyService
         && DateOnly.FromDateTime(expense.Data) == date
         && decimal.Round(expense.Valor, 2, MidpointRounding.AwayFromZero)
             == decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+    private static void ValidarSelecaoCategoria(Guid? idCategoria, string? descricaoNovaCategoria, Guid? categoriaPaiId)
+    {
+        var hasExistingCategory = idCategoria.HasValue;
+        var hasNewCategory = descricaoNovaCategoria is not null || categoriaPaiId.HasValue;
+        if (hasExistingCategory == hasNewCategory)
+            throw new ArgumentException("Selecione uma categoria existente ou informe uma nova categoria e sua categoria-pai.");
+
+        if (hasExistingCategory && idCategoria == Guid.Empty)
+            throw new ArgumentException("Selecione uma categoria de despesa válida.");
+
+        if (hasNewCategory
+            && (string.IsNullOrWhiteSpace(descricaoNovaCategoria)
+                || descricaoNovaCategoria.Trim().Length > 100
+                || !categoriaPaiId.HasValue
+                || categoriaPaiId == Guid.Empty))
+            throw new ArgumentException("Informe o nome da nova categoria e uma categoria-pai válida.");
+    }
 
     private static bool PodeReconciliarComoDespesa(PluggyTransactionPreviewDTO source)
         => PodeReconciliarComoDespesa(source, null);
