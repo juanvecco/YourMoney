@@ -47,6 +47,12 @@ public interface IPluggyService
         CancellationToken cancellationToken = default,
         Guid? carteiraId = null);
 
+    Task<PluggyAccountDTO> VincularContaAsync(
+        string usuarioId,
+        PluggyAccountLinkRequestDTO request,
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null);
+
     Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
         string usuarioId,
         Guid? connectionId = null,

@@ -264,6 +264,16 @@ public static class PluggyControllerTests
             Guid? carteiraId = null) =>
             Task.FromResult<IReadOnlyList<PluggyAccountDTO>>(Array.Empty<PluggyAccountDTO>());
 
+        public Task<PluggyAccountDTO> VincularContaAsync(
+            string usuarioId, PluggyAccountLinkRequestDTO request,
+            CancellationToken cancellationToken = default, Guid? carteiraId = null) =>
+            Task.FromResult(new PluggyAccountDTO
+            {
+                ConnectionId = request.ConnectionId,
+                AccountId = request.AccountId,
+                LinkedContaFinanceiraId = request.ContaFinanceiraId
+            });
+
         public Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
             string usuarioId, Guid? connectionId = null, bool retryFailed = false,
             CancellationToken cancellationToken = default, Guid? carteiraId = null) =>

@@ -24,6 +24,7 @@ namespace YourMoney.Infrastructure.Persistence
         public DbSet<ReceitaRecorrente> ReceitasRecorrentes { get; set; }
         public DbSet<ReceitaRecorrenteOcorrencia> ReceitasRecorrentesOcorrencias { get; set; }
         public DbSet<PluggyConnection> PluggyConnections { get; set; }
+        public DbSet<PluggyAccountLink> PluggyAccountLinks { get; set; }
         public DbSet<PluggyCredential> PluggyCredentials { get; set; }
         public DbSet<PluggyTransactionImport> PluggyTransactionImports { get; set; }
         public DbSet<PluggyInvestmentAssetSnapshot> PluggyInvestmentAssetSnapshots { get; set; }
@@ -50,6 +51,7 @@ namespace YourMoney.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ReceitaRecorrenteConfiguration());
             modelBuilder.ApplyConfiguration(new ReceitaRecorrenteOcorrenciaConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyConnectionConfiguration());
+            modelBuilder.ApplyConfiguration(new PluggyAccountLinkConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyCredentialConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyTransactionImportConfiguration());
             modelBuilder.ApplyConfiguration(new PluggyInvestmentAssetSnapshotConfiguration());

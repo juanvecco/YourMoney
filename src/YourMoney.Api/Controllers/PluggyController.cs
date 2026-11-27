@@ -251,6 +251,27 @@ public sealed class PluggyController : ControllerBase
         }
     }
 
+    [HttpPut("accounts/link")]
+    [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
+    public async Task<IActionResult> VincularConta(
+        [FromBody] PluggyAccountLinkRequestDTO request,
+        [FromQuery] Guid? carteiraId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await _pluggyService.VincularContaAsync(
+                _currentUserService.UserId, request, cancellationToken, carteiraId));
+        }
+        catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
+        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+        catch (PluggyAuthorizationException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message }); }
+        catch (PluggyConfigurationException ex) { return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = ex.Message }); }
+        catch (PluggyConsentExpiredException ex) { return Conflict(new { message = ex.Message }); }
+        catch (PluggyIntegrationException ex) { return StatusCode(StatusCodes.Status502BadGateway, new { message = ex.Message }); }
+        catch (HttpRequestException) { return StatusCode(StatusCodes.Status502BadGateway, new { message = "Não foi possível comunicar com a Pluggy agora." }); }
+    }
+
     [HttpGet("investments/preview")]
     [RegraNegocioAtiva(RegraNegocioCatalogo.OpenFinance)]
     [RegraNegocioAtiva(RegraNegocioCatalogo.AtivosOpenFinance)]

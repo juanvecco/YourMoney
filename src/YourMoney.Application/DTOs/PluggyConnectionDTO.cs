@@ -23,6 +23,8 @@ public sealed class PluggyAccountDTO
     public string InstitutionName { get; set; } = string.Empty;
     public string AccountId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public string OriginalName { get; set; } = string.Empty;
+    public Guid? LinkedContaFinanceiraId { get; set; }
     public string Type { get; set; } = string.Empty;
     public string? Number { get; set; }
     public decimal? Balance { get; set; }
@@ -37,6 +39,8 @@ public sealed class PluggyTransactionPreviewDTO
     public string AccountId { get; set; } = string.Empty;
     public string InstitutionName { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
+    public string AccountOriginalName { get; set; } = string.Empty;
+    public Guid? LinkedContaFinanceiraId { get; set; }
     public string? Category { get; set; }
     public DateTimeOffset Date { get; set; }
     public string Description { get; set; } = string.Empty;
@@ -60,4 +64,11 @@ public sealed class PluggyTransactionPreviewDTO
     public bool Importable { get; set; }
     public decimal? SuggestedAmountBrl { get; set; }
     public string? ImportUnavailableReason { get; set; }
+}
+
+public sealed class PluggyAccountLinkRequestDTO
+{
+    public Guid ConnectionId { get; set; }
+    public string AccountId { get; set; } = string.Empty;
+    public Guid? ContaFinanceiraId { get; set; }
 }

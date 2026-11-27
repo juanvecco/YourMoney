@@ -203,9 +203,6 @@ namespace YourMoney.Infrastructure.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("MesReferencia")
-                        .HasColumnType("date");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -216,6 +213,9 @@ namespace YourMoney.Infrastructure.Migrations
 
                     b.Property<Guid>("IdContaFinanceira")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("MesReferencia")
+                        .HasColumnType("date");
 
                     b.Property<int?>("NumeroParcela")
                         .HasColumnType("int");
@@ -248,13 +248,13 @@ namespace YourMoney.Infrastructure.Migrations
                     b.HasIndex("ParcelamentoId")
                         .HasDatabaseName("IX_Despesa_ParcelamentoId");
 
-                    b.HasIndex("UsuarioId", "MesReferencia")
-                        .HasDatabaseName("IX_Despesa_UsuarioId_MesReferencia");
-
                     b.HasIndex("UsuarioId");
 
                     b.HasIndex("ParcelamentoId", "NumeroParcela")
                         .HasDatabaseName("IX_Despesa_Parcelamento_Parcela");
+
+                    b.HasIndex("UsuarioId", "MesReferencia")
+                        .HasDatabaseName("IX_Despesa_UsuarioId_MesReferencia");
 
                     b.ToTable("tbDespesa", (string)null);
                 });
@@ -703,6 +703,42 @@ namespace YourMoney.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_MetaMensal_Definicao", "([TipoDefinicao] = N'Percentual' AND [PercentualReceita] IS NOT NULL AND [PercentualReceita] > 0 AND [ValorMeta] IS NULL) OR ([TipoDefinicao] = N'Valor' AND [ValorMeta] IS NOT NULL AND [ValorMeta] > 0 AND [PercentualReceita] IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyAccountLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("ConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContaFinanceiraId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConnectionId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("ContaFinanceiraId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId", "ConnectionId", "AccountId")
+                        .IsUnique();
+
+                    b.ToTable("tbPluggyAccountLink", (string)null);
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.PluggyConnection", b =>
@@ -1405,6 +1441,22 @@ namespace YourMoney.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("GrupoObjetivoInvestimento");
+                });
+
+            modelBuilder.Entity("YourMoney.Domain.Entities.PluggyAccountLink", b =>
+                {
+                    b.HasOne("YourMoney.Domain.Entities.PluggyConnection", null)
+                        .WithMany()
+                        .HasForeignKey("ConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YourMoney.Domain.Entities.ContaFinanceira", null)
+                        .WithMany()
+                        .HasForeignKey("ContaFinanceiraId", "UsuarioId")
+                        .HasPrincipalKey("Id", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("YourMoney.Domain.Entities.PluggyConnection", b =>

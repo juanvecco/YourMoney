@@ -55,6 +55,11 @@ and apply it to PostgreSQL after a verified backup and before deploying the API
 that reads `tbDespesa.MesReferencia`. It backfills existing rows from `Data` and
 adds the user/month index. Do not run the SQL Server EF migration against Neon.
 
+For links between Pluggy accounts and manual accounts, apply
+`add-pluggy-account-links.sql` to PostgreSQL before deploying the API that reads
+`tbPluggyAccountLink`. The script adds the mapping table and account ownership
+constraint; it does not change existing transactions.
+
 Pluggy credentials encrypted with the Windows DPAPI key ring cannot be decrypted
 by a new Linux key ring. Re-enter them through the existing authenticated UI
 after publication. The original notebook and its key ring must remain available

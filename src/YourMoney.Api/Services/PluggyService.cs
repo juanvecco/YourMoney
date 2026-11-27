@@ -521,6 +521,7 @@ public sealed class PluggyService : IPluggyService
                     InstitutionName = connection.InstitutionName,
                     AccountId = account.Id,
                     Name = string.IsNullOrWhiteSpace(account.MarketingName) ? account.Name : account.MarketingName,
+                    OriginalName = account.Name,
                     Type = account.Type,
                     Number = MascararNumeroConta(account.Number),
                     Balance = account.Balance,
@@ -530,7 +531,60 @@ public sealed class PluggyService : IPluggyService
             }
         }
 
+        var accountIds = accounts.Select(account => account.AccountId).ToHashSet();
+        var links = await _dbContext.PluggyAccountLinks.AsNoTracking()
+            .Where(link => link.UsuarioId == usuarioId && accountIds.Contains(link.AccountId))
+            .Join(_dbContext.ContaFinanceira.AsNoTracking()
+                    .Where(account => account.UsuarioId == usuarioId && account.CarteiraId == walletId),
+                link => link.ContaFinanceiraId,
+                account => account.Id,
+                (link, _) => link)
+            .ToListAsync(cancellationToken);
+        foreach (var account in accounts)
+            account.LinkedContaFinanceiraId = links.FirstOrDefault(link =>
+                link.ConnectionId == account.ConnectionId && link.AccountId == account.AccountId)?.ContaFinanceiraId;
+
         return accounts;
+    }
+
+    public async Task<PluggyAccountDTO> VincularContaAsync(
+        string usuarioId,
+        PluggyAccountLinkRequestDTO request,
+        CancellationToken cancellationToken = default,
+        Guid? carteiraId = null)
+    {
+        if (request is null || request.ConnectionId == Guid.Empty || string.IsNullOrWhiteSpace(request.AccountId)
+            || request.AccountId.Length > 128 || request.ContaFinanceiraId == Guid.Empty)
+            throw new ArgumentException("Informe uma conta da Pluggy e uma conta manual válida.");
+
+        var walletId = await ObterCarteiraIdAsync(usuarioId, carteiraId, cancellationToken);
+        var accounts = await ListarContasAsync(usuarioId, cancellationToken, walletId);
+        var source = accounts.SingleOrDefault(account => account.ConnectionId == request.ConnectionId
+            && account.AccountId == request.AccountId);
+        if (source is null)
+            throw new KeyNotFoundException("Conta da Pluggy não encontrada nesta carteira.");
+
+        if (request.ContaFinanceiraId.HasValue && !await _dbContext.ContaFinanceira.AnyAsync(account =>
+                account.Id == request.ContaFinanceiraId.Value && account.UsuarioId == usuarioId
+                && account.CarteiraId == walletId, cancellationToken))
+            throw new KeyNotFoundException("Conta manual não encontrada nesta carteira.");
+
+        var link = await _dbContext.PluggyAccountLinks.SingleOrDefaultAsync(existing =>
+            existing.UsuarioId == usuarioId && existing.ConnectionId == request.ConnectionId
+            && existing.AccountId == request.AccountId, cancellationToken);
+        if (!request.ContaFinanceiraId.HasValue)
+        {
+            if (link is not null) _dbContext.PluggyAccountLinks.Remove(link);
+        }
+        else if (link is null)
+            _dbContext.PluggyAccountLinks.Add(new PluggyAccountLink(
+                usuarioId, request.ConnectionId, request.AccountId, request.ContaFinanceiraId.Value));
+        else
+            link.Vincular(request.ContaFinanceiraId.Value);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        source.LinkedContaFinanceiraId = request.ContaFinanceiraId;
+        return source;
     }
 
     public async Task<PluggyInvestmentAssetsOverviewDTO> ObterAtivosInvestimentoAsync(
@@ -1089,6 +1143,8 @@ public sealed class PluggyService : IPluggyService
                         AccountId = account.AccountId,
                         InstitutionName = account.InstitutionName,
                         AccountName = account.Name,
+                        AccountOriginalName = account.OriginalName,
+                        LinkedContaFinanceiraId = account.LinkedContaFinanceiraId,
                         Category = transaction.Category,
                         Date = transaction.Date,
                         Description = string.IsNullOrWhiteSpace(transaction.Description)
