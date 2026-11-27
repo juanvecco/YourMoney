@@ -1797,13 +1797,21 @@ public sealed class PluggyService : IPluggyService
 
     private static bool PodeReconciliarComoDespesa(
         PluggyTransactionPreviewDTO source,
-        string? reviewedClassification) =>
-        string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(source.Status, "POSTED", StringComparison.OrdinalIgnoreCase)
-        && (string.Equals(source.Classification, "EXPENSE", StringComparison.OrdinalIgnoreCase)
-            && string.IsNullOrWhiteSpace(reviewedClassification)
-            || string.Equals(source.Classification, "REVIEW", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(reviewedClassification, "expense", StringComparison.OrdinalIgnoreCase));
+        string? reviewedClassification)
+    {
+        if (!string.Equals(source.Direction, "DEBIT", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var posted = string.Equals(source.Status, "POSTED", StringComparison.OrdinalIgnoreCase);
+        var pending = string.Equals(source.Status, "PENDING", StringComparison.OrdinalIgnoreCase);
+        var confirmedExpense = string.Equals(reviewedClassification, "expense", StringComparison.OrdinalIgnoreCase);
+        if (posted && string.Equals(source.Classification, "EXPENSE", StringComparison.OrdinalIgnoreCase))
+            return string.IsNullOrWhiteSpace(reviewedClassification) || confirmedExpense;
+
+        return (posted || pending)
+            && string.Equals(source.Classification, "REVIEW", StringComparison.OrdinalIgnoreCase)
+            && confirmedExpense;
+    }
 
     private static bool PodeReconciliarComoInvestimento(PluggyTransactionPreviewDTO source)
         => PodeReconciliarComoInvestimento(source, null);

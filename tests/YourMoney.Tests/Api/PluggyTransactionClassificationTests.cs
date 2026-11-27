@@ -35,8 +35,22 @@ public static class PluggyTransactionClassificationTests
         var expense = Source("EXPENSE");
         TestAssert.True(CanReconcile(ExpenseEligibility, expense, null),
             "A transaction already classified as consumption can use normal expense reconciliation");
-        TestAssert.True(!CanReconcile(ExpenseEligibility, expense, "expense"),
-            "Manual review confirmation must only be sent for transactions actually classified as review");
+        TestAssert.True(CanReconcile(ExpenseEligibility, expense, "expense"),
+            "A pending transaction that became posted during review must retain the explicit expense choice");
+
+        var pendingReview = Source("REVIEW");
+        pendingReview.Status = "PENDING";
+        TestAssert.True(!CanReconcile(ExpenseEligibility, pendingReview, null),
+            "A pending source requires an explicit expense choice");
+        TestAssert.True(CanReconcile(ExpenseEligibility, pendingReview, "expense"),
+            "An operator can register a pending debit after explicitly confirming it as an expense");
+        TestAssert.True(!CanReconcile(InvestmentEligibility, pendingReview, "investment"),
+            "Pending investment registration remains unavailable");
+
+        var pendingExcluded = Source("EXCLUDED");
+        pendingExcluded.Status = "PENDING";
+        TestAssert.True(!CanReconcile(ExpenseEligibility, pendingExcluded, "expense"),
+            "Explicit review cannot turn a pending card payment or transfer into an expense");
         return Task.CompletedTask;
     }
 

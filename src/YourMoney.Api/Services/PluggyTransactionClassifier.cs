@@ -50,7 +50,8 @@ public static class PluggyTransactionClassifier
         var paymentContext = Normalize(string.Join(' ', source.PaymentMethod, source.PaymentReason, source.PaymentReceiver));
         var structuredContext = Normalize(string.Join(' ', operation, category, accountType, paymentContext));
 
-        if (status == "PENDING" || status == "AUTHORIZED" || status == "AUTHORISED")
+        var pending = status == "PENDING";
+        if (status == "AUTHORIZED" || status == "AUTHORISED")
             return Excluded("UNSUPPORTED_STATUS");
 
         if (string.IsNullOrWhiteSpace(status))
@@ -96,7 +97,7 @@ public static class PluggyTransactionClassifier
         if (pixMayBeTransfer)
             return Review("AMBIGUOUS");
 
-        if (status != "POSTED")
+        if (status != "POSTED" && !pending)
             return Review("UNSUPPORTED_STATUS");
 
         if (type == "CREDIT")
@@ -108,6 +109,8 @@ public static class PluggyTransactionClassifier
             return Review("CONFLICTING_SIGNALS");
         if (investmentEvidence)
             return Investment();
+        if (pending)
+            return Review("PENDING_STATUS");
         if (expenseEvidence)
             return Expense();
 

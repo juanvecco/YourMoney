@@ -78,8 +78,23 @@ public static class PluggyTransactionClassifierTests
             category: "Fixed Income Investment",
             description: "Resgate RDB").Classification,
             "A redemption must not be classified as an investment acquisition");
-        TestAssert.Equal("EXCLUDED", Classify(status: "PENDING").Classification,
-            "A pending transaction cannot be registered as an expense or investment");
+        var pendingPurchase = Classify(status: "PENDING");
+        TestAssert.Equal("REVIEW", pendingPurchase.Classification,
+            "A pending purchase must remain visible for an explicit expense decision");
+        TestAssert.Equal("PENDING_STATUS", pendingPurchase.Reason,
+            "The review should explain that the bank has not finalized the transaction");
+        TestAssert.Equal("EXCLUDED", Classify(
+            status: "PENDING", operationType: "PAGAMENTO_FATURA",
+            description: "PGTO FAT CARTAO C6", category: null).Classification,
+            "A pending card bill payment must not become a suggested expense");
+        TestAssert.Equal("EXCLUDED", Classify(
+            status: "PENDING", operationType: "TRANSFER",
+            description: "TRANSFERENCIA ENVIADA", category: null).Classification,
+            "A pending transfer must not become a suggested expense");
+        TestAssert.Equal("INVESTMENT", Classify(
+            status: "PENDING", operationType: "APLICACAO",
+            description: "Aplicação RDB", category: "Fixed Income Investment").Classification,
+            "A pending investment must not appear in the expense queue");
         return Task.CompletedTask;
     }
 
